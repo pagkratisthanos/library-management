@@ -32,7 +32,7 @@ public class Member extends AbstractEntity {
     @Column(nullable = false)
     private String lastname;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String phoneNumber;
 
     @Column(nullable = false, unique = true)
