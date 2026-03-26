@@ -47,6 +47,10 @@ public class Rental extends AbstractEntity {
         }
     }
 
+    public boolean isActive() {
+        return returnDate == null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Rental)) return false;
