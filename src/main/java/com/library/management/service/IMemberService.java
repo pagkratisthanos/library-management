@@ -19,7 +19,7 @@ public interface IMemberService {
     MemberReadOnlyDTO updateMember(MemberUpdateDTO memberUpdateDTO)
         throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException;
 
-    void deleteMemberByUuid(UUID uuid) throws EntityNotFoundException;
+    void deleteMemberByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
 
     MemberReadOnlyDTO getMemberByUuid(UUID uuid) throws EntityNotFoundException;
 
