@@ -30,4 +30,9 @@ public interface IMemberService {
     Page<MemberReadOnlyDTO> getMembersPaginatedAndDeletedFalse(Pageable pageable);
 
     boolean isMemberExistByEmail(String email);
+
+    MemberReadOnlyDTO getMemberByEmail(String email) throws EntityNotFoundException;
+
+    MemberReadOnlyDTO getMemberByPhoneNumber(String phoneNumber) throws EntityNotFoundException;
+
 }
