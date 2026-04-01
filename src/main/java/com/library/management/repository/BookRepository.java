@@ -14,6 +14,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Optional<Book> findByUuidAndDeletedFalse(UUID uuid);
     Optional<Book> findByIsbn(String isbn);
     boolean existsByIsbn(String isbn);
+    boolean existsByUuid(UUID uuid);
     boolean existsByIsbnAndUuidNot(String isbn, UUID uuid);
     Page<Book> findByDeletedFalse(Pageable pageable);
 }
