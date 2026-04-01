@@ -7,5 +7,5 @@ import java.util.UUID;
 public record AuthorReadOnlyDTO(UUID uuid, String firstname, String lastname,
                                 LocalDate birthDate, String birthPlace, String bio,
                                 Set<BookReadOnlyDTO> bookReadOnlyDTOs
-) {
-}
+)
+{}
