@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,5 +15,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     Optional<Author> findByUuidAndDeletedFalse(UUID uuid);
     Page<Author> findByDeletedFalse(Pageable pageable);
     boolean existsByUuid(UUID uuid);
+    boolean existsByLastname(String lastname);
+    List<Author> findByBooks_Uuid(UUID bookUuid);
 }
 
