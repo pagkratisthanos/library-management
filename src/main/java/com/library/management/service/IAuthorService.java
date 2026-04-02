@@ -15,10 +15,10 @@ import java.util.UUID;
 public interface IAuthorService {
 
     AuthorReadOnlyDTO saveAuthor(AuthorInsertDTO authorInsertDTO)
-            throws EntityAlreadyExistsException, EntityInvalidArgumentException;
+            throws EntityInvalidArgumentException;
 
     AuthorReadOnlyDTO updateAuthor(AuthorUpdateDTO authorUpdateDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException;
+            throws EntityNotFoundException;
 
     void deleteAuthorByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
 
