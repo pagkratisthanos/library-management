@@ -1,0 +1,2 @@
+ALTER TABLE copies
+ALTER COLUMN condition TYPE VARCHAR(10);
