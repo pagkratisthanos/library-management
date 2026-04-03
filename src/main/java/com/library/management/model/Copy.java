@@ -33,8 +33,9 @@ public class Copy extends AbstractEntity {
     @Column(nullable = false)
     private Boolean available;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String condition;
+    private CopyCondition condition;
 
     @PrePersist
     public void initializeUUID() {
