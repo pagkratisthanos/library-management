@@ -1,5 +1,6 @@
 package com.library.management.dto;
 
+import com.library.management.model.CopyCondition;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -16,5 +17,5 @@ public record CopyUpdateDTO(
         Boolean available,
 
         @NotBlank
-        String condition
+        CopyCondition condition
 ) {}
