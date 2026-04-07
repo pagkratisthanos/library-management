@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+
 public interface RentalRepository extends JpaRepository<Rental, Long> {
 
         Optional<Rental> findByUuid(UUID uuid);
