@@ -64,6 +64,8 @@ public class AuthorServiceImpl implements IAuthorService {
             author.setFirstname(authorUpdateDTO.firstname());
             author.setLastname(authorUpdateDTO.lastname());
             author.setBio(authorUpdateDTO.bio());
+            author.setBirthDate(authorUpdateDTO.birthDate());
+            author.setBirthPlace(authorUpdateDTO.birthPlace());
 
             Author updatedAuthor = authorRepository.save(author);
             log.info("Author with uuid={} has successfully been updated", updatedAuthor.getUuid());

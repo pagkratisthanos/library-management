@@ -17,8 +17,10 @@ public record AuthorUpdateDTO(
         @NotBlank
         String lastname,
 
+        LocalDate birthDate,
+
+        String birthPlace,
+
         String bio
-
-
 ) {
 }
