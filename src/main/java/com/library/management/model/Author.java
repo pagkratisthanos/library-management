@@ -53,6 +53,10 @@ public class Author extends AbstractEntity{
         return Collections.unmodifiableSet(books);
     }
 
+    public void addBook(Book book) {
+        books.add(book);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Author)) return false;

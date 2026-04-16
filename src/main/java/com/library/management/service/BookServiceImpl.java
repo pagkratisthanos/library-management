@@ -63,9 +63,13 @@ public class BookServiceImpl implements IBookService{
             }
 
             Book book = mapper.mapToBookEntity(dto);
-            book.setAuthors(authors);
 
             Book savedBook = bookRepository.save(book);
+
+            for (Author author : authors) {
+                author.addBook(savedBook);
+                authorRepository.save(author);
+            }
             log.info("Book with isbn={} has been saved successfully", savedBook.getIsbn());
 
             return mapper.mapToBookReadOnlyDTO(savedBook);
