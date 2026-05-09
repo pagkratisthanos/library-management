@@ -15,8 +15,8 @@ public interface CopyRepository extends JpaRepository<Copy, Long> {
     Optional<Copy> findByUuidAndDeletedFalse(UUID uuid);
     Page<Copy> findByDeletedFalse(Pageable pageable);
     boolean existsByUuid(UUID uuid);
-    List<Copy> findByBook_Uuid(UUID bookUuid);
-    List<Copy> findByBook_UuidAndAvailableTrue(UUID bookUuid);
+    List<Copy> findByBookUuid(UUID bookUuid);
+    List<Copy> findByBookUuidAndAvailableTrue(UUID bookUuid);
     Page<Copy> findByAvailableTrueAndDeletedFalse(Pageable pageable);
     long countByBook_Uuid(UUID bookUuid);
 }
