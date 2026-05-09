@@ -15,14 +15,7 @@ import java.util.*;
 @ToString(exclude = "books")
 public class Author extends AbstractEntity{
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true, updatable = false)
-    private UUID uuid;
-
-    @Getter(AccessLevel.PROTECTED)
+    @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     @ManyToMany
     @JoinTable(name = "authors_books", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
@@ -42,11 +35,11 @@ public class Author extends AbstractEntity{
 
     private String bio;
 
-    @PrePersist
-    public void initializeUuid() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
+    public Optional<Book> getBook(UUID bookId) {
+
+        return books.stream()
+                .filter(book -> book.getId().equals(bookId))
+                .findFirst();
     }
 
     public Set<Book> getAllBooks() {
@@ -57,15 +50,19 @@ public class Author extends AbstractEntity{
         books.add(book);
     }
 
+    public void removeBook(Book book) {
+        books.remove(book);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Author)) return false;
         Author author = (Author) o;
-        return Objects.equals(getUuid(), author.getUuid());
+        return Objects.equals(getId(), author.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUuid());
+        return Objects.hashCode(getId());
     }
 }

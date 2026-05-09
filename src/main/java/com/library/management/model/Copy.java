@@ -14,14 +14,7 @@ import java.util.*;
 @ToString(exclude = {"rentals", "book"})
 public class Copy extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private UUID uuid;
-
-    @Getter(AccessLevel.PROTECTED)
+    @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "copy", fetch = FetchType.LAZY)
     private List<Rental> rentals = new ArrayList<>();
@@ -37,26 +30,23 @@ public class Copy extends AbstractEntity {
     @Column(nullable = false)
     private CopyCondition condition;
 
-    @PrePersist
-    public void initializeUUID() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
-    }
-
     public List<Rental> getAllRentals() {
         return Collections.unmodifiableList(rentals);
+    }
+
+    public void addRental(Rental rental) {
+        rentals.add(rental);
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Copy)) return false;
         Copy copy = (Copy) o;
-        return Objects.equals(getUuid(), copy.getUuid());
+        return Objects.equals(getId(), copy.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUuid());
+        return Objects.hashCode(getId());
     }
 }

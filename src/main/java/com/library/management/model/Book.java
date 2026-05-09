@@ -16,18 +16,13 @@ import java.util.*;
 @ToString(exclude = {"copies", "authors"})
 public class Book extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true, updatable = false)
-    private UUID uuid;
-
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
-    @Getter(AccessLevel.PROTECTED)
+    @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     private List<Copy> copies = new ArrayList<>();
 
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
     @ManyToMany(mappedBy = "books")
     private Set<Author> authors = new HashSet<>();
 
@@ -47,26 +42,48 @@ public class Book extends AbstractEntity {
 
     private String description;
 
-    @PrePersist
-    public void initializeUuid() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
+    public Optional<Copy> getCopy(UUID copyId) {
+
+        return copies.stream()
+                .filter(copy -> copy.getId().equals(copyId))
+                .findFirst();
+    }
+
+    public Set<Author> getAllAuthors() {
+        return Collections.unmodifiableSet(authors);
+    }
+
+    public Optional<Author> getAuthor(UUID authorId) {
+        return authors.stream()
+                .filter(author -> author.getId().equals(authorId))
+                .findFirst();
+    }
+
+    public void addAuthor(Author author) {
+        authors.add(author);
+    }
+
+    public void removeAuthor(Author author) {
+        authors.remove(author);
     }
 
     public List<Copy> getAllCopies() {
         return Collections.unmodifiableList(copies);
     }
 
+    public void addCopy(Copy copy) {
+        copies.add(copy);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Book)) return false;
         Book book = (Book) o;
-        return Objects.equals(getUuid(), book.getUuid());
+        return Objects.equals(getId(), book.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUuid());
+        return Objects.hashCode(getId());
     }
 }

@@ -15,13 +15,6 @@ import java.util.*;
 @ToString(exclude = {"address", "rentals"})
 public class Member extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private UUID uuid;
-
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id", nullable = false)
     private Address address;
@@ -44,7 +37,7 @@ public class Member extends AbstractEntity {
     @Column(name = "membership_date", nullable = false)
     private LocalDate membershipDate;
 
-    @Getter(AccessLevel.PROTECTED)
+    @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     private List<Rental> rentals = new ArrayList<>();
@@ -53,22 +46,19 @@ public class Member extends AbstractEntity {
         return Collections.unmodifiableList(rentals);
     }
 
-    @PrePersist
-    public void initializeUUID() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
+    public void addRental(Rental rental) {
+        rentals.add(rental);
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Member)) return false;
         Member member = (Member) o;
-        return Objects.equals(getUuid(), member.getUuid());
+        return Objects.equals(getId(), member.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUuid());
+        return Objects.hashCode(getId());
     }
 }

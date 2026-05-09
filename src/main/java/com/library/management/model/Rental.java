@@ -16,13 +16,6 @@ import java.util.UUID;
 @ToString(exclude = {"member", "copy"})
 public class Rental extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private UUID uuid;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
@@ -40,13 +33,6 @@ public class Rental extends AbstractEntity {
     @Column(name = "return_date")
     private Instant returnDate;
 
-    @PrePersist
-    public void initializeUUID() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
-    }
-
     public boolean isActive() {
         return returnDate == null;
     }
@@ -55,11 +41,11 @@ public class Rental extends AbstractEntity {
     public boolean equals(Object o) {
         if (!(o instanceof Rental)) return false;
         Rental rental = (Rental) o;
-        return Objects.equals(getUuid(), rental.getUuid());
+        return Objects.equals(getId(), rental.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUuid());
+        return Objects.hashCode(getId());
     }
 }

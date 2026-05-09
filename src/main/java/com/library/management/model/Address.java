@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -14,13 +15,6 @@ import java.util.UUID;
 @Table(name = "addresses")
 @ToString(exclude = "member")
 public class Address extends AbstractEntity{
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false, updatable = false)
-    private UUID uuid;
 
     @Column(nullable = false)
     private String street;
@@ -40,24 +34,17 @@ public class Address extends AbstractEntity{
     @OneToOne(mappedBy = "address")
     private Member member;
 
-    @PrePersist
-    public void initializeUUID() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID();
-        }
-    }
-
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Address address)) return false;
-        return Objects.equals(getUuid(), address.getUuid());
+        return Objects.equals(getId(), address.getId());
     }
 
 
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getUuid());
+        return Objects.hashCode(getId());
     }
 
 }
