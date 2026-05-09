@@ -28,14 +28,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class BookServiceImpl implements IBookService{
+public class BookServiceImpl implements IBookService {
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final Mapper mapper;
 
     @Override
-    @Transactional (rollbackFor = {EntityAlreadyExistsException.class,
+    @Transactional(rollbackFor = {EntityAlreadyExistsException.class,
             EntityInvalidArgumentException.class,
             EntityNotFoundException.class})
     public BookReadOnlyDTO saveBook(BookInsertDTO dto) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
@@ -63,21 +63,24 @@ public class BookServiceImpl implements IBookService{
             }
 
             Book book = mapper.mapToBookEntity(dto);
-
             Book savedBook = bookRepository.save(book);
 
             for (Author author : authors) {
                 author.addBook(savedBook);
                 authorRepository.save(author);
             }
-            log.info("Book with isbn={} has been saved successfully", savedBook.getIsbn());
 
+            for (Author author : authors) {
+                savedBook.addAuthor(author);
+            }
+
+            log.info("Book with isbn={} has been saved successfully", savedBook.getIsbn());
             return mapper.mapToBookReadOnlyDTO(savedBook);
+
         } catch (EntityNotFoundException | EntityAlreadyExistsException | EntityInvalidArgumentException e) {
             log.error("Save book failed. {}", e.getMessage());
             throw e;
         }
-
     }
 
     @Override
@@ -98,7 +101,7 @@ public class BookServiceImpl implements IBookService{
             book.setDescription(dto.description());
 
             Book updatedBook = bookRepository.save(book);
-            log.info("Book updated with uuid={}", updatedBook.getUuid());
+            log.info("Book updated with uuid={}", updatedBook.getId());
 
             return mapper.mapToBookReadOnlyDTO(updatedBook);
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
@@ -112,7 +115,7 @@ public class BookServiceImpl implements IBookService{
     public void deleteBookByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
             Book book = bookRepository.findByUuid(uuid)
-                    .orElseThrow(() -> new EntityNotFoundException("Book","Book with uuid " + uuid + " not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid " + uuid + " not found"));
 
             boolean hasActiveRentals = book.getAllCopies().stream()
                     .anyMatch(copy -> copy.getAllRentals().stream()
@@ -141,7 +144,6 @@ public class BookServiceImpl implements IBookService{
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid " + uuid + " not found"));
 
             log.info("Get book by uuid={} returned successfully.", uuid);
-
             return mapper.mapToBookReadOnlyDTO(book);
         } catch (EntityNotFoundException e) {
             log.error("Get book by uuid={} failed. {}", uuid, e.getMessage());
@@ -157,9 +159,7 @@ public class BookServiceImpl implements IBookService{
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid: " + uuid + " not found"));
 
             log.info("Get non-deleted book by uuid={} returned successfully.", uuid);
-
             return mapper.mapToBookReadOnlyDTO(book);
-
         } catch (EntityNotFoundException e) {
             log.error("Get book by uuid={} failed. {}", uuid, e.getMessage());
             throw e;
@@ -169,7 +169,6 @@ public class BookServiceImpl implements IBookService{
     @Override
     @Transactional(readOnly = true)
     public Page<BookReadOnlyDTO> getBooksPaginated(Pageable pageable) {
-
         Page<Book> bookPage = bookRepository.findAll(pageable);
         log.info("Get paginated returned successfully page={} and size={}", bookPage.getNumber(), bookPage.getSize());
         return bookPage.map(mapper::mapToBookReadOnlyDTO);
@@ -178,7 +177,6 @@ public class BookServiceImpl implements IBookService{
     @Override
     @Transactional(readOnly = true)
     public Page<BookReadOnlyDTO> getBooksPaginatedAndDeletedFalse(Pageable pageable) {
-
         Page<Book> memberPage = bookRepository.findByDeletedFalse(pageable);
         log.info("Get paginated not deleted returned successfully page={} and size={}", memberPage.getNumber(), memberPage.getSize());
         return memberPage.map(mapper::mapToBookReadOnlyDTO);
@@ -187,12 +185,6 @@ public class BookServiceImpl implements IBookService{
     @Override
     @Transactional(readOnly = true)
     public boolean isBookExistByIsbn(String isbn) {
-
         return bookRepository.existsByIsbn(isbn);
     }
-
-
-
-
-
 }
