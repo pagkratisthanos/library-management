@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record MemberReadOnlyDTO(
-        UUID uuid,
+        UUID id,
         AddressReadOnlyDTO addressReadOnlyDTO,
         String firstname,
         String lastname,

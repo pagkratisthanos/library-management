@@ -10,9 +10,6 @@ import java.util.UUID;
 public record RentalUpdateDTO(
 
         @NotNull
-        UUID uuid,
-
-        @NotNull
         Instant dueDate,
 
         Instant returnDate

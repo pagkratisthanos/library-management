@@ -16,7 +16,7 @@ public record CopyInsertDTO(
         @NotNull
         Boolean available,
 
-        @NotBlank
+        @NotNull
         CopyCondition condition
 ) {
 }

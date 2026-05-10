@@ -13,9 +13,6 @@ import java.util.UUID;
 @Builder
 public record MemberUpdateDTO(
 
-        @NotNull
-        UUID uuid,
-
         @Valid
         @NotNull
         AddressInsertDTO addressInsertDTO,

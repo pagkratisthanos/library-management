@@ -9,9 +9,6 @@ import java.util.UUID;
 @Builder
 public record BookUpdateDTO(
 
-        @NotNull
-        UUID uuid,
-
         String language,
 
         @NotNull

@@ -11,9 +11,6 @@ import java.util.UUID;
 public record CopyUpdateDTO(
 
         @NotNull
-        UUID uuid,
-
-        @NotNull
         Boolean available,
 
         @NotBlank
