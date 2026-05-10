@@ -11,11 +11,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-public interface RentalRepository extends JpaRepository<Rental, Long> {
+public interface RentalRepository extends JpaRepository<Rental, UUID> {
 
-        Optional<Rental> findByUuid(UUID uuid);
-        List<Rental> findByMember_Uuid(UUID memberUuid);
-        List<Rental> findByCopy_Uuid(UUID copyUuid);
+        Optional<Rental> findById(UUID uuid);
+        List<Rental> findByMember_Id(UUID memberUuid);
+        List<Rental> findByCopy_Id(UUID copyUuid);
         Page<Rental> findByReturnDateIsNull(Pageable pageable);
-        boolean existsByUuid(UUID uuid);
+        boolean existsById(UUID uuid);
 }

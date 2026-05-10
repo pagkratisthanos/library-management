@@ -9,14 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CopyRepository extends JpaRepository<Copy, Long> {
+public interface CopyRepository extends JpaRepository<Copy, UUID> {
 
-    Optional<Copy> findByUuid(UUID uuid);
-    Optional<Copy> findByUuidAndDeletedFalse(UUID uuid);
+    Optional<Copy> findById(UUID uuid);
+    Optional<Copy> findByIdAndDeletedFalse(UUID uuid);
     Page<Copy> findByDeletedFalse(Pageable pageable);
-    boolean existsByUuid(UUID uuid);
-    List<Copy> findByBookUuid(UUID bookUuid);
-    List<Copy> findByBookUuidAndAvailableTrue(UUID bookUuid);
-    Page<Copy> findByAvailableTrueAndDeletedFalse(Pageable pageable);
-    long countByBook_Uuid(UUID bookUuid);
-}
+    boolean existsById(UUID uuid);
+    List<Copy> findByBookId(UUID bookUuid);
+    List<Copy> findByBookIdAndAvailableTrue(UUID bookId);    Page<Copy> findByAvailableTrueAndDeletedFalse(Pageable pageable);
+    long countByBook_Id(UUID bookId);}

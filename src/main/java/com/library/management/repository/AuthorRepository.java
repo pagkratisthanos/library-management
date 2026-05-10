@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AuthorRepository extends JpaRepository<Author, Long> {
+public interface AuthorRepository extends JpaRepository<Author, UUID> {
 
-    Optional<Author> findByUuid(UUID uuid);
-    Optional<Author> findByUuidAndDeletedFalse(UUID uuid);
+    Optional<Author> findById(UUID uuid);
+    Optional<Author> findByIdAndDeletedFalse(UUID uuid);
     Page<Author> findByDeletedFalse(Pageable pageable);
-    boolean existsByUuid(UUID uuid);
+    boolean existsById(UUID uuid);
     boolean existsByLastname(String lastname);
-    List<Author> findByBooks_Uuid(UUID bookUuid);
+    List<Author> findByBooks_Id(UUID bookUuid);
 }
 

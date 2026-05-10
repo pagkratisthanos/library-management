@@ -9,17 +9,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface BookRepository extends JpaRepository<Book, Long> {
+public interface BookRepository extends JpaRepository<Book, UUID> {
 
     @EntityGraph(attributePaths = {"authors"})
-    Optional<Book> findByUuid(UUID uuid);
+    Optional<Book> findById(UUID uuid);
 
     @EntityGraph(attributePaths = {"authors"})
-    Optional<Book> findByUuidAndDeletedFalse(UUID uuid);
+    Optional<Book> findByIdAndDeletedFalse(UUID uuid);
     Optional<Book> findByIsbn(String isbn);
     boolean existsByIsbn(String isbn);
-    boolean existsByUuid(UUID uuid);
-    boolean existsByIsbnAndUuidNot(String isbn, UUID uuid);
+    boolean existsById(UUID uuid);
+    boolean existsByIsbnAndIdNot(String isbn, UUID id);
 
     @EntityGraph(attributePaths = {"authors"})
     Page<Book> findByDeletedFalse(Pageable pageable);
