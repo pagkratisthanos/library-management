@@ -34,7 +34,7 @@ public class CopyServiceImpl implements ICopyService {
     public CopyReadOnlyDTO saveCopy(CopyInsertDTO dto) throws EntityInvalidArgumentException, EntityNotFoundException {
 
         try {
-            Book book = bookRepository.findByUuid(dto.bookUuid())
+            Book book = bookRepository.findById(dto.bookUuid())
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid=" + dto.bookUuid() + " not found"));
 
             if (book.isDeleted()) {
@@ -57,13 +57,13 @@ public class CopyServiceImpl implements ICopyService {
 
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public CopyReadOnlyDTO updateCopy(CopyUpdateDTO dto)
+    public CopyReadOnlyDTO updateCopy(UUID uuid,CopyUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
 
         try {
 
-            Copy copy = copyRepository.findByUuid(dto.uuid())
-                    .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid=" + dto.uuid() + " not found"));
+            Copy copy = copyRepository.findById(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid=" + uuid + " not found"));
 
             if (dto.available() && copy.getAllRentals().stream().anyMatch(Rental::isActive)) {
                 throw new EntityInvalidArgumentException("Copy",
@@ -88,7 +88,7 @@ public class CopyServiceImpl implements ICopyService {
     public void deleteCopyByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException {
 
         try {
-            Copy copy = copyRepository.findByUuid(uuid)
+            Copy copy = copyRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found"));
 
             boolean hasActiveRental = copy.getAllRentals().stream()
@@ -113,7 +113,7 @@ public class CopyServiceImpl implements ICopyService {
     public CopyReadOnlyDTO getCopyByUuid(UUID uuid) throws EntityNotFoundException {
 
         try {
-            Copy copy = copyRepository.findByUuid(uuid)
+            Copy copy = copyRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found."));
 
             log.info("Copy with uuid={} returned successfully.", uuid);
@@ -130,7 +130,7 @@ public class CopyServiceImpl implements ICopyService {
     public CopyReadOnlyDTO getCopyByUuidDeletedFalse(UUID uuid) throws EntityNotFoundException {
 
         try {
-            Copy copy = copyRepository.findByUuidAndDeletedFalse(uuid)
+            Copy copy = copyRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found."));
 
             log.info("Copy with uuid={} and deleted false returned successfully.", uuid);

@@ -38,10 +38,10 @@ public class RentalServiceImpl implements IRentalService {
             throws EntityNotFoundException, EntityInvalidArgumentException {
 
         try {
-            Member member = memberRepository.findByUuidAndDeletedFalse(dto.memberUuid())
+            Member member = memberRepository.findByIdAndDeletedFalse(dto.memberUuid())
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid=" + dto.memberUuid() + " not found"));
 
-            Copy copy = copyRepository.findByUuidAndDeletedFalse(dto.copyUuid())
+            Copy copy = copyRepository.findByIdAndDeletedFalse(dto.copyUuid())
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid=" + dto.copyUuid() + " not found"));
 
             if (!copy.getAvailable()) {
@@ -76,7 +76,7 @@ public class RentalServiceImpl implements IRentalService {
             throws EntityNotFoundException, EntityInvalidArgumentException {
 
         try {
-            Rental rental = rentalRepository.findByUuid(uuid)
+            Rental rental = rentalRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Rental", "Rental with uuid=" + uuid + " not found"));
 
             if (!rental.isActive()) {
@@ -102,7 +102,7 @@ public class RentalServiceImpl implements IRentalService {
     public RentalReadOnlyDTO getRentalByUuid(UUID uuid) throws EntityNotFoundException {
 
         try {
-            Rental rental = rentalRepository.findByUuid(uuid)
+            Rental rental = rentalRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Rental", "Rental with uuid=" + uuid + " not found"));
 
             return mapper.mapToRentalReadOnlyDTO(rental);
@@ -117,10 +117,10 @@ public class RentalServiceImpl implements IRentalService {
     public List<RentalReadOnlyDTO> getRentalsByMemberUuid(UUID memberUuid) throws EntityNotFoundException {
 
         try {
-            Member member = memberRepository.findByUuid(memberUuid)
+            Member member = memberRepository.findById(memberUuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid= " + memberUuid + " not found."));
 
-            List<Rental> rentals = rentalRepository.findByMember_Uuid(memberUuid);
+            List<Rental> rentals = rentalRepository.findByMember_Id(memberUuid);
             log.info("Get rentals by memberUuid={} returned successfully", memberUuid);
 
             return rentals.stream()
@@ -138,10 +138,10 @@ public class RentalServiceImpl implements IRentalService {
     public List<RentalReadOnlyDTO> getRentalsByCopyUuid(UUID copyUuid) throws EntityNotFoundException {
 
         try {
-            Copy copy = copyRepository.findByUuid(copyUuid)
+            Copy copy = copyRepository.findById(copyUuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + copyUuid + " not found."));
 
-            List<Rental> rentals = rentalRepository.findByCopy_Uuid(copyUuid);
+            List<Rental> rentals = rentalRepository.findByCopy_Id(copyUuid);
             log.info("Get rentals by memberUuid={} returned successfully", copyUuid);
 
             return rentals.stream()

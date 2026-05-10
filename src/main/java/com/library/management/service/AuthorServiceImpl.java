@@ -54,12 +54,12 @@ public class AuthorServiceImpl implements IAuthorService {
 
     @Override
     @Transactional(rollbackFor = EntityNotFoundException.class)
-    public AuthorReadOnlyDTO updateAuthor(AuthorUpdateDTO authorUpdateDTO)
+    public AuthorReadOnlyDTO updateAuthor(UUID id, AuthorUpdateDTO authorUpdateDTO)
             throws EntityNotFoundException {
 
         try {
-            Author author = authorRepository.findByUuid(authorUpdateDTO.uuid())
-                    .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + authorUpdateDTO.uuid() + " not found."));
+            Author author = authorRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + id + " not found."));
 
             author.setFirstname(authorUpdateDTO.firstname());
             author.setLastname(authorUpdateDTO.lastname());
@@ -72,7 +72,7 @@ public class AuthorServiceImpl implements IAuthorService {
 
             return mapper.mapToAuthorReadOnlyDTO(updatedAuthor);
         } catch (EntityNotFoundException e) {
-            log.error("Update author with uuid={} failed. {}", authorUpdateDTO.uuid(), e.getMessage());
+            log.error("Update author with uuid={} failed. {}", id, e.getMessage());
             throw e;
         }
     }
@@ -82,7 +82,7 @@ public class AuthorServiceImpl implements IAuthorService {
     public void deleteAuthorByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException {
 
         try {
-            Author author = authorRepository.findByUuid(uuid)
+            Author author = authorRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
 
             boolean hasBookWithSingleAuthor = author.getAllBooks().stream()
@@ -108,7 +108,7 @@ public class AuthorServiceImpl implements IAuthorService {
     public AuthorReadOnlyDTO getAuthorByUuid(UUID uuid) throws EntityNotFoundException {
 
         try {
-            Author author = authorRepository.findByUuid(uuid)
+            Author author = authorRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
 
             log.info("Get author by uuid={} returned successfully", uuid);
@@ -125,7 +125,7 @@ public class AuthorServiceImpl implements IAuthorService {
     public AuthorReadOnlyDTO getAuthorByUUIDDeletedFalse(UUID uuid) throws EntityNotFoundException {
 
         try {
-            Author author = authorRepository.findByUuidAndDeletedFalse(uuid)
+            Author author = authorRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
 
             log.info("Get author by uuid={} and deleted false returned successfully", uuid);
@@ -169,11 +169,11 @@ public class AuthorServiceImpl implements IAuthorService {
 
         try {
 
-            if (!bookRepository.existsByUuid(bookUuid)) {
+            if (!bookRepository.existsById(bookUuid)) {
                 throw new EntityNotFoundException("Book", "Book with uuid=" + bookUuid + " not found");
             }
 
-            List<Author> authors = authorRepository.findByBooks_Uuid(bookUuid);
+            List<Author> authors = authorRepository.findByBooks_Id(bookUuid);
 
             log.info("Get authors by bookUuid={} returned successfully", bookUuid);
 

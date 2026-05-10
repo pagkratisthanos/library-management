@@ -70,18 +70,18 @@ public class MemberServiceImpl implements IMemberService {
     @Override
     @Transactional(rollbackFor = {EntityAlreadyExistsException.class,
             EntityInvalidArgumentException.class, EntityNotFoundException.class})
-    public MemberReadOnlyDTO updateMember(MemberUpdateDTO dto)
+    public MemberReadOnlyDTO updateMember(UUID id, MemberUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException, EntityAlreadyExistsException {
 
         try {
-            Member member = memberRepository.findByUuid(dto.uuid())
-                    .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid: " + dto.uuid() + " not found"));
+            Member member = memberRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid: " + id + " not found"));
 
-            if (memberRepository.existsByEmailAndUuidNot(dto.email(), dto.uuid())) {
+            if (memberRepository.existsByEmailAndIdNot(dto.email(), id)) {
                 throw new EntityAlreadyExistsException("Member", "Member with email: " + dto.email() + " already exists");
             }
 
-            if (memberRepository.existsByPhoneNumberAndUuidNot(dto.phoneNumber(), dto.uuid())) {
+            if (memberRepository.existsByPhoneNumberAndIdNot(dto.phoneNumber(), id)) {
                 throw new EntityAlreadyExistsException("Member", "Member with phone number: " + dto.phoneNumber() + " already exists");
             }
 
@@ -119,7 +119,7 @@ public class MemberServiceImpl implements IMemberService {
     @Transactional(rollbackFor = {EntityNotFoundException.class,EntityInvalidArgumentException.class})
     public void  deleteMemberByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
-            Member member = memberRepository.findByUuidAndDeletedFalse(uuid)
+            Member member = memberRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid=" + uuid + " not found"));
 
             boolean hasActiveRentals = member.getAllRentals().stream()
@@ -148,7 +148,7 @@ public class MemberServiceImpl implements IMemberService {
     @Transactional(readOnly = true)
     public MemberReadOnlyDTO getMemberByUuid(UUID uuid) throws EntityNotFoundException {
         try {
-            Member member = memberRepository.findByUuid(uuid)
+            Member member = memberRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member","Member with uuid=" + uuid + " not found"));
             log.info("Get member by uuid={} returned successfully", uuid);
             return mapper.mapToMemberReadOnlyDTO(member);
@@ -162,7 +162,7 @@ public class MemberServiceImpl implements IMemberService {
     @Transactional(readOnly = true)
     public MemberReadOnlyDTO getMemberByUUIDDeletedFalse(UUID uuid) throws EntityNotFoundException {
         try {
-            Member member = memberRepository.findByUuidAndDeletedFalse(uuid)
+            Member member = memberRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member","Member with uuid=" + uuid + " not found"));
             log.info("Get non-deleted member by uuid={} returned successfully", uuid);
             return mapper.mapToMemberReadOnlyDTO(member);
