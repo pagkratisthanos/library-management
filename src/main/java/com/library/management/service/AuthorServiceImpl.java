@@ -43,7 +43,7 @@ public class AuthorServiceImpl implements IAuthorService {
             Author author = mapper.mapToAuthorEntity(authorInsertDTO);
 
             Author savedAuthor = authorRepository.save(author);
-            log.info("Author saved with uuid={}", savedAuthor.getUuid());
+            log.info("Author saved with uuid={}", savedAuthor.getId());
 
             return mapper.mapToAuthorReadOnlyDTO(savedAuthor);
         } catch (EntityInvalidArgumentException e) {
@@ -68,7 +68,7 @@ public class AuthorServiceImpl implements IAuthorService {
             author.setBirthPlace(authorUpdateDTO.birthPlace());
 
             Author updatedAuthor = authorRepository.save(author);
-            log.info("Author with uuid={} has successfully been updated", updatedAuthor.getUuid());
+            log.info("Author with uuid={} has successfully been updated", updatedAuthor.getId());
 
             return mapper.mapToAuthorReadOnlyDTO(updatedAuthor);
         } catch (EntityNotFoundException e) {
