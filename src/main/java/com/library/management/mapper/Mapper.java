@@ -25,9 +25,9 @@ public class Mapper {
 
     public BookReadOnlyDTO mapToBookReadOnlyDTO(Book book) {
 
-        Set<AuthorReadOnlyDTO> authors = book.getAuthors().stream()
+        Set<AuthorReadOnlyDTO> authors = book.getAllAuthors().stream()
                 .map(author -> new AuthorReadOnlyDTO(
-                        author.getUuid(),
+                        author.getId(),
                         author.getFirstname(),
                         author.getLastname(),
                         author.getBirthDate(),
@@ -38,7 +38,7 @@ public class Mapper {
                 .collect(Collectors.toSet());
 
         return new BookReadOnlyDTO(
-                book.getUuid(),
+                book.getId(),
                 book.getTitle(),
                 book.getIsbn(),
                 book.getPublishedDate(),
@@ -66,7 +66,7 @@ public class Mapper {
 
         Set<BookReadOnlyDTO> books = author.getAllBooks().stream()
                 .map(book -> new BookReadOnlyDTO(
-                        book.getUuid(),
+                        book.getId(),
                         book.getTitle(),
                         book.getIsbn(),
                         book.getPublishedDate(),
@@ -78,7 +78,7 @@ public class Mapper {
                 .collect(Collectors.toSet());
 
         return new AuthorReadOnlyDTO(
-                author.getUuid(),
+                author.getId(),
                 author.getFirstname(),
                 author.getLastname(),
                 author.getBirthDate(),
@@ -114,7 +114,7 @@ public class Mapper {
     public MemberReadOnlyDTO mapToMemberReadOnlyDTO(Member member) {
 
         AddressReadOnlyDTO addressReadOnlyDTO = new AddressReadOnlyDTO(
-                member.getAddress().getUuid(),
+                member.getAddress().getId(),
                 member.getAddress().getStreet(),
                 member.getAddress().getStreetNumber(),
                 member.getAddress().getCity(),
@@ -123,7 +123,7 @@ public class Mapper {
         );
 
         return new MemberReadOnlyDTO(
-                member.getUuid(),
+                member.getId(),
                 addressReadOnlyDTO,
                 member.getFirstname(),
                 member.getLastname(),
@@ -147,8 +147,8 @@ public class Mapper {
     public CopyReadOnlyDTO mapToCopyReadOnlyDTO(Copy copy) {
 
         return new CopyReadOnlyDTO(
-                copy.getUuid(),
-                copy.getBook().getUuid(),
+                copy.getId(),
+                copy.getBook().getId(),
                 copy.getBook().getTitle(),
                 copy.getAvailable(),
                 copy.getCondition()
@@ -167,9 +167,9 @@ public class Mapper {
     public RentalReadOnlyDTO mapToRentalReadOnlyDTO(Rental rental) {
 
         return new RentalReadOnlyDTO(
-                rental.getUuid(),
-                rental.getMember().getUuid(),
-                rental.getCopy().getUuid(),
+                rental.getId(),
+                rental.getMember().getId(),
+                rental.getCopy().getId(),
                 rental.getRentalDate(),
                 rental.getDueDate(),
                 rental.getReturnDate(),
