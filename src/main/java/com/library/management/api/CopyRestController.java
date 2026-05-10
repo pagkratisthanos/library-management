@@ -29,7 +29,7 @@ public class CopyRestController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedCopy.uuid())
+                .buildAndExpand(savedCopy.id())
                 .toUri();
         return ResponseEntity.created(location).body(savedCopy);
     }
@@ -38,7 +38,7 @@ public class CopyRestController {
     public ResponseEntity<CopyReadOnlyDTO> updateCopy(@PathVariable UUID uuid,
                                                       @Valid @RequestBody CopyUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(copyService.updateCopy(dto));
+        return ResponseEntity.ok(copyService.updateCopy(uuid, dto));
     }
 
     @DeleteMapping("/{uuid}")

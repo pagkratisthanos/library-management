@@ -36,7 +36,7 @@ public class MemberRestController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedMember.uuid())
+                .buildAndExpand(savedMember.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(savedMember);
@@ -47,7 +47,7 @@ public class MemberRestController {
             @PathVariable UUID uuid,
             @Valid @RequestBody MemberUpdateDTO dto)
             throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(memberService.updateMember(dto));
+        return ResponseEntity.ok(memberService.updateMember(uuid, dto));
     }
 
     @DeleteMapping("/{uuid}")

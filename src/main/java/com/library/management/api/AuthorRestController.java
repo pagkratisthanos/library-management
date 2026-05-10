@@ -30,7 +30,7 @@ public class AuthorRestController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedAuthor.uuid())
+                .buildAndExpand(savedAuthor.id())
                 .toUri();
         return ResponseEntity.created(location).body(savedAuthor);
     }
@@ -39,7 +39,7 @@ public class AuthorRestController {
     public ResponseEntity<AuthorReadOnlyDTO> updateAuthor(@PathVariable UUID uuid,
                                                           @Valid @RequestBody AuthorUpdateDTO dto)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(authorService.updateAuthor(dto));
+        return ResponseEntity.ok(authorService.updateAuthor(uuid, dto));
     }
 
     @DeleteMapping("/{uuid}")

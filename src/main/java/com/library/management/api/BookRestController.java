@@ -29,7 +29,7 @@ public class BookRestController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedBook.uuid())
+                .buildAndExpand(savedBook.id())
                 .toUri();
         return ResponseEntity.created(location).body(savedBook);
     }
@@ -38,7 +38,7 @@ public class BookRestController {
     public ResponseEntity<BookReadOnlyDTO> updateBook(@PathVariable UUID uuid,
                                                       @Valid @RequestBody BookUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(bookService.updateBook(dto));
+        return ResponseEntity.ok(bookService.updateBook(uuid, dto));
     }
 
     @DeleteMapping("/{uuid}")

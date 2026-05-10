@@ -56,7 +56,7 @@ public class BookServiceImpl implements IBookService {
             Set<Author> authors = new HashSet<>();
             if (dto.authorUuids() != null) {
                 for (UUID uuid : dto.authorUuids()) {
-                    Author author = authorRepository.findByUuid(uuid)
+                    Author author = authorRepository.findById(uuid)
                             .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid=" + uuid + " not found"));
                     authors.add(author);
                 }
@@ -86,11 +86,11 @@ public class BookServiceImpl implements IBookService {
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class,
             EntityInvalidArgumentException.class})
-    public BookReadOnlyDTO updateBook(BookUpdateDTO dto) throws EntityNotFoundException,
+    public BookReadOnlyDTO updateBook(UUID uuid, BookUpdateDTO dto) throws EntityNotFoundException,
             EntityInvalidArgumentException {
         try {
-            Book book = bookRepository.findByUuid(dto.uuid())
-                    .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid=" + dto.uuid() + " not found"));
+            Book book = bookRepository.findById(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid=" + uuid + " not found"));
 
             if (dto.dailyCost().compareTo(BigDecimal.ZERO) < 0) {
                 throw new EntityInvalidArgumentException("Book", "Daily cost cannot be negative");
@@ -114,7 +114,7 @@ public class BookServiceImpl implements IBookService {
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
     public void deleteBookByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
-            Book book = bookRepository.findByUuid(uuid)
+            Book book = bookRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid " + uuid + " not found"));
 
             boolean hasActiveRentals = book.getAllCopies().stream()
@@ -140,7 +140,7 @@ public class BookServiceImpl implements IBookService {
     @Transactional(readOnly = true)
     public BookReadOnlyDTO getBookByUuid(UUID uuid) throws EntityNotFoundException {
         try {
-            Book book = bookRepository.findByUuid(uuid)
+            Book book = bookRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid " + uuid + " not found"));
 
             log.info("Get book by uuid={} returned successfully.", uuid);
@@ -155,7 +155,7 @@ public class BookServiceImpl implements IBookService {
     @Transactional(readOnly = true)
     public BookReadOnlyDTO getBookByUuidDeletedFalse(UUID uuid) throws EntityNotFoundException {
         try {
-            Book book = bookRepository.findByUuidAndDeletedFalse(uuid)
+            Book book = bookRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid: " + uuid + " not found"));
 
             log.info("Get non-deleted book by uuid={} returned successfully.", uuid);

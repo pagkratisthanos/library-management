@@ -30,7 +30,7 @@ public class RentalRestController {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedRental.uuid())
+                .buildAndExpand(savedRental.id())
                 .toUri();
         return ResponseEntity.created(location).body(savedRental);
     }
