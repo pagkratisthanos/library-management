@@ -15,7 +15,7 @@ public interface ICopyService {
 
     CopyReadOnlyDTO saveCopy(CopyInsertDTO dto) throws EntityInvalidArgumentException, EntityNotFoundException;
 
-    CopyReadOnlyDTO updateCopy(CopyUpdateDTO dto) throws EntityNotFoundException, EntityInvalidArgumentException;
+    CopyReadOnlyDTO updateCopy(UUID id, CopyUpdateDTO dto) throws EntityNotFoundException, EntityInvalidArgumentException;
 
     void deleteCopyByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
 

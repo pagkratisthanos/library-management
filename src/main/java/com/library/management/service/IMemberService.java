@@ -16,7 +16,7 @@ public interface IMemberService {
     MemberReadOnlyDTO saveMember(MemberInsertDTO memberInsertDTO)
         throws EntityAlreadyExistsException, EntityInvalidArgumentException;
 
-    MemberReadOnlyDTO updateMember(MemberUpdateDTO memberUpdateDTO)
+    MemberReadOnlyDTO updateMember(UUID id, MemberUpdateDTO memberUpdateDTO)
         throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException;
 
     void deleteMemberByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;

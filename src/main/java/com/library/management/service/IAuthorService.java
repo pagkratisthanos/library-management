@@ -17,7 +17,7 @@ public interface IAuthorService {
     AuthorReadOnlyDTO saveAuthor(AuthorInsertDTO authorInsertDTO)
             throws EntityInvalidArgumentException;
 
-    AuthorReadOnlyDTO updateAuthor(AuthorUpdateDTO authorUpdateDTO)
+    AuthorReadOnlyDTO updateAuthor(UUID id, AuthorUpdateDTO authorUpdateDTO)
             throws EntityNotFoundException;
 
     void deleteAuthorByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
