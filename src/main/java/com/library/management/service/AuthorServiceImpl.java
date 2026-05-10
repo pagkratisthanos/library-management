@@ -5,7 +5,7 @@ import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.AuthorInsertDTO;
 import com.library.management.dto.AuthorReadOnlyDTO;
 import com.library.management.dto.AuthorUpdateDTO;
-import com.library.management.mapper.Mapper;
+import com.library.management.mapper.AuthorMapper;
 import com.library.management.model.Author;
 import com.library.management.repository.AuthorRepository;
 import com.library.management.repository.BookRepository;
@@ -28,7 +28,7 @@ public class AuthorServiceImpl implements IAuthorService {
 
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
-    private final Mapper mapper;
+    private final AuthorMapper mapper;
 
     @Override
     @Transactional(rollbackFor = EntityInvalidArgumentException.class)
@@ -86,7 +86,7 @@ public class AuthorServiceImpl implements IAuthorService {
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
 
             boolean hasBookWithSingleAuthor = author.getAllBooks().stream()
-                    .anyMatch(book -> book.getAuthors().size() == 1);
+                    .anyMatch(book -> book.getAllAuthors().size() == 1);
 
             if (hasBookWithSingleAuthor) {
                 throw new EntityInvalidArgumentException("Author",

@@ -6,7 +6,7 @@ import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.BookInsertDTO;
 import com.library.management.dto.BookReadOnlyDTO;
 import com.library.management.dto.BookUpdateDTO;
-import com.library.management.mapper.Mapper;
+import com.library.management.mapper.BookMapper;
 import com.library.management.model.Author;
 import com.library.management.model.Book;
 import com.library.management.model.Rental;
@@ -32,7 +32,7 @@ public class BookServiceImpl implements IBookService {
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
-    private final Mapper mapper;
+    private final BookMapper mapper;
 
     @Override
     @Transactional(rollbackFor = {EntityAlreadyExistsException.class,

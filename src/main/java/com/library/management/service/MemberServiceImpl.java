@@ -6,7 +6,7 @@ import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.MemberInsertDTO;
 import com.library.management.dto.MemberReadOnlyDTO;
 import com.library.management.dto.MemberUpdateDTO;
-import com.library.management.mapper.Mapper;
+import com.library.management.mapper.MemberMapper;
 import com.library.management.model.Member;
 import com.library.management.model.Rental;
 import com.library.management.repository.MemberRepository;
@@ -26,7 +26,7 @@ import java.util.UUID;
 public class MemberServiceImpl implements IMemberService {
 
     private final MemberRepository memberRepository;
-    private final Mapper mapper;
+    private final MemberMapper mapper;
 
     @Override
     @Transactional(rollbackFor = {EntityAlreadyExistsException.class, EntityInvalidArgumentException.class})
@@ -96,7 +96,7 @@ public class MemberServiceImpl implements IMemberService {
             member.setFirstname(dto.firstname());
 
             Member updatedMember = memberRepository.save(member);
-            log.info("Member updated with uuid={}.", updatedMember.getUuid());
+            log.info("Member updated with uuid={}.", updatedMember.getId());
 
             return mapper.mapToMemberReadOnlyDTO(updatedMember);
 

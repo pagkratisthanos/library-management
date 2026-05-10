@@ -5,7 +5,7 @@ import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.CopyInsertDTO;
 import com.library.management.dto.CopyReadOnlyDTO;
 import com.library.management.dto.CopyUpdateDTO;
-import com.library.management.mapper.Mapper;
+import com.library.management.mapper.CopyMapper;
 import com.library.management.model.Book;
 import com.library.management.model.Copy;
 import com.library.management.model.Rental;
@@ -27,7 +27,7 @@ public class CopyServiceImpl implements ICopyService {
 
     private final CopyRepository copyRepository;
     private final BookRepository bookRepository;
-    private final Mapper mapper;
+    private final CopyMapper mapper;
 
     @Override
     @Transactional(rollbackFor = {EntityInvalidArgumentException.class, EntityNotFoundException.class})
@@ -46,7 +46,7 @@ public class CopyServiceImpl implements ICopyService {
             copy.setBook(book);
 
             Copy savedCopy = copyRepository.save(copy);
-            log.info("Copy saved with uuid={}", savedCopy.getUuid());
+            log.info("Copy saved with uuid={}", savedCopy.getId());
 
             return mapper.mapToCopyReadOnlyDTO(savedCopy);
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
@@ -74,7 +74,7 @@ public class CopyServiceImpl implements ICopyService {
             copy.setCondition(dto.condition());
 
             Copy updatedCopy = copyRepository.save(copy);
-            log.info("Copy updated with uuid={}", updatedCopy.getUuid());
+            log.info("Copy updated with uuid={}", updatedCopy.getId());
             return mapper.mapToCopyReadOnlyDTO(updatedCopy);
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {

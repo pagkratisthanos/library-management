@@ -4,7 +4,7 @@ import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.RentalInsertDTO;
 import com.library.management.dto.RentalReadOnlyDTO;
-import com.library.management.mapper.Mapper;
+import com.library.management.mapper.RentalMapper;
 import com.library.management.model.Copy;
 import com.library.management.model.Member;
 import com.library.management.model.Rental;
@@ -30,7 +30,7 @@ public class RentalServiceImpl implements IRentalService {
     private final RentalRepository rentalRepository;
     private final MemberRepository memberRepository;
     private final CopyRepository copyRepository;
-    private final Mapper mapper;
+    private final RentalMapper mapper;
 
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
@@ -61,7 +61,7 @@ public class RentalServiceImpl implements IRentalService {
             copyRepository.save(copy);
 
             Rental savedRental = rentalRepository.save(rental);
-            log.info("Rental saved with uuid={}", savedRental.getUuid());
+            log.info("Rental saved with uuid={}", savedRental.getId());
             return mapper.mapToRentalReadOnlyDTO(savedRental);
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
