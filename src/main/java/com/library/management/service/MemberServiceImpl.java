@@ -34,11 +34,11 @@ public class MemberServiceImpl implements IMemberService {
             throws EntityAlreadyExistsException, EntityInvalidArgumentException {
 
         try {
-            if (dto.email() != null && memberRepository.existsByEmail(dto.email())) {
+            if (dto.email() != null && memberRepository.existsByEmailAndDeletedFalse(dto.email())) {
                 throw new EntityAlreadyExistsException("Member", "Member with email: " + dto.email() + " already exists");
             }
 
-            if (dto.phoneNumber() != null && memberRepository.existsByPhoneNumber(dto.phoneNumber())) {
+            if (dto.phoneNumber() != null && memberRepository.existsByPhoneNumberAndDeletedFalse(dto.phoneNumber())) {
                 throw new EntityAlreadyExistsException("Member", "Member with phone number: " + dto.phoneNumber() + " already exists");
             }
 
