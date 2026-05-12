@@ -17,6 +17,7 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
     @EntityGraph(attributePaths = {"authors"})
     Optional<Book> findByIdAndDeletedFalse(UUID uuid);
     Optional<Book> findByIsbn(String isbn);
+    boolean existsByIsbnAndDeletedFalse(String isbn);
     boolean existsByIsbn(String isbn);
     boolean existsById(UUID uuid);
     boolean existsByIsbnAndIdNot(String isbn, UUID id);

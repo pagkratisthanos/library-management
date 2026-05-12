@@ -41,7 +41,7 @@ public class BookServiceImpl implements IBookService {
     public BookReadOnlyDTO saveBook(BookInsertDTO dto) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
 
         try {
-            if (bookRepository.existsByIsbn(dto.isbn())) {
+            if (bookRepository.existsByIsbnAndDeletedFalse(dto.isbn())) {
                 throw new EntityAlreadyExistsException("Book", "Book with isbn: " + dto.isbn() + " already exists.");
             }
 
