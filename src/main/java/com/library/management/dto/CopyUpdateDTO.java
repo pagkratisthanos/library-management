@@ -13,6 +13,6 @@ public record CopyUpdateDTO(
         @NotNull
         Boolean available,
 
-        @NotBlank
+        @NotNull
         CopyCondition condition
 ) {}
