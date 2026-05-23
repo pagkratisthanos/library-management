@@ -2,6 +2,8 @@ package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
 import com.library.management.dto.*;
+import com.library.management.mapper.BookMapper;
+import com.library.management.model.Book;
 import com.library.management.service.IBookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +23,27 @@ import java.util.UUID;
 public class BookRestController {
 
     private final IBookService bookService;
+    private final BookMapper bookMapper;
 
     @PostMapping
     public ResponseEntity<BookReadOnlyDTO> saveBook(@Valid @RequestBody BookInsertDTO dto)
             throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
-        BookReadOnlyDTO savedBook = bookService.saveBook(dto);
+        Book savedBook = bookService.saveBook(dto);
+        BookReadOnlyDTO responseDTO = bookMapper.mapToBookReadOnlyDTO(savedBook);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedBook.id())
+                .buildAndExpand(responseDTO.id())
                 .toUri();
-        return ResponseEntity.created(location).body(savedBook);
+        return ResponseEntity.created(location).body(responseDTO);
     }
 
     @PutMapping("/{uuid}")
     public ResponseEntity<BookReadOnlyDTO> updateBook(@PathVariable UUID uuid,
                                                       @Valid @RequestBody BookUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(bookService.updateBook(uuid, dto));
+        Book updatedBook = bookService.updateBook(uuid, dto);
+        return ResponseEntity.ok(bookMapper.mapToBookReadOnlyDTO(updatedBook));
     }
 
     @DeleteMapping("/{uuid}")
@@ -51,12 +56,14 @@ public class BookRestController {
     @GetMapping("/{uuid}")
     public ResponseEntity<BookReadOnlyDTO> getBook(@PathVariable UUID uuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(bookService.getBookByUuidDeletedFalse(uuid));
+        Book book = bookService.getBookByUuidDeletedFalse(uuid);
+        return ResponseEntity.ok(bookMapper.mapToBookReadOnlyDTO(book));
     }
 
     @GetMapping
     public ResponseEntity<Page<BookReadOnlyDTO>> getBooks(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return ResponseEntity.ok(bookService.getBooksPaginatedAndDeletedFalse(pageable));
+        Page<Book> books = bookService.getBooksPaginatedAndDeletedFalse(pageable);
+        return ResponseEntity.ok(books.map(bookMapper::mapToBookReadOnlyDTO));
     }
 }
