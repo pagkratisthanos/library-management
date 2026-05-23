@@ -2,6 +2,8 @@ package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
 import com.library.management.dto.*;
+import com.library.management.mapper.AuthorMapper;
+import com.library.management.model.Author;
 import com.library.management.service.IAuthorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,24 +24,27 @@ import java.util.UUID;
 public class AuthorRestController {
 
     private final IAuthorService authorService;
+    private final AuthorMapper authorMapper;
 
     @PostMapping
     public ResponseEntity<AuthorReadOnlyDTO> saveAuthor(@Valid @RequestBody AuthorInsertDTO dto)
             throws EntityInvalidArgumentException {
-        AuthorReadOnlyDTO savedAuthor = authorService.saveAuthor(dto);
+        Author savedAuthor = authorService.saveAuthor(dto);
+        AuthorReadOnlyDTO responseDTO = authorMapper.mapToAuthorReadOnlyDTO(savedAuthor);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedAuthor.id())
+                .buildAndExpand(responseDTO.id())
                 .toUri();
-        return ResponseEntity.created(location).body(savedAuthor);
+        return ResponseEntity.created(location).body(responseDTO);
     }
 
     @PutMapping("/{uuid}")
     public ResponseEntity<AuthorReadOnlyDTO> updateAuthor(@PathVariable UUID uuid,
                                                           @Valid @RequestBody AuthorUpdateDTO dto)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(authorService.updateAuthor(uuid, dto));
+        Author updatedAuthor = authorService.updateAuthor(uuid, dto);
+        return ResponseEntity.ok(authorMapper.mapToAuthorReadOnlyDTO(updatedAuthor));
     }
 
     @DeleteMapping("/{uuid}")
@@ -52,18 +57,23 @@ public class AuthorRestController {
     @GetMapping("/{uuid}")
     public ResponseEntity<AuthorReadOnlyDTO> getAuthor(@PathVariable UUID uuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(authorService.getAuthorByUUIDDeletedFalse(uuid));
+        Author author = authorService.getAuthorByUUIDDeletedFalse(uuid);
+        return ResponseEntity.ok(authorMapper.mapToAuthorReadOnlyDTO(author));
     }
 
     @GetMapping
     public ResponseEntity<Page<AuthorReadOnlyDTO>> getAuthors(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return ResponseEntity.ok(authorService.getAuthorsPaginatedAndDeletedFalse(pageable));
+        Page<Author> authors = authorService.getAuthorsPaginatedAndDeletedFalse(pageable);
+        return ResponseEntity.ok(authors.map(authorMapper::mapToAuthorReadOnlyDTO));
     }
 
     @GetMapping("/book/{bookUuid}")
     public ResponseEntity<List<AuthorReadOnlyDTO>> getAuthorsByBook(@PathVariable UUID bookUuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(authorService.getAuthorsByBookUuid(bookUuid));
+        List<Author> authors = authorService.getAuthorsByBookUuid(bookUuid);
+        return ResponseEntity.ok(authors.stream()
+                .map(authorMapper::mapToAuthorReadOnlyDTO)
+                .toList());
     }
 }
