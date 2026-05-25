@@ -3,9 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.CopyInsertDTO;
-import com.library.management.dto.CopyReadOnlyDTO;
 import com.library.management.dto.CopyUpdateDTO;
-import com.library.management.mapper.CopyMapper;
 import com.library.management.model.Book;
 import com.library.management.model.Copy;
 import com.library.management.model.Rental;
@@ -27,12 +25,10 @@ public class CopyServiceImpl implements ICopyService {
 
     private final CopyRepository copyRepository;
     private final BookRepository bookRepository;
-    private final CopyMapper mapper;
 
     @Override
     @Transactional(rollbackFor = {EntityInvalidArgumentException.class, EntityNotFoundException.class})
-    public CopyReadOnlyDTO saveCopy(CopyInsertDTO dto) throws EntityInvalidArgumentException, EntityNotFoundException {
-
+    public Copy saveCopy(CopyInsertDTO dto) throws EntityInvalidArgumentException, EntityNotFoundException {
         try {
             Book book = bookRepository.findById(dto.bookUuid())
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid=" + dto.bookUuid() + " not found"));
@@ -41,14 +37,14 @@ public class CopyServiceImpl implements ICopyService {
                 throw new EntityInvalidArgumentException("Copy", "Cannot add copy to a deleted book");
             }
 
-            Copy copy = mapper.mapToCopyEntity(dto);
-
+            Copy copy = new Copy();
+            copy.setAvailable(dto.available());
+            copy.setCondition(dto.condition());
             copy.setBook(book);
 
             Copy savedCopy = copyRepository.save(copy);
             log.info("Copy saved with uuid={}", savedCopy.getId());
-
-            return mapper.mapToCopyReadOnlyDTO(savedCopy);
+            return savedCopy;
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
             log.error("Save copy failed. {}", e.getMessage());
             throw e;
@@ -57,11 +53,9 @@ public class CopyServiceImpl implements ICopyService {
 
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public CopyReadOnlyDTO updateCopy(UUID uuid,CopyUpdateDTO dto)
+    public Copy updateCopy(UUID uuid, CopyUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-
         try {
-
             Copy copy = copyRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid=" + uuid + " not found"));
 
@@ -75,8 +69,7 @@ public class CopyServiceImpl implements ICopyService {
 
             Copy updatedCopy = copyRepository.save(copy);
             log.info("Copy updated with uuid={}", updatedCopy.getId());
-            return mapper.mapToCopyReadOnlyDTO(updatedCopy);
-
+            return updatedCopy;
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
             log.error("Update copy failed. {}", e.getMessage());
             throw e;
@@ -86,7 +79,6 @@ public class CopyServiceImpl implements ICopyService {
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
     public void deleteCopyByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException {
-
         try {
             Copy copy = copyRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found"));
@@ -95,8 +87,7 @@ public class CopyServiceImpl implements ICopyService {
                     .anyMatch(Rental::isActive);
 
             if (hasActiveRental) {
-                throw new EntityInvalidArgumentException("Copy",
-                        "Cannot delete copy with active rental");
+                throw new EntityInvalidArgumentException("Copy", "Cannot delete copy with active rental");
             }
 
             copy.softDelete();
@@ -110,15 +101,12 @@ public class CopyServiceImpl implements ICopyService {
 
     @Override
     @Transactional(readOnly = true)
-    public CopyReadOnlyDTO getCopyByUuid(UUID uuid) throws EntityNotFoundException {
-
+    public Copy getCopyByUuid(UUID uuid) throws EntityNotFoundException {
         try {
             Copy copy = copyRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found."));
-
             log.info("Copy with uuid={} returned successfully.", uuid);
-
-            return mapper.mapToCopyReadOnlyDTO(copy);
+            return copy;
         } catch (EntityNotFoundException e) {
             log.error("Get copy by uuid failed. {}", e.getMessage());
             throw e;
@@ -127,15 +115,12 @@ public class CopyServiceImpl implements ICopyService {
 
     @Override
     @Transactional(readOnly = true)
-    public CopyReadOnlyDTO getCopyByUuidDeletedFalse(UUID uuid) throws EntityNotFoundException {
-
+    public Copy getCopyByUuidDeletedFalse(UUID uuid) throws EntityNotFoundException {
         try {
             Copy copy = copyRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found."));
-
             log.info("Copy with uuid={} and deleted false returned successfully.", uuid);
-
-            return mapper.mapToCopyReadOnlyDTO(copy);
+            return copy;
         } catch (EntityNotFoundException e) {
             log.error("Get copy by uuid failed. {}", e.getMessage());
             throw e;
@@ -144,20 +129,17 @@ public class CopyServiceImpl implements ICopyService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CopyReadOnlyDTO> getCopiesPaginated(Pageable pageable) {
-
+    public Page<Copy> getCopiesPaginated(Pageable pageable) {
         Page<Copy> copyPage = copyRepository.findAll(pageable);
         log.info("Get paginated returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
-        return copyPage.map(mapper::mapToCopyReadOnlyDTO);
+        return copyPage;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CopyReadOnlyDTO> getCopiesPaginatedAndDeletedFalse(Pageable pageable) {
-
+    public Page<Copy> getCopiesPaginatedAndDeletedFalse(Pageable pageable) {
         Page<Copy> copyPage = copyRepository.findByDeletedFalse(pageable);
         log.info("Get paginated not deleted returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
-        return copyPage.map(mapper::mapToCopyReadOnlyDTO);
+        return copyPage;
     }
-
 }

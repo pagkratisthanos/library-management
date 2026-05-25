@@ -2,6 +2,8 @@ package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
 import com.library.management.dto.*;
+import com.library.management.mapper.CopyMapper;
+import com.library.management.model.Copy;
 import com.library.management.service.ICopyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +23,27 @@ import java.util.UUID;
 public class CopyRestController {
 
     private final ICopyService copyService;
+    private final CopyMapper copyMapper;
 
     @PostMapping
     public ResponseEntity<CopyReadOnlyDTO> saveCopy(@Valid @RequestBody CopyInsertDTO dto)
             throws EntityInvalidArgumentException, EntityNotFoundException {
-        CopyReadOnlyDTO savedCopy = copyService.saveCopy(dto);
+        Copy savedCopy = copyService.saveCopy(dto);
+        CopyReadOnlyDTO responseDTO = copyMapper.mapToCopyReadOnlyDTO(savedCopy);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedCopy.id())
+                .buildAndExpand(responseDTO.id())
                 .toUri();
-        return ResponseEntity.created(location).body(savedCopy);
+        return ResponseEntity.created(location).body(responseDTO);
     }
 
     @PutMapping("/{uuid}")
     public ResponseEntity<CopyReadOnlyDTO> updateCopy(@PathVariable UUID uuid,
                                                       @Valid @RequestBody CopyUpdateDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(copyService.updateCopy(uuid, dto));
+        Copy updatedCopy = copyService.updateCopy(uuid, dto);
+        return ResponseEntity.ok(copyMapper.mapToCopyReadOnlyDTO(updatedCopy));
     }
 
     @DeleteMapping("/{uuid}")
@@ -51,12 +56,14 @@ public class CopyRestController {
     @GetMapping("/{uuid}")
     public ResponseEntity<CopyReadOnlyDTO> getCopy(@PathVariable UUID uuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(copyService.getCopyByUuidDeletedFalse(uuid));
+        Copy copy = copyService.getCopyByUuidDeletedFalse(uuid);
+        return ResponseEntity.ok(copyMapper.mapToCopyReadOnlyDTO(copy));
     }
 
     @GetMapping
     public ResponseEntity<Page<CopyReadOnlyDTO>> getCopies(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return ResponseEntity.ok(copyService.getCopiesPaginatedAndDeletedFalse(pageable));
+        Page<Copy> copies = copyService.getCopiesPaginatedAndDeletedFalse(pageable);
+        return ResponseEntity.ok(copies.map(copyMapper::mapToCopyReadOnlyDTO));
     }
 }
