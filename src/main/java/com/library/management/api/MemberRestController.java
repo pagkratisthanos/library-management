@@ -6,6 +6,8 @@ import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.MemberInsertDTO;
 import com.library.management.dto.MemberReadOnlyDTO;
 import com.library.management.dto.MemberUpdateDTO;
+import com.library.management.mapper.MemberMapper;
+import com.library.management.model.Member;
 import com.library.management.service.IMemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,21 +27,20 @@ import java.util.UUID;
 public class MemberRestController {
 
     private final IMemberService memberService;
+    private final MemberMapper memberMapper;
 
     @PostMapping
     public ResponseEntity<MemberReadOnlyDTO> saveMember(
             @Valid @RequestBody MemberInsertDTO dto)
             throws EntityAlreadyExistsException, EntityInvalidArgumentException {
-
-        MemberReadOnlyDTO savedMember = memberService.saveMember(dto);
-
+        Member savedMember = memberService.saveMember(dto);
+        MemberReadOnlyDTO responseDTO = memberMapper.mapToMemberReadOnlyDTO(savedMember);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedMember.id())
+                .buildAndExpand(responseDTO.id())
                 .toUri();
-
-        return ResponseEntity.created(location).body(savedMember);
+        return ResponseEntity.created(location).body(responseDTO);
     }
 
     @PutMapping("/{uuid}")
@@ -47,7 +48,8 @@ public class MemberRestController {
             @PathVariable UUID uuid,
             @Valid @RequestBody MemberUpdateDTO dto)
             throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(memberService.updateMember(uuid, dto));
+        Member updatedMember = memberService.updateMember(uuid, dto);
+        return ResponseEntity.ok(memberMapper.mapToMemberReadOnlyDTO(updatedMember));
     }
 
     @DeleteMapping("/{uuid}")
@@ -60,12 +62,14 @@ public class MemberRestController {
     @GetMapping("/{uuid}")
     public ResponseEntity<MemberReadOnlyDTO> getMember(@PathVariable UUID uuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(memberService.getMemberByUUIDDeletedFalse(uuid));
+        Member member = memberService.getMemberByUUIDDeletedFalse(uuid);
+        return ResponseEntity.ok(memberMapper.mapToMemberReadOnlyDTO(member));
     }
 
     @GetMapping
     public ResponseEntity<Page<MemberReadOnlyDTO>> getMembers(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return ResponseEntity.ok(memberService.getMembersPaginatedAndDeletedFalse(pageable));
+        Page<Member> members = memberService.getMembersPaginatedAndDeletedFalse(pageable);
+        return ResponseEntity.ok(members.map(memberMapper::mapToMemberReadOnlyDTO));
     }
 }
