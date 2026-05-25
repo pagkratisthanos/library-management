@@ -14,13 +14,21 @@ import java.util.UUID;
 public interface IAuthorService {
 
     Author saveAuthor(AuthorInsertDTO dto) throws EntityInvalidArgumentException;
+
     Author updateAuthor(UUID id, AuthorUpdateDTO dto) throws EntityNotFoundException;
+
     Author getAuthorByUuid(UUID uuid) throws EntityNotFoundException;
+
     Author getAuthorByUUIDDeletedFalse(UUID uuid) throws EntityNotFoundException;
+
     Page<Author> getAuthorsPaginated(Pageable pageable);
+
     Page<Author> getAuthorsPaginatedAndDeletedFalse(Pageable pageable);
+
     List<Author> getAuthorsByBookUuid(UUID bookUuid) throws EntityNotFoundException;
+
     boolean isAuthorExistByLastname(String lastname);
+
     void deleteAuthorByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
 
 }
