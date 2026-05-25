@@ -3,8 +3,6 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.RentalInsertDTO;
-import com.library.management.dto.RentalReadOnlyDTO;
-import com.library.management.mapper.RentalMapper;
 import com.library.management.model.Copy;
 import com.library.management.model.Member;
 import com.library.management.model.Rental;
@@ -21,22 +19,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class RentalServiceImpl implements IRentalService {
+
     private final RentalRepository rentalRepository;
     private final MemberRepository memberRepository;
     private final CopyRepository copyRepository;
-    private final RentalMapper mapper;
 
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public RentalReadOnlyDTO saveRental(RentalInsertDTO dto)
+    public Rental saveRental(RentalInsertDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-
         try {
             Member member = memberRepository.findByIdAndDeletedFalse(dto.memberUuid())
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid=" + dto.memberUuid() + " not found"));
@@ -52,7 +48,8 @@ public class RentalServiceImpl implements IRentalService {
                 throw new EntityInvalidArgumentException("Rental", "Due date cannot be in the past");
             }
 
-            Rental rental = mapper.mapToRentalEntity(dto);
+            Rental rental = new Rental();
+            rental.setDueDate(dto.dueDate());
             rental.setMember(member);
             rental.setCopy(copy);
             rental.setRentalDate(Instant.now());
@@ -62,7 +59,7 @@ public class RentalServiceImpl implements IRentalService {
 
             Rental savedRental = rentalRepository.save(rental);
             log.info("Rental saved with uuid={}", savedRental.getId());
-            return mapper.mapToRentalReadOnlyDTO(savedRental);
+            return savedRental;
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
             log.error("Save rental failed. {}", e.getMessage());
@@ -72,9 +69,8 @@ public class RentalServiceImpl implements IRentalService {
 
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public RentalReadOnlyDTO returnRental(UUID uuid)
+    public Rental returnRental(UUID uuid)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-
         try {
             Rental rental = rentalRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Rental", "Rental with uuid=" + uuid + " not found"));
@@ -89,8 +85,8 @@ public class RentalServiceImpl implements IRentalService {
 
             Rental returnedRental = rentalRepository.save(rental);
             log.info("Rental with uuid={} returned successfully", uuid);
+            return returnedRental;
 
-            return mapper.mapToRentalReadOnlyDTO(returnedRental);
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
             log.error("Return rental failed. {}", e.getMessage());
             throw e;
@@ -99,13 +95,11 @@ public class RentalServiceImpl implements IRentalService {
 
     @Override
     @Transactional(readOnly = true)
-    public RentalReadOnlyDTO getRentalByUuid(UUID uuid) throws EntityNotFoundException {
-
+    public Rental getRentalByUuid(UUID uuid) throws EntityNotFoundException {
         try {
             Rental rental = rentalRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Rental", "Rental with uuid=" + uuid + " not found"));
-
-            return mapper.mapToRentalReadOnlyDTO(rental);
+            return rental;
         } catch (EntityNotFoundException e) {
             log.error("Get rental by uuid failed. {}", e.getMessage());
             throw e;
@@ -114,18 +108,14 @@ public class RentalServiceImpl implements IRentalService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RentalReadOnlyDTO> getRentalsByMemberUuid(UUID memberUuid) throws EntityNotFoundException {
-
+    public List<Rental> getRentalsByMemberUuid(UUID memberUuid) throws EntityNotFoundException {
         try {
-            Member member = memberRepository.findById(memberUuid)
+            memberRepository.findById(memberUuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid= " + memberUuid + " not found."));
 
             List<Rental> rentals = rentalRepository.findByMember_Id(memberUuid);
             log.info("Get rentals by memberUuid={} returned successfully", memberUuid);
-
-            return rentals.stream()
-                    .map(mapper::mapToRentalReadOnlyDTO)
-                    .collect(Collectors.toList());
+            return rentals;
 
         } catch (EntityNotFoundException e) {
             log.error("Get rentals by memberUuid={} failed. {}", memberUuid, e.getMessage());
@@ -135,18 +125,15 @@ public class RentalServiceImpl implements IRentalService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RentalReadOnlyDTO> getRentalsByCopyUuid(UUID copyUuid) throws EntityNotFoundException {
-
+    public List<Rental> getRentalsByCopyUuid(UUID copyUuid) throws EntityNotFoundException {
         try {
-            Copy copy = copyRepository.findById(copyUuid)
+            copyRepository.findById(copyUuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + copyUuid + " not found."));
 
             List<Rental> rentals = rentalRepository.findByCopy_Id(copyUuid);
-            log.info("Get rentals by memberUuid={} returned successfully", copyUuid);
+            log.info("Get rentals by copyUuid={} returned successfully", copyUuid);
+            return rentals;
 
-            return rentals.stream()
-                    .map(mapper::mapToRentalReadOnlyDTO)
-                    .collect(Collectors.toList());
         } catch (EntityNotFoundException e) {
             log.error("Get rentals by copyUuid={} failed. {}", copyUuid, e.getMessage());
             throw e;
@@ -155,22 +142,17 @@ public class RentalServiceImpl implements IRentalService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<RentalReadOnlyDTO> getRentalsPaginated(Pageable pageable) {
-
+    public Page<Rental> getRentalsPaginated(Pageable pageable) {
         Page<Rental> rentalPage = rentalRepository.findAll(pageable);
-        log.info("Get rentals paginated returned successfully page={} and size={}",
-                rentalPage.getNumber(), rentalPage.getSize());
-        return rentalPage.map(mapper::mapToRentalReadOnlyDTO);
+        log.info("Get rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
+        return rentalPage;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<RentalReadOnlyDTO> getActiveRentalsPaginated(Pageable pageable) {
-
+    public Page<Rental> getActiveRentalsPaginated(Pageable pageable) {
         Page<Rental> rentalPage = rentalRepository.findByReturnDateIsNull(pageable);
-        log.info("Get active rentals paginated returned successfully page={} and size={}",
-                rentalPage.getNumber(), rentalPage.getSize());
-        return rentalPage.map(mapper::mapToRentalReadOnlyDTO);
+        log.info("Get active rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
+        return rentalPage;
     }
-
 }

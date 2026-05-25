@@ -3,7 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.RentalInsertDTO;
-import com.library.management.dto.RentalReadOnlyDTO;
+import com.library.management.model.Rental;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,19 +12,17 @@ import java.util.UUID;
 
 public interface IRentalService {
 
-    RentalReadOnlyDTO saveRental(RentalInsertDTO dto)
-            throws EntityNotFoundException, EntityInvalidArgumentException;
+    Rental saveRental(RentalInsertDTO dto) throws EntityNotFoundException, EntityInvalidArgumentException;
 
-    RentalReadOnlyDTO returnRental(UUID uuid)
-            throws EntityNotFoundException, EntityInvalidArgumentException;
+    Rental returnRental(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
 
-    RentalReadOnlyDTO getRentalByUuid(UUID uuid) throws EntityNotFoundException;
+    Rental getRentalByUuid(UUID uuid) throws EntityNotFoundException;
 
-    List<RentalReadOnlyDTO> getRentalsByMemberUuid(UUID memberUuid) throws EntityNotFoundException;
+    List<Rental> getRentalsByMemberUuid(UUID memberUuid) throws EntityNotFoundException;
 
-    List<RentalReadOnlyDTO> getRentalsByCopyUuid(UUID copyUuid) throws EntityNotFoundException;
+    List<Rental> getRentalsByCopyUuid(UUID copyUuid) throws EntityNotFoundException;
 
-    Page<RentalReadOnlyDTO> getRentalsPaginated(Pageable pageable);
+    Page<Rental> getRentalsPaginated(Pageable pageable);
 
-    Page<RentalReadOnlyDTO> getActiveRentalsPaginated(Pageable pageable);
+    Page<Rental> getActiveRentalsPaginated(Pageable pageable);
 }

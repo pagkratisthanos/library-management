@@ -2,6 +2,8 @@ package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
 import com.library.management.dto.*;
+import com.library.management.mapper.RentalMapper;
+import com.library.management.model.Rental;
 import com.library.management.service.IRentalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,46 +24,55 @@ import java.util.UUID;
 public class RentalRestController {
 
     private final IRentalService rentalService;
+    private final RentalMapper rentalMapper;
 
     @PostMapping
     public ResponseEntity<RentalReadOnlyDTO> saveRental(@Valid @RequestBody RentalInsertDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-        RentalReadOnlyDTO savedRental = rentalService.saveRental(dto);
+        Rental savedRental = rentalService.saveRental(dto);
+        RentalReadOnlyDTO responseDTO = rentalMapper.mapToRentalReadOnlyDTO(savedRental);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{uuid}")
-                .buildAndExpand(savedRental.id())
+                .buildAndExpand(responseDTO.id())
                 .toUri();
-        return ResponseEntity.created(location).body(savedRental);
+        return ResponseEntity.created(location).body(responseDTO);
     }
 
     @PutMapping("/{uuid}/return")
     public ResponseEntity<RentalReadOnlyDTO> returnRental(@PathVariable UUID uuid)
             throws EntityNotFoundException, EntityInvalidArgumentException {
-        return ResponseEntity.ok(rentalService.returnRental(uuid));
+        Rental returnedRental = rentalService.returnRental(uuid);
+        return ResponseEntity.ok(rentalMapper.mapToRentalReadOnlyDTO(returnedRental));
     }
 
     @GetMapping("/{uuid}")
     public ResponseEntity<RentalReadOnlyDTO> getRental(@PathVariable UUID uuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(rentalService.getRentalByUuid(uuid));
+        Rental rental = rentalService.getRentalByUuid(uuid);
+        return ResponseEntity.ok(rentalMapper.mapToRentalReadOnlyDTO(rental));
     }
 
     @GetMapping
     public ResponseEntity<Page<RentalReadOnlyDTO>> getRentals(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return ResponseEntity.ok(rentalService.getRentalsPaginated(pageable));
+        Page<Rental> rentals = rentalService.getRentalsPaginated(pageable);
+        return ResponseEntity.ok(rentals.map(rentalMapper::mapToRentalReadOnlyDTO));
     }
 
     @GetMapping("/member/{memberUuid}")
     public ResponseEntity<List<RentalReadOnlyDTO>> getRentalsByMember(@PathVariable UUID memberUuid)
             throws EntityNotFoundException {
-        return ResponseEntity.ok(rentalService.getRentalsByMemberUuid(memberUuid));
+        List<Rental> rentals = rentalService.getRentalsByMemberUuid(memberUuid);
+        return ResponseEntity.ok(rentals.stream()
+                .map(rentalMapper::mapToRentalReadOnlyDTO)
+                .toList());
     }
 
     @GetMapping("/active")
     public ResponseEntity<Page<RentalReadOnlyDTO>> getActiveRentals(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        return ResponseEntity.ok(rentalService.getActiveRentalsPaginated(pageable));
+        Page<Rental> rentals = rentalService.getActiveRentalsPaginated(pageable);
+        return ResponseEntity.ok(rentals.map(rentalMapper::mapToRentalReadOnlyDTO));
     }
 }
