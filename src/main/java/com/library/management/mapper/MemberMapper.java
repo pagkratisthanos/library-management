@@ -51,8 +51,8 @@ public class MemberMapper {
                 member.getLastname(),
                 member.getEmail(),
                 member.getPhoneNumber(),
-                member.getMembershipDate(),
-                member.getBirthDate()
+                member.getBirthDate(),
+                member.getMembershipDate()
         );
     }
 }
