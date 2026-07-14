@@ -5,6 +5,8 @@ import com.library.management.dto.*;
 import com.library.management.mapper.CopyMapper;
 import com.library.management.model.Copy;
 import com.library.management.service.ICopyService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,8 @@ public class CopyRestController {
     private final ICopyService copyService;
     private final CopyMapper copyMapper;
 
+    @Operation(summary = "Save a copy")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
     public ResponseEntity<CopyReadOnlyDTO> saveCopy(@Valid @RequestBody CopyInsertDTO dto)
             throws EntityInvalidArgumentException, EntityNotFoundException {
@@ -38,6 +42,8 @@ public class CopyRestController {
         return ResponseEntity.created(location).body(responseDTO);
     }
 
+    @Operation(summary = "Update a copy")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{uuid}")
     public ResponseEntity<CopyReadOnlyDTO> updateCopy(@PathVariable UUID uuid,
                                                       @Valid @RequestBody CopyUpdateDTO dto)
@@ -46,6 +52,8 @@ public class CopyRestController {
         return ResponseEntity.ok(copyMapper.mapToCopyReadOnlyDTO(updatedCopy));
     }
 
+    @Operation(summary = "Delete a copy")
+    @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteCopy(@PathVariable UUID uuid)
             throws EntityNotFoundException, EntityInvalidArgumentException {
@@ -53,6 +61,8 @@ public class CopyRestController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Get a copy by uuid")
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/{uuid}")
     public ResponseEntity<CopyReadOnlyDTO> getCopy(@PathVariable UUID uuid)
             throws EntityNotFoundException {
@@ -60,6 +70,8 @@ public class CopyRestController {
         return ResponseEntity.ok(copyMapper.mapToCopyReadOnlyDTO(copy));
     }
 
+    @Operation(summary = "Get all copies paginated")
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<CopyReadOnlyDTO>> getCopies(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {

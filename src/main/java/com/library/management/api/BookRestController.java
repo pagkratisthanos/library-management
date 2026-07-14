@@ -5,6 +5,8 @@ import com.library.management.dto.*;
 import com.library.management.mapper.BookMapper;
 import com.library.management.model.Book;
 import com.library.management.service.IBookService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,8 @@ public class BookRestController {
     private final IBookService bookService;
     private final BookMapper bookMapper;
 
+    @Operation(summary = "Save a book")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping
     public ResponseEntity<BookReadOnlyDTO> saveBook(@Valid @RequestBody BookInsertDTO dto)
             throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
@@ -38,6 +42,8 @@ public class BookRestController {
         return ResponseEntity.created(location).body(responseDTO);
     }
 
+    @Operation(summary = "Update a book")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PutMapping("/{uuid}")
     public ResponseEntity<BookReadOnlyDTO> updateBook(@PathVariable UUID uuid,
                                                       @Valid @RequestBody BookUpdateDTO dto)
@@ -46,6 +52,8 @@ public class BookRestController {
         return ResponseEntity.ok(bookMapper.mapToBookReadOnlyDTO(updatedBook));
     }
 
+    @Operation(summary = "Delete a book")
+    @SecurityRequirement(name = "Bearer Authentication")
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteBook(@PathVariable UUID uuid)
             throws EntityNotFoundException, EntityInvalidArgumentException {
@@ -53,6 +61,8 @@ public class BookRestController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Get a book by uuid")
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/{uuid}")
     public ResponseEntity<BookReadOnlyDTO> getBook(@PathVariable UUID uuid)
             throws EntityNotFoundException {
@@ -60,6 +70,8 @@ public class BookRestController {
         return ResponseEntity.ok(bookMapper.mapToBookReadOnlyDTO(book));
     }
 
+    @Operation(summary = "Get all books paginated")
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<BookReadOnlyDTO>> getBooks(
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
