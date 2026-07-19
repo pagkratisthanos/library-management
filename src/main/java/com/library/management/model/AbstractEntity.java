@@ -25,23 +25,21 @@ public abstract class AbstractEntity {
     private UUID id = UUID.randomUUID();
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMPTZ")
+    @Column(name = "created_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMPTZ")
+    @Column(name = "updated_at", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant updatedAt;
 
     @Column(nullable = false)
     private boolean deleted;
 
-    @Column(name = "deleted_at", columnDefinition = "TIMESTAMPTZ")
+    @Column(name = "deleted_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant deletedAt;
 
     public void softDelete() {
         this.deleted = true;
         this.deletedAt = Instant.now();
     }
-
-
 }
