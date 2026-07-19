@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;MODE=PostgreSQL;NON_KEYWORDS=VALUE
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;MODE=PostgreSQL
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -12,7 +12,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-        globally_quoted_identifiers: false
 
   flyway:
     enabled: false
+
+app:
+  security:
+    secret-key: zPdk2U5PncBo7gGVxzRC+7OA86N4h+CCbu52tiXZsX4=
+    jwt-expiration: 43200000
