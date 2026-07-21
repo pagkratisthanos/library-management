@@ -313,4 +313,34 @@ class MemberServiceTest {
         assertThatThrownBy(() -> memberService.getMemberByPhoneNumber("0000000000"))
                 .isInstanceOf(EntityNotFoundException.class);
     }
+
+    @Test
+    void getMemberByUuid_whenExists_shouldReturnMember() throws EntityNotFoundException {
+        Member found = memberService.getMemberByUuid(existingMember.getId());
+        assertThat(found).isNotNull();
+        assertThat(found.getEmail()).isEqualTo("thanos@example.com");
+    }
+
+    @Test
+    void getMemberByUuid_whenNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> memberService.getMemberByUuid(UUID.randomUUID()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void getMembersPaginated_shouldReturnAllMembers() {
+        Page<Member> members = memberService.getMembersPaginated(PageRequest.of(0, 10));
+        assertThat(members.getContent()).hasSize(1);
+    }
+
+    @Test
+    void updateMember_whenMembershipDateInFuture_shouldThrowException() {
+        MemberUpdateDTO dto = new MemberUpdateDTO(
+                createAddressDTO(), "Thanos", "Pagkratis", "6912345678",
+                "thanos@example.com", LocalDate.of(1990, 1, 1), LocalDate.now().plusDays(1)
+        );
+
+        assertThatThrownBy(() -> memberService.updateMember(existingMember.getId(), dto))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
 }
