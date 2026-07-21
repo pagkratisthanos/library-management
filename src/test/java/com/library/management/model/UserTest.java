@@ -91,4 +91,21 @@ class UserTest {
         anotherUser.setUsername("librarian");
         assertThat(user).isNotEqualTo(anotherUser);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = user.hashCode();
+        int hashCode2 = user.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(user.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(user.equals("string")).isFalse();
+    }
 }

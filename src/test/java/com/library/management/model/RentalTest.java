@@ -48,4 +48,21 @@ class RentalTest {
         Rental anotherRental = new Rental();
         assertThat(rental).isNotEqualTo(anotherRental);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = rental.hashCode();
+        int hashCode2 = rental.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(rental.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(rental.equals("string")).isFalse();
+    }
 }

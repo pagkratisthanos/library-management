@@ -94,4 +94,21 @@ class RoleTest {
         anotherRole.setName("LIBRARIAN");
         assertThat(role).isNotEqualTo(anotherRole);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = role.hashCode();
+        int hashCode2 = role.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(role.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(role.equals("string")).isFalse();
+    }
 }

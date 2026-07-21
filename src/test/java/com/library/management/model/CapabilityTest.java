@@ -65,4 +65,21 @@ class CapabilityTest {
         anotherCapability.setName("DELETE_AUTHOR");
         assertThat(capability).isNotEqualTo(anotherCapability);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = capability.hashCode();
+        int hashCode2 = capability.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(capability.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(capability.equals("string")).isFalse();
+    }
 }

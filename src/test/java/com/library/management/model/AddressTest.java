@@ -52,4 +52,21 @@ class AddressTest {
     void id_shouldBeGeneratedAutomatically() {
         assertThat(address.getId()).isNotNull();
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = address.hashCode();
+        int hashCode2 = address.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(address.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(address.equals("string")).isFalse();
+    }
 }

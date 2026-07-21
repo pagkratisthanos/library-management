@@ -74,4 +74,21 @@ class AuthorTest {
         Author anotherAuthor = new Author();
         assertThat(author).isNotEqualTo(anotherAuthor);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = author.hashCode();
+        int hashCode2 = author.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(author.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(author.equals("string")).isFalse();
+    }
 }

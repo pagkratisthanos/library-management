@@ -71,4 +71,21 @@ class MemberTest {
         Member anotherMember = new Member();
         assertThat(member).isNotEqualTo(anotherMember);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = member.hashCode();
+        int hashCode2 = member.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(member.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(member.equals("string")).isFalse();
+    }
 }

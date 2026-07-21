@@ -103,4 +103,21 @@ class BookTest {
         Book anotherBook = new Book();
         assertThat(book).isNotEqualTo(anotherBook);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = book.hashCode();
+        int hashCode2 = book.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(book.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(book.equals("string")).isFalse();
+    }
 }

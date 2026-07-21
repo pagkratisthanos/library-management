@@ -65,4 +65,21 @@ class CopyTest {
         Copy anotherCopy = new Copy();
         assertThat(copy).isNotEqualTo(anotherCopy);
     }
+
+    @Test
+    void hashCode_shouldBeConsistent() {
+        int hashCode1 = copy.hashCode();
+        int hashCode2 = copy.hashCode();
+        assertThat(hashCode1).isEqualTo(hashCode2);
+    }
+
+    @Test
+    void equals_whenNull_shouldReturnFalse() {
+        assertThat(copy.equals(null)).isFalse();
+    }
+
+    @Test
+    void equals_whenDifferentType_shouldReturnFalse() {
+        assertThat(copy.equals("string")).isFalse();
+    }
 }
