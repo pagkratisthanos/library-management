@@ -204,4 +204,35 @@ class AuthorServiceTest {
         assertThatThrownBy(() -> authorService.getAuthorsByBookUuid(UUID.randomUUID()))
                 .isInstanceOf(EntityNotFoundException.class);
     }
+
+    @Test
+    void getAuthorByUuid_whenExists_shouldReturnAuthor() throws EntityNotFoundException {
+        Author found = authorService.getAuthorByUuid(existingAuthor.getId());
+        assertThat(found).isNotNull();
+        assertThat(found.getFirstname()).isEqualTo("George");
+    }
+
+    @Test
+    void getAuthorByUuid_whenNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> authorService.getAuthorByUuid(UUID.randomUUID()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void getAuthorsPaginated_shouldReturnAllAuthors() {
+        Page<Author> authors = authorService.getAuthorsPaginated(PageRequest.of(0, 10));
+        assertThat(authors.getContent()).hasSize(1);
+    }
+
+    @Test
+    void saveAuthor_whenBirthDateIsNull_shouldSaveSuccessfully() throws EntityInvalidArgumentException {
+        AuthorInsertDTO dto = new AuthorInsertDTO(
+                "John", "Tolkien", null, "England", "Author of LOTR"
+        );
+
+        Author saved = authorService.saveAuthor(dto);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getBirthDate()).isNull();
+    }
 }
