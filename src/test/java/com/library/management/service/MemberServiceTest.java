@@ -343,4 +343,43 @@ class MemberServiceTest {
         assertThatThrownBy(() -> memberService.updateMember(existingMember.getId(), dto))
                 .isInstanceOf(EntityInvalidArgumentException.class);
     }
+
+    @Test
+    void saveMember_whenEmailIsNull_shouldSaveSuccessfully()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException {
+        MemberInsertDTO dto = new MemberInsertDTO(
+                createAddressDTO(), "John", "Doe", "6900000001",
+                null, LocalDate.of(1985, 5, 15), LocalDate.of(2024, 1, 1)
+        );
+
+        Member saved = memberService.saveMember(dto);
+        assertThat(saved).isNotNull();
+        assertThat(saved.getEmail()).isNull();
+    }
+
+    @Test
+    void saveMember_whenPhoneNumberIsNull_shouldSaveSuccessfully()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException {
+        MemberInsertDTO dto = new MemberInsertDTO(
+                createAddressDTO(), "John", "Doe", null,
+                "john@example.com", LocalDate.of(1985, 5, 15), LocalDate.of(2024, 1, 1)
+        );
+
+        Member saved = memberService.saveMember(dto);
+        assertThat(saved).isNotNull();
+        assertThat(saved.getPhoneNumber()).isNull();
+    }
+
+    @Test
+    void updateMember_whenMembershipDateIsNull_shouldUpdateSuccessfully()
+            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
+        MemberUpdateDTO dto = new MemberUpdateDTO(
+                createAddressDTO(), "Updated", "Pagkratis", "6912345678",
+                "thanos@example.com", LocalDate.of(1990, 1, 1), null
+        );
+
+        Member updated = memberService.updateMember(existingMember.getId(), dto);
+        assertThat(updated).isNotNull();
+        assertThat(updated.getMembershipDate()).isNull();
+    }
 }
