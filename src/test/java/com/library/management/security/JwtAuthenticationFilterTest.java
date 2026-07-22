@@ -110,4 +110,38 @@ class JwtAuthenticationFilterTest {
                 jwtAuthenticationFilter.doFilterInternal(request, response, filterChain))
                 .isInstanceOf(BadCredentialsException.class);
     }
+
+    @Test
+    void doFilterInternal_whenUsernameIsNull_shouldContinueFilterChain() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Bearer validtoken");
+        when(jwtService.extractSubject("validtoken")).thenReturn(null);
+
+        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        verify(userDetailsService, never()).loadUserByUsername(any());
+    }
+
+    @Test
+    void doFilterInternal_whenJwtException_shouldThrowBadCredentialsException() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Bearer invalidtoken");
+        when(jwtService.extractSubject("invalidtoken"))
+                .thenThrow(new io.jsonwebtoken.MalformedJwtException("Invalid"));
+
+        assertThatThrownBy(() ->
+                jwtAuthenticationFilter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(BadCredentialsException.class);
+    }
+
+    @Test
+    void doFilterInternal_whenGenericException_shouldThrowAuthenticationCredentialsNotFoundException() throws Exception {
+        when(request.getHeader("Authorization")).thenReturn("Bearer token");
+        when(jwtService.extractSubject("token")).thenReturn("admin");
+        when(userDetailsService.loadUserByUsername("admin"))
+                .thenThrow(new RuntimeException("Unexpected"));
+
+        assertThatThrownBy(() ->
+                jwtAuthenticationFilter.doFilterInternal(request, response, filterChain))
+                .isInstanceOf(Exception.class);
+    }
 }
