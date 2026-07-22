@@ -264,4 +264,37 @@ class BookServiceTest {
         boolean exists = bookService.isBookExistByIsbn("000-0-000-00000-0");
         assertThat(exists).isFalse();
     }
+
+    @Test
+    void getBookByUuid_whenExists_shouldReturnBook() throws EntityNotFoundException {
+        Book found = bookService.getBookByUuid(existingBook.getId());
+        assertThat(found).isNotNull();
+        assertThat(found.getTitle()).isEqualTo("Animal Farm");
+    }
+
+    @Test
+    void getBookByUuid_whenNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> bookService.getBookByUuid(UUID.randomUUID()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void getBooksPaginated_shouldReturnAllBooks() {
+        Page<Book> books = bookService.getBooksPaginated(PageRequest.of(0, 10));
+        assertThat(books.getContent()).hasSize(1);
+    }
+
+    @Test
+    void saveBook_whenPublishedDateIsNull_shouldSaveSuccessfully()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
+        BookInsertDTO dto = new BookInsertDTO(
+                "1984", "978-0-452-28423-4", null,
+                "English", BigDecimal.valueOf(1.50), "Dystopian novel", null
+        );
+
+        Book saved = bookService.saveBook(dto);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getPublishedDate()).isNull();
+    }
 }
