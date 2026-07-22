@@ -238,4 +238,32 @@ class CopyServiceTest {
         assertThat(copies.getContent()).hasSize(1);
         assertThat(copies.getContent().get(0).getCondition()).isEqualTo(CopyCondition.GOOD);
     }
+
+    @Test
+    void getCopyByUuid_whenExists_shouldReturnCopy() throws EntityNotFoundException {
+        Copy found = copyService.getCopyByUuid(existingCopy.getId());
+        assertThat(found).isNotNull();
+        assertThat(found.getCondition()).isEqualTo(CopyCondition.NEW);
+    }
+
+    @Test
+    void getCopyByUuid_whenNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> copyService.getCopyByUuid(UUID.randomUUID()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void getCopiesPaginated_shouldReturnAllCopies() {
+        Page<Copy> copies = copyService.getCopiesPaginated(PageRequest.of(0, 10));
+        assertThat(copies.getContent()).hasSize(1);
+    }
+
+    @Test
+    void updateCopy_whenSetAvailableFalse_shouldUpdateCopy()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        CopyUpdateDTO dto = new CopyUpdateDTO(false, CopyCondition.GOOD);
+        Copy updated = copyService.updateCopy(existingCopy.getId(), dto);
+        assertThat(updated.getAvailable()).isFalse();
+        assertThat(updated.getCondition()).isEqualTo(CopyCondition.GOOD);
+    }
 }
