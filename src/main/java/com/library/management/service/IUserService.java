@@ -18,4 +18,6 @@ public interface IUserService {
     User getUserByUuidDeletedFalse(UUID uuid) throws EntityNotFoundException;
 
     boolean isUserExists(String username);
+
+    void deleteUserByUuid(UUID uuid) throws EntityNotFoundException;
 }

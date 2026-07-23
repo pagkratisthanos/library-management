@@ -88,4 +88,21 @@ public class UserServiceImpl implements IUserService {
     public boolean isUserExists(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
+
+    @Override
+    @Transactional(rollbackFor = EntityNotFoundException.class)
+    public void deleteUserByUuid(UUID uuid) throws EntityNotFoundException {
+        try {
+            User user = userRepository.findByIdAndDeletedFalse(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("User", "User with uuid=" + uuid + " not found"));
+
+            user.softDelete();
+            userRepository.save(user);
+            log.info("User with uuid={} deleted successfully", uuid);
+
+        } catch (EntityNotFoundException e) {
+            log.error("Delete failed. User with uuid={} not found", uuid);
+            throw e;
+        }
+    }
 }
