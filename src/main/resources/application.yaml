@@ -27,9 +27,8 @@ server:
 
 app:
   security:
-    secret-key: zPdk2U5PncBo7gGVxzRC+7OA86N4h+CCbu52tiXZsX4=
-    jwt-expiration: 43200000
-
+    secret-key: ${APP_SECURITY_SECRET_KEY}
+    jwt-expiration: ${APP_SECURITY_JWT_EXPIRATION:43200000}
 logging:
   level:
     org.springframework.security: DEBUG
