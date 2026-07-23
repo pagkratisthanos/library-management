@@ -50,4 +50,13 @@ public class UserRestController {
         User user = userService.getUserByUuidDeletedFalse(uuid);
         return ResponseEntity.ok(userMapper.mapToUserReadOnlyDTO(user));
     }
+
+    @Operation(summary = "Delete a user")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID uuid)
+            throws EntityNotFoundException {
+        userService.deleteUserByUuid(uuid);
+        return ResponseEntity.noContent().build();
+    }
 }
