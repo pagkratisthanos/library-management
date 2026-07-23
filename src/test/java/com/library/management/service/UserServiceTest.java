@@ -125,4 +125,28 @@ class UserServiceTest {
         boolean exists = userService.isUserExists("nonexistent");
         assertThat(exists).isFalse();
     }
+
+    @Test
+    void deleteUserByUuid_whenExists_shouldSoftDelete() throws EntityNotFoundException {
+        userService.deleteUserByUuid(existingUser.getId());
+
+        User deleted = userRepository.findById(existingUser.getId()).orElseThrow();
+        assertThat(deleted.isDeleted()).isTrue();
+        assertThat(deleted.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    void deleteUserByUuid_whenNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> userService.deleteUserByUuid(UUID.randomUUID()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void deleteUserByUuid_whenAlreadyDeleted_shouldThrowException() {
+        existingUser.softDelete();
+        userRepository.save(existingUser);
+
+        assertThatThrownBy(() -> userService.deleteUserByUuid(existingUser.getId()))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
 }

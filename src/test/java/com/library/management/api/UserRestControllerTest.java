@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -123,6 +124,23 @@ class UserRestControllerTest {
                 .thenThrow(new EntityNotFoundException("User", "Not found"));
 
         mockMvc.perform(get("/api/users/{uuid}", UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteUser_whenExists_shouldReturn204() throws Exception {
+        doNothing().when(userService).deleteUserByUuid(any());
+
+        mockMvc.perform(delete("/api/users/{uuid}", userId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteUser_whenNotFound_shouldReturn404() throws Exception {
+        org.mockito.Mockito.doThrow(new EntityNotFoundException("User", "Not found"))
+                .when(userService).deleteUserByUuid(any());
+
+        mockMvc.perform(delete("/api/users/{uuid}", userId))
                 .andExpect(status().isNotFound());
     }
 }
