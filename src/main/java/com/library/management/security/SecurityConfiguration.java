@@ -63,6 +63,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/rentals/**").hasAuthority("MANAGE_RENTAL")
                         .requestMatchers(HttpMethod.POST, "/api/users/**").hasAuthority("MANAGE_USERS")
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("MANAGE_USERS")
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("MANAGE_USERS")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
