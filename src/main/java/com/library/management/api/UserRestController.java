@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -58,5 +61,14 @@ public class UserRestController {
             throws EntityNotFoundException {
         userService.deleteUserByUuid(uuid);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get all users paginated")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @GetMapping
+    public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsers(
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        Page<User> users = userService.getAllUsers(pageable);
+        return ResponseEntity.ok(users.map(userMapper::mapToUserReadOnlyDTO));
     }
 }
