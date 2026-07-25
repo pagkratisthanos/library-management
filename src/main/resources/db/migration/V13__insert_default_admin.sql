@@ -1,5 +1,5 @@
 -- Insert default admin user
--- Password: admin123!
+-- NOTE: Password hash is incorrect. See V14 for the correct hash.
 INSERT INTO users (id, username, password, role_id)
 SELECT
     gen_random_uuid(),
