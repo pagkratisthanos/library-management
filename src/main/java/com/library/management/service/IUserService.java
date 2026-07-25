@@ -5,6 +5,8 @@ import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.UserInsertDTO;
 import com.library.management.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -20,4 +22,6 @@ public interface IUserService {
     boolean isUserExists(String username);
 
     void deleteUserByUuid(UUID uuid) throws EntityNotFoundException;
+
+    Page<User> getAllUsers(Pageable pageable);
 }
