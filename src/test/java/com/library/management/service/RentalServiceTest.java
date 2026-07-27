@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.RentalFilters;
 import com.library.management.dto.RentalInsertDTO;
 import com.library.management.model.*;
 import com.library.management.repository.*;
@@ -245,5 +246,17 @@ class RentalServiceTest {
     void getRentalsPaginated_shouldReturnAllRentals() {
         Page<Rental> rentals = rentalService.getRentalsPaginated(PageRequest.of(0, 10));
         assertThat(rentals.getContent()).hasSize(1);
+    }
+
+    @Test
+    void getRentalsPaginatedFiltered_whenFilterByActive_shouldReturnActiveRentals() {
+        RentalFilters filters = new RentalFilters();
+        filters.setActive("true");
+
+        Page<Rental> rentals = rentalService.getRentalsPaginatedFiltered(
+                PageRequest.of(0, 10), filters);
+        assertThat(rentals).isNotNull();
+        assertThat(rentals.getContent()).hasSize(1);
+        assertThat(rentals.getContent().get(0).getReturnDate()).isNull();
     }
 }
