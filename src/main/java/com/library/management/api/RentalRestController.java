@@ -1,6 +1,7 @@
 package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
+import com.library.management.core.filters.RentalFilters;
 import com.library.management.dto.*;
 import com.library.management.mapper.RentalMapper;
 import com.library.management.model.Rental;
@@ -65,8 +66,9 @@ public class RentalRestController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<RentalReadOnlyDTO>> getRentals(
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        Page<Rental> rentals = rentalService.getRentalsPaginated(pageable);
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @ModelAttribute RentalFilters filters) {
+        Page<Rental> rentals = rentalService.getRentalsPaginatedFiltered(pageable, filters);
         return ResponseEntity.ok(rentals.map(rentalMapper::mapToRentalReadOnlyDTO));
     }
 
