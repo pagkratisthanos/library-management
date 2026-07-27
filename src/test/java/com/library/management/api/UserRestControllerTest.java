@@ -14,10 +14,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -142,5 +146,16 @@ class UserRestControllerTest {
 
         mockMvc.perform(delete("/api/users/{uuid}", userId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getAllUsers_shouldReturn200WithPage() throws Exception {
+        Page<User> page = new PageImpl<>(List.of(user), PageRequest.of(0, 10), 1);
+        when(userService.getAllUsers(any())).thenReturn(page);
+        when(userMapper.mapToUserReadOnlyDTO(any())).thenReturn(userReadOnlyDTO);
+
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].username").value("admin"));
     }
 }
