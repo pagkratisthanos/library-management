@@ -4,11 +4,12 @@ import com.library.management.model.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public interface MemberRepository extends JpaRepository<Member, UUID> {
+public interface MemberRepository extends JpaRepository<Member, UUID>, JpaSpecificationExecutor<Member> {
 
     Page<Member> findAll(Pageable pageable);
     Page<Member> findByDeletedFalse(Pageable pageable);

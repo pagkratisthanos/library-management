@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.MemberFilters;
 import com.library.management.dto.MemberInsertDTO;
 import com.library.management.dto.MemberUpdateDTO;
 import com.library.management.model.Member;
@@ -32,5 +33,7 @@ public interface IMemberService {
     Member getMemberByEmail(String email) throws EntityNotFoundException;
 
     Member getMemberByPhoneNumber(String phoneNumber) throws EntityNotFoundException;
+
+    Page<Member> getMembersPaginatedFilteredAndDeletedFalse(Pageable pageable, MemberFilters filters);
 
 }
