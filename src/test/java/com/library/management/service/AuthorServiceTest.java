@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.AuthorFilters;
 import com.library.management.dto.AuthorInsertDTO;
 import com.library.management.dto.AuthorUpdateDTO;
 import com.library.management.model.Author;
@@ -234,5 +235,44 @@ class AuthorServiceTest {
 
         assertThat(saved).isNotNull();
         assertThat(saved.getBirthDate()).isNull();
+    }
+
+    @Test
+    void getAuthorsPaginatedFilteredAndDeletedFalse_shouldReturnFilteredAuthors() {
+        AuthorFilters filters = new AuthorFilters();
+        filters.setLastname("Orwell");
+
+        Page<Author> authors = authorService.getAuthorsPaginatedFilteredAndDeletedFalse(
+                PageRequest.of(0, 10), filters);
+        assertThat(authors).isNotNull();
+        assertThat(authors.getContent()).hasSize(1);
+        assertThat(authors.getContent().get(0).getLastname()).isEqualTo("Orwell");
+    }
+
+    @Test
+    void deleteAuthorByUuid_whenAuthorHasBookWithMultipleAuthors_shouldSoftDelete()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Book book = new Book();
+        book.setTitle("Animal Farm");
+        book.setIsbn("978-0-452-28424-4");
+        book.setLanguage("English");
+        book.setDailyCost(BigDecimal.valueOf(1.20));
+        bookRepository.save(book);
+
+        Author anotherAuthor = new Author();
+        anotherAuthor.setFirstname("Another");
+        anotherAuthor.setLastname("Author");
+        authorRepository.save(anotherAuthor);
+
+        existingAuthor.addBook(book);
+        book.addAuthor(existingAuthor);
+        book.addAuthor(anotherAuthor);
+        authorRepository.save(existingAuthor);
+        bookRepository.save(book);
+
+        authorService.deleteAuthorByUuid(existingAuthor.getId());
+
+        Author deleted = authorRepository.findById(existingAuthor.getId()).orElseThrow();
+        assertThat(deleted.isDeleted()).isTrue();
     }
 }
