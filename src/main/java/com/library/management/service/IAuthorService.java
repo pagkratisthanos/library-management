@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.AuthorFilters;
 import com.library.management.dto.AuthorInsertDTO;
 import com.library.management.dto.AuthorUpdateDTO;
 import com.library.management.model.Author;
@@ -30,5 +31,7 @@ public interface IAuthorService {
     boolean isAuthorExistByLastname(String lastname);
 
     void deleteAuthorByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
+
+    Page<Author> getAuthorsPaginatedFilteredAndDeletedFalse(Pageable pageable, AuthorFilters filters);
 
 }

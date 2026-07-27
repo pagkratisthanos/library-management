@@ -2,11 +2,13 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.AuthorFilters;
 import com.library.management.dto.AuthorInsertDTO;
 import com.library.management.dto.AuthorUpdateDTO;
 import com.library.management.model.Author;
 import com.library.management.repository.AuthorRepository;
 import com.library.management.repository.BookRepository;
+import com.library.management.specification.AuthorSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -162,5 +164,14 @@ public class AuthorServiceImpl implements IAuthorService {
             log.error("Get authors by bookUuid={} failed. {}", bookUuid, e.getMessage());
             throw e;
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Author> getAuthorsPaginatedFilteredAndDeletedFalse(Pageable pageable, AuthorFilters filters) {
+        Page<Author> authorsPage = authorRepository.findAll(AuthorSpecification.build(filters), pageable);
+        log.info("Get filtered and paginated authors returned successfully page={} and size={}",
+                authorsPage.getNumber(), authorsPage.getSize());
+        return authorsPage;
     }
 }
