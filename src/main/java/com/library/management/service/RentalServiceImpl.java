@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.RentalFilters;
 import com.library.management.dto.RentalInsertDTO;
 import com.library.management.model.Copy;
 import com.library.management.model.Member;
@@ -9,6 +10,7 @@ import com.library.management.model.Rental;
 import com.library.management.repository.CopyRepository;
 import com.library.management.repository.MemberRepository;
 import com.library.management.repository.RentalRepository;
+import com.library.management.specification.RentalSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -153,6 +155,15 @@ public class RentalServiceImpl implements IRentalService {
     public Page<Rental> getActiveRentalsPaginated(Pageable pageable) {
         Page<Rental> rentalPage = rentalRepository.findByReturnDateIsNull(pageable);
         log.info("Get active rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
+        return rentalPage;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Rental> getRentalsPaginatedFiltered(Pageable pageable, RentalFilters filters) {
+        Page<Rental> rentalPage = rentalRepository.findAll(RentalSpecification.build(filters), pageable);
+        log.info("Get filtered and paginated rentals returned successfully page={} and size={}",
+                rentalPage.getNumber(), rentalPage.getSize());
         return rentalPage;
     }
 }
