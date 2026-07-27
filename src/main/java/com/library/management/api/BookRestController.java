@@ -1,6 +1,7 @@
 package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
+import com.library.management.core.filters.BookFilters;
 import com.library.management.dto.*;
 import com.library.management.mapper.BookMapper;
 import com.library.management.model.Book;
@@ -74,8 +75,9 @@ public class BookRestController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<BookReadOnlyDTO>> getBooks(
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        Page<Book> books = bookService.getBooksPaginatedAndDeletedFalse(pageable);
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @ModelAttribute BookFilters filters) {
+        Page<Book> books = bookService.getBooksPaginatedFilteredAndDeletedFalse(pageable, filters);
         return ResponseEntity.ok(books.map(bookMapper::mapToBookReadOnlyDTO));
     }
 }
