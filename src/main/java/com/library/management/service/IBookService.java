@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.BookFilters;
 import com.library.management.dto.BookInsertDTO;
 import com.library.management.dto.BookUpdateDTO;
 import com.library.management.model.Book;
@@ -28,4 +29,6 @@ public interface IBookService {
     Page<Book> getBooksPaginatedAndDeletedFalse(Pageable pageable);
 
     boolean isBookExistByIsbn(String isbn);
+
+    Page<Book> getBooksPaginatedFilteredAndDeletedFalse(Pageable pageable, BookFilters filters);
 }

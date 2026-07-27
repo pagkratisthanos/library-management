@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.BookFilters;
 import com.library.management.dto.BookInsertDTO;
 import com.library.management.dto.BookUpdateDTO;
 import com.library.management.model.Author;
@@ -10,6 +11,7 @@ import com.library.management.model.Book;
 import com.library.management.model.Rental;
 import com.library.management.repository.AuthorRepository;
 import com.library.management.repository.BookRepository;
+import com.library.management.specification.BookSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -184,5 +186,14 @@ public class BookServiceImpl implements IBookService {
     @Transactional(readOnly = true)
     public boolean isBookExistByIsbn(String isbn) {
         return bookRepository.existsByIsbn(isbn);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Book> getBooksPaginatedFilteredAndDeletedFalse(Pageable pageable, BookFilters filters) {
+        Page<Book> bookPage = bookRepository.findAll(BookSpecification.build(filters), pageable);
+        log.info("Get filtered and paginated books returned successfully page={} and size={}",
+                bookPage.getNumber(), bookPage.getSize());
+        return bookPage;
     }
 }
