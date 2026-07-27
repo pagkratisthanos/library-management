@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.CopyFilters;
 import com.library.management.dto.CopyInsertDTO;
 import com.library.management.dto.CopyUpdateDTO;
 import com.library.management.model.*;
@@ -265,5 +266,17 @@ class CopyServiceTest {
         Copy updated = copyService.updateCopy(existingCopy.getId(), dto);
         assertThat(updated.getAvailable()).isFalse();
         assertThat(updated.getCondition()).isEqualTo(CopyCondition.GOOD);
+    }
+
+    @Test
+    void getCopiesPaginatedFilteredAndDeletedFalse_shouldReturnFilteredCopies() {
+        CopyFilters filters = new CopyFilters();
+        filters.setAvailable(true);
+
+        Page<Copy> copies = copyService.getCopiesPaginatedFilteredAndDeletedFalse(
+                PageRequest.of(0, 10), filters);
+        assertThat(copies).isNotNull();
+        assertThat(copies.getContent()).hasSize(1);
+        assertThat(copies.getContent().get(0).getAvailable()).isTrue();
     }
 }
