@@ -1,6 +1,7 @@
 package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
+import com.library.management.core.filters.AuthorFilters;
 import com.library.management.dto.*;
 import com.library.management.mapper.AuthorMapper;
 import com.library.management.model.Author;
@@ -75,8 +76,9 @@ public class AuthorRestController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<AuthorReadOnlyDTO>> getAuthors(
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        Page<Author> authors = authorService.getAuthorsPaginatedAndDeletedFalse(pageable);
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @ModelAttribute AuthorFilters filters) {
+        Page<Author> authors = authorService.getAuthorsPaginatedFilteredAndDeletedFalse(pageable, filters);
         return ResponseEntity.ok(authors.map(authorMapper::mapToAuthorReadOnlyDTO));
     }
 
