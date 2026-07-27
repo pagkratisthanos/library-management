@@ -4,12 +4,13 @@ import com.library.management.model.Copy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CopyRepository extends JpaRepository<Copy, UUID> {
+public interface CopyRepository extends JpaRepository<Copy, UUID>, JpaSpecificationExecutor<Copy> {
 
     Optional<Copy> findById(UUID uuid);
     Optional<Copy> findByIdAndDeletedFalse(UUID uuid);
@@ -17,4 +18,6 @@ public interface CopyRepository extends JpaRepository<Copy, UUID> {
     boolean existsById(UUID uuid);
     List<Copy> findByBookId(UUID bookUuid);
     List<Copy> findByBookIdAndAvailableTrue(UUID bookId);    Page<Copy> findByAvailableTrueAndDeletedFalse(Pageable pageable);
-    long countByBook_Id(UUID bookId);}
+    long countByBook_Id(UUID bookId);
+}
+

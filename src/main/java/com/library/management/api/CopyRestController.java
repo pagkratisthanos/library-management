@@ -1,6 +1,7 @@
 package com.library.management.api;
 
 import com.library.management.core.exceptions.*;
+import com.library.management.core.filters.CopyFilters;
 import com.library.management.dto.*;
 import com.library.management.mapper.CopyMapper;
 import com.library.management.model.Copy;
@@ -74,8 +75,9 @@ public class CopyRestController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<CopyReadOnlyDTO>> getCopies(
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        Page<Copy> copies = copyService.getCopiesPaginatedAndDeletedFalse(pageable);
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @ModelAttribute CopyFilters filters) {
+        Page<Copy> copies = copyService.getCopiesPaginatedFilteredAndDeletedFalse(pageable, filters);
         return ResponseEntity.ok(copies.map(copyMapper::mapToCopyReadOnlyDTO));
     }
 }
