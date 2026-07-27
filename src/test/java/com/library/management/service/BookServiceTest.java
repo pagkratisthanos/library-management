@@ -19,9 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import com.library.management.core.filters.BookFilters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -296,5 +297,33 @@ class BookServiceTest {
 
         assertThat(saved).isNotNull();
         assertThat(saved.getPublishedDate()).isNull();
+    }
+
+    @Test
+    void getBooksPaginatedFilteredAndDeletedFalse_shouldReturnFilteredBooks() {
+        BookFilters filters = new BookFilters();
+        filters.setTitle("Animal");
+
+        Page<Book> books = bookService.getBooksPaginatedFilteredAndDeletedFalse(PageRequest.of(0, 10), filters);
+        assertThat(books).isNotNull();
+        assertThat(books.getContent()).hasSize(1);
+        assertThat(books.getContent().get(0).getTitle()).isEqualTo("Animal Farm");
+    }
+
+    @Test
+    void deleteBookByUuid_whenHasCopiesToSoftDelete_shouldSoftDeleteAllCopies()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Copy copy = new Copy();
+        copy.setBook(existingBook);
+        copy.setAvailable(true);
+        copy.setCondition(CopyCondition.NEW);
+        copyRepository.save(copy);
+        existingBook.addCopy(copy);
+        bookRepository.save(existingBook);
+
+        bookService.deleteBookByUuid(existingBook.getId());
+
+        Copy deletedCopy = copyRepository.findById(copy.getId()).orElseThrow();
+        assertThat(deletedCopy.isDeleted()).isTrue();
     }
 }
