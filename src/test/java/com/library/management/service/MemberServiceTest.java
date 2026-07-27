@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.MemberFilters;
 import com.library.management.dto.AddressInsertDTO;
 import com.library.management.dto.MemberInsertDTO;
 import com.library.management.dto.MemberUpdateDTO;
@@ -422,5 +423,17 @@ class MemberServiceTest {
         );
 
         assertThatThrownBy(() -> memberService.updateMember(existingMember.getId(), dto));
+    }
+
+    @Test
+    void getMembersPaginatedFilteredAndDeletedFalse_shouldReturnFilteredMembers() {
+        MemberFilters filters = new MemberFilters();
+        filters.setLastname("Pagkratis");
+
+        Page<Member> members = memberService.getMembersPaginatedFilteredAndDeletedFalse(
+                PageRequest.of(0, 10), filters);
+        assertThat(members).isNotNull();
+        assertThat(members.getContent()).hasSize(1);
+        assertThat(members.getContent().get(0).getLastname()).isEqualTo("Pagkratis");
     }
 }
