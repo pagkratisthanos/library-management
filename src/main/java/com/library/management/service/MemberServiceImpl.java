@@ -3,12 +3,14 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.MemberFilters;
 import com.library.management.dto.MemberInsertDTO;
 import com.library.management.dto.MemberUpdateDTO;
 import com.library.management.model.Address;
 import com.library.management.model.Member;
 import com.library.management.model.Rental;
 import com.library.management.repository.MemberRepository;
+import com.library.management.specification.MemberSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -223,5 +225,14 @@ public class MemberServiceImpl implements IMemberService {
             log.error("Get member by phone={} failed. {}", phoneNumber, e.getMessage());
             throw e;
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Member> getMembersPaginatedFilteredAndDeletedFalse(Pageable pageable, MemberFilters filters) {
+        Page<Member> memberPage = memberRepository.findAll(MemberSpecification.build(filters), pageable);
+        log.info("Get filtered and paginated members returned successfully page={} and size={}",
+                memberPage.getNumber(), memberPage.getSize());
+        return memberPage;
     }
 }

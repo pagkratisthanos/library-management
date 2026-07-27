@@ -3,6 +3,7 @@ package com.library.management.api;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.MemberFilters;
 import com.library.management.dto.MemberInsertDTO;
 import com.library.management.dto.MemberReadOnlyDTO;
 import com.library.management.dto.MemberUpdateDTO;
@@ -80,8 +81,9 @@ public class MemberRestController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<MemberReadOnlyDTO>> getMembers(
-            @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        Page<Member> members = memberService.getMembersPaginatedAndDeletedFalse(pageable);
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @ModelAttribute MemberFilters filters) {
+        Page<Member> members = memberService.getMembersPaginatedFilteredAndDeletedFalse(pageable, filters);
         return ResponseEntity.ok(members.map(memberMapper::mapToMemberReadOnlyDTO));
     }
 }
