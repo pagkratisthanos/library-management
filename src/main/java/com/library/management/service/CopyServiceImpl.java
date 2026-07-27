@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.CopyFilters;
 import com.library.management.dto.CopyInsertDTO;
 import com.library.management.dto.CopyUpdateDTO;
 import com.library.management.model.Book;
@@ -9,6 +10,7 @@ import com.library.management.model.Copy;
 import com.library.management.model.Rental;
 import com.library.management.repository.BookRepository;
 import com.library.management.repository.CopyRepository;
+import com.library.management.specification.CopySpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -140,6 +142,15 @@ public class CopyServiceImpl implements ICopyService {
     public Page<Copy> getCopiesPaginatedAndDeletedFalse(Pageable pageable) {
         Page<Copy> copyPage = copyRepository.findByDeletedFalse(pageable);
         log.info("Get paginated not deleted returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
+        return copyPage;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Copy> getCopiesPaginatedFilteredAndDeletedFalse(Pageable pageable, CopyFilters filters) {
+        Page<Copy> copyPage = copyRepository.findAll(CopySpecification.build(filters), pageable);
+        log.info("Get filtered and paginated copies returned successfully page={} and size={}",
+                copyPage.getNumber(), copyPage.getSize());
         return copyPage;
     }
 }

@@ -2,6 +2,7 @@ package com.library.management.service;
 
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.CopyFilters;
 import com.library.management.dto.CopyInsertDTO;
 import com.library.management.dto.CopyUpdateDTO;
 import com.library.management.model.Copy;
@@ -25,4 +26,6 @@ public interface ICopyService {
     Page<Copy> getCopiesPaginated(Pageable pageable);
 
     Page<Copy> getCopiesPaginatedAndDeletedFalse(Pageable pageable);
+
+    Page<Copy> getCopiesPaginatedFilteredAndDeletedFalse(Pageable pageable, CopyFilters filters);
 }
