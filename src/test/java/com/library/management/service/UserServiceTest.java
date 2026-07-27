@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -148,5 +150,12 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.deleteUserByUuid(existingUser.getId()))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void getAllUsers_shouldReturnAllUsers() {
+        Page<User> users = userService.getAllUsers(PageRequest.of(0, 10));
+        assertThat(users).isNotNull();
+        assertThat(users.getContent()).hasSize(1);
     }
 }
