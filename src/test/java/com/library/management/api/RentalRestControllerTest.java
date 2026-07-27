@@ -165,7 +165,7 @@ class RentalRestControllerTest {
     @Test
     void getRentals_shouldReturn200WithPage() throws Exception {
         Page<Rental> page = new PageImpl<>(List.of(rental), PageRequest.of(0, 10), 1);
-        when(rentalService.getRentalsPaginated(any())).thenReturn(page);
+        when(rentalService.getRentalsPaginatedFiltered(any(), any())).thenReturn(page);
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
         mockMvc.perform(get("/api/rentals"))

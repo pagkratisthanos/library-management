@@ -182,7 +182,7 @@ class CopyRestControllerTest {
     @Test
     void getCopies_shouldReturn200WithPage() throws Exception {
         Page<Copy> page = new PageImpl<>(List.of(copy), PageRequest.of(0, 10), 1);
-        when(copyService.getCopiesPaginatedAndDeletedFalse(any())).thenReturn(page);
+        when(copyService.getCopiesPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(copyMapper.mapToCopyReadOnlyDTO(any())).thenReturn(copyReadOnlyDTO);
 
         mockMvc.perform(get("/api/copies"))

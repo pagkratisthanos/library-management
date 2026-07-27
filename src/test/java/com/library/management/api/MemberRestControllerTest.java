@@ -195,7 +195,7 @@ class MemberRestControllerTest {
     @Test
     void getMembers_shouldReturn200WithPage() throws Exception {
         Page<Member> page = new PageImpl<>(List.of(member), PageRequest.of(0, 10), 1);
-        when(memberService.getMembersPaginatedAndDeletedFalse(any())).thenReturn(page);
+        when(memberService.getMembersPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(memberMapper.mapToMemberReadOnlyDTO(any())).thenReturn(memberReadOnlyDTO);
 
         mockMvc.perform(get("/api/members"))

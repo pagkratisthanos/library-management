@@ -178,7 +178,7 @@ class AuthorRestControllerTest {
     @Test
     void getAuthors_shouldReturn200WithPage() throws Exception {
         Page<Author> page = new PageImpl<>(List.of(author), PageRequest.of(0, 10), 1);
-        when(authorService.getAuthorsPaginatedAndDeletedFalse(any())).thenReturn(page);
+        when(authorService.getAuthorsPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(authorMapper.mapToAuthorReadOnlyDTO(any())).thenReturn(authorReadOnlyDTO);
 
         mockMvc.perform(get("/api/authors"))

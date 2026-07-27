@@ -182,7 +182,7 @@ class BookRestControllerTest {
     @Test
     void getBooks_shouldReturn200WithPage() throws Exception {
         Page<Book> page = new PageImpl<>(List.of(book), PageRequest.of(0, 10), 1);
-        when(bookService.getBooksPaginatedAndDeletedFalse(any())).thenReturn(page);
+        when(bookService.getBooksPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(bookMapper.mapToBookReadOnlyDTO(any())).thenReturn(bookReadOnlyDTO);
 
         mockMvc.perform(get("/api/books"))
