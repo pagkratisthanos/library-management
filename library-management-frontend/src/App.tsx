@@ -1,11 +1,13 @@
+import { Navigate, Route, Routes } from "react-router"
+import LoginPage from "@/pages/LoginPage.tsx"
+
 function App() {
-  return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <h1 className="text-3xl font-bold text-slate-800">
-          Library Management
-        </h1>
-      </div>
-  )
+    return (
+        <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+        </Routes>
+    )
 }
 
 export default App
