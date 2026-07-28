@@ -3,6 +3,11 @@ import LoginPage from "@/pages/LoginPage.tsx"
 import PlaceholderPage from "@/pages/PlaceholderPage.tsx"
 import AppLayout from "@/components/AppLayout.tsx"
 import BooksPage from "@/pages/BooksPage.tsx"
+import AuthorsPage from "@/pages/AuthorsPage.tsx"
+import CopiesPage from "@/pages/CopiesPage.tsx"
+import MembersPage from "@/pages/MembersPage.tsx"
+import RentalsPage from "@/pages/RentalsPage.tsx"
+import UsersPage from "@/pages/UsersPage.tsx"
 
 function App() {
     return (
@@ -12,23 +17,23 @@ function App() {
 
             {/* Administrator */}
             <Route path="/admin" element={<AppLayout role="ADMIN" />}>
-                <Route index element={<Navigate to="books" replace />} />
+                <Route index element={<PlaceholderPage title="Dashboard" />} />
                 <Route path="books" element={<BooksPage />} />
-                <Route path="authors" element={<PlaceholderPage title="Authors" />} />
-                <Route path="copies" element={<PlaceholderPage title="Copies" />} />
-                <Route path="members" element={<PlaceholderPage title="Members" />} />
-                <Route path="rentals" element={<PlaceholderPage title="Rentals" />} />
-                <Route path="users" element={<PlaceholderPage title="Users" />} />
+                <Route path="authors" element={<AuthorsPage />} />
+                <Route path="copies" element={<CopiesPage />} />
+                <Route path="members" element={<MembersPage />} />
+                <Route path="rentals" element={<RentalsPage />} />
+                <Route path="users" element={<UsersPage />} />
             </Route>
 
             {/* Librarian */}
             <Route path="/librarian" element={<AppLayout role="LIBRARIAN" />}>
                 <Route index element={<PlaceholderPage title="Dashboard" />} />
-                <Route path="books" element={<PlaceholderPage title="Books" />} />
-                <Route path="authors" element={<PlaceholderPage title="Authors" />} />
-                <Route path="copies" element={<PlaceholderPage title="Copies" />} />
-                <Route path="members" element={<PlaceholderPage title="Members" />} />
-                <Route path="rentals" element={<PlaceholderPage title="Rentals" />} />
+                <Route path="books" element={<BooksPage />} />
+                <Route path="authors" element={<AuthorsPage />} />
+                <Route path="copies" element={<CopiesPage />} />
+                <Route path="members" element={<MembersPage />} />
+                <Route path="rentals" element={<RentalsPage />} />
             </Route>
         </Routes>
     )
