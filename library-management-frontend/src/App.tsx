@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router"
 import LoginPage from "@/pages/LoginPage.tsx"
 import PlaceholderPage from "@/pages/PlaceholderPage.tsx"
 import AppLayout from "@/components/AppLayout.tsx"
+import BooksPage from "@/pages/BooksPage.tsx"
 
 function App() {
     return (
@@ -12,7 +13,7 @@ function App() {
             {/* Administrator */}
             <Route path="/admin" element={<AppLayout role="ADMIN" />}>
                 <Route index element={<Navigate to="books" replace />} />
-                <Route path="books" element={<PlaceholderPage title="Books" />} />
+                <Route path="books" element={<BooksPage />} />
                 <Route path="authors" element={<PlaceholderPage title="Authors" />} />
                 <Route path="copies" element={<PlaceholderPage title="Copies" />} />
                 <Route path="members" element={<PlaceholderPage title="Members" />} />

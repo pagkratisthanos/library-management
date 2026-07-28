@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 export type Role = "ADMIN" | "LIBRARIAN"
+export type AppLayoutContext = { role: Role }
 
 type NavItem = {
     to: string
@@ -86,7 +87,7 @@ const AppLayout = ({ role }: { role: Role }) => {
             </aside>
 
             <main className="flex-1 p-8">
-                <Outlet />
+                <Outlet context={{ role } satisfies AppLayoutContext} />
             </main>
         </div>
     )
