@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Pencil, Plus, Search, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -10,52 +11,77 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import TablePagination from "@/components/TablePagination"
+import { deleteBook, getBooks } from "@/api/books"
+import type { Book } from "@/schemas/books"
+import type { Page } from "@/schemas/common"
+import { useDebounce } from "@/hooks/useDebounce"
 import { useRole } from "@/hooks/useRole"
 
-type Book = {
-    id: string
-    title: string
-    isbn: string
-    language: string
-    dailyCost: number
-    authors: string[]
-}
-
-const mockBooks: Book[] = [
-    {
-        id: "1",
-        title: "Animal Farm",
-        isbn: "978-0451526342",
-        language: "English",
-        dailyCost: 1.5,
-        authors: ["George Orwell"],
-    },
-    {
-        id: "2",
-        title: "Nineteen Eighty-Four",
-        isbn: "978-0452284234",
-        language: "English",
-        dailyCost: 2,
-        authors: ["George Orwell"],
-    },
-    {
-        id: "3",
-        title: "The Little Prince",
-        isbn: "978-0156012195",
-        language: "French",
-        dailyCost: 1.2,
-        authors: ["Antoine de Saint-Exupéry"],
-    },
-]
+const PAGE_SIZE = 10
 
 const BooksPage = () => {
     const role = useRole()
     const canEdit = role === "ADMIN"
-    const [search, setSearch] = useState("")
 
-    const books = mockBooks.filter((book) =>
-        book.title.toLowerCase().includes(search.toLowerCase()),
-    )
+    const [search, setSearch] = useState("")
+    const [page, setPage] = useState(0)
+    const [data, setData] = useState<Page<Book> | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [reloadKey, setReloadKey] = useState(0)
+
+    const debouncedSearch = useDebounce(search)
+
+    // a new search always starts from the first page
+    const handleSearchChange = (value: string) => {
+        setSearch(value)
+        setPage(0)
+    }
+
+    useEffect(() => {
+        let cancelled = false
+
+        const load = async () => {
+            setLoading(true)
+            setError(null)
+
+            try {
+                const result = await getBooks(
+                    { title: debouncedSearch || undefined },
+                    { page, size: PAGE_SIZE },
+                )
+                if (!cancelled) setData(result)
+            } catch (err) {
+                if (!cancelled) {
+                    setError(err instanceof Error ? err.message : "Failed to load books")
+                }
+            } finally {
+                if (!cancelled) setLoading(false)
+            }
+        }
+
+        void load()
+
+        return () => {
+            cancelled = true
+        }
+    }, [debouncedSearch, page, reloadKey])
+
+    const handleDelete = async (book: Book) => {
+        if (!window.confirm(`Delete "${book.title}"?`)) return
+
+        try {
+            await deleteBook(book.id)
+            toast.success(`"${book.title}" was deleted`)
+            setReloadKey((key) => key + 1)
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to delete the book")
+        }
+    }
+
+    const books = data?.content ?? []
+    const columnCount = canEdit ? 6 : 5
 
     return (
         <div className="space-y-6">
@@ -80,7 +106,7 @@ const BooksPage = () => {
                     placeholder="Search by title..."
                     className="pl-9"
                     value={search}
-                    onChange={(event) => setSearch(event.target.value)}
+                    onChange={(event) => handleSearchChange(event.target.value)}
                 />
             </div>
 
@@ -98,41 +124,76 @@ const BooksPage = () => {
                     </TableHeader>
 
                     <TableBody>
-                        {books.length === 0 && (
+                        {loading && (
                             <TableRow>
-                                <TableCell
-                                    colSpan={canEdit ? 6 : 5}
-                                    className="h-24 text-center text-muted-foreground"
-                                >
+                                <TableCell colSpan={columnCount} className="h-24 text-center text-muted-foreground">
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && error && (
+                            <TableRow>
+                                <TableCell colSpan={columnCount} className="h-24 text-center text-destructive">
+                                    {error}
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && !error && books.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={columnCount} className="h-24 text-center text-muted-foreground">
                                     No books found.
                                 </TableCell>
                             </TableRow>
                         )}
 
-                        {books.map((book) => (
-                            <TableRow key={book.id}>
-                                <TableCell className="font-medium">{book.title}</TableCell>
-                                <TableCell>{book.isbn}</TableCell>
-                                <TableCell>{book.language}</TableCell>
-                                <TableCell>{book.authors.join(", ")}</TableCell>
-                                <TableCell className="text-right">
-                                    {book.dailyCost.toFixed(2)} €
-                                </TableCell>
-                                {canEdit && (
-                                    <TableCell className="text-right space-x-2">
-                                        <Button variant="outline" size="icon" aria-label="Edit">
-                                            <Pencil className="size-4" />
-                                        </Button>
-                                        <Button variant="outline" size="icon" aria-label="Delete">
-                                            <Trash2 className="size-4" />
-                                        </Button>
+                        {!loading &&
+                            !error &&
+                            books.map((book) => (
+                                <TableRow key={book.id}>
+                                    <TableCell className="font-medium">{book.title}</TableCell>
+                                    <TableCell>{book.isbn}</TableCell>
+                                    <TableCell>{book.language ?? "—"}</TableCell>
+                                    <TableCell>
+                                        {book.authorReadOnlyDTOs.length > 0
+                                            ? book.authorReadOnlyDTOs
+                                                .map((author) => `${author.firstname} ${author.lastname}`)
+                                                .join(", ")
+                                            : "—"}
                                     </TableCell>
-                                )}
-                            </TableRow>
-                        ))}
+                                    <TableCell className="text-right">
+                                        {book.dailyCost.toFixed(2)} €
+                                    </TableCell>
+                                    {canEdit && (
+                                        <TableCell className="text-right space-x-2">
+                                            <Button variant="outline" size="icon" aria-label="Edit">
+                                                <Pencil className="size-4" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Delete"
+                                                onClick={() => handleDelete(book)}
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </Button>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))}
                     </TableBody>
                 </Table>
             </div>
+
+            {data && (
+                <TablePagination
+                    page={data.number}
+                    totalPages={data.totalPages}
+                    totalElements={data.totalElements}
+                    onPageChange={setPage}
+                />
+            )}
         </div>
     )
 }
