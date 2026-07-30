@@ -1,7 +1,12 @@
-import { useOutletContext } from "react-router"
-import type { AppLayoutContext } from "@/components/AppLayout"
+import { useAuth } from "@/hooks/useAuth"
+import type { Role } from "@/schemas/auth"
 
-export function useRole() {
-    const { role } = useOutletContext<AppLayoutContext>()
+export function useRole(): Role {
+    const { role } = useAuth()
+
+    if (!role) {
+        throw new Error("useRole must be used inside an authenticated route")
+    }
+
     return role
 }

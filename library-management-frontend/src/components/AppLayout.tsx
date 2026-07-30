@@ -12,9 +12,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-export type Role = "ADMIN" | "LIBRARIAN"
-export type AppLayoutContext = { role: Role }
+import { useAuth } from "@/hooks/useAuth"
 
 type NavItem = {
     to: string
@@ -36,9 +34,16 @@ const adminOnlyItems: NavItem[] = [
     { to: "users", label: "Users", icon: UserCog },
 ]
 
-const AppLayout = ({ role }: { role: Role }) => {
+const AppLayout = () => {
     const navigate = useNavigate()
+    const { role, username, logoutUser } = useAuth()
+
     const items = role === "ADMIN" ? [...sharedItems, ...adminOnlyItems] : sharedItems
+
+    const handleSignOut = () => {
+        logoutUser()
+        navigate("/login", { replace: true })
+    }
 
     return (
         <div className="min-h-screen flex bg-muted/40">
@@ -70,15 +75,13 @@ const AppLayout = ({ role }: { role: Role }) => {
 
                 <div className="p-4 border-t space-y-3">
                     <div className="px-3">
-                        <p className="text-sm font-medium">
-                            {role === "ADMIN" ? "Administrator" : "Librarian"}
-                        </p>
+                        <p className="text-sm font-medium">{username}</p>
                         <p className="text-xs text-muted-foreground">{role}</p>
                     </div>
                     <Button
                         variant="outline"
                         className="w-full justify-start gap-3"
-                        onClick={() => navigate("/login")}
+                        onClick={handleSignOut}
                     >
                         <LogOut className="size-4" />
                         Sign out
@@ -87,7 +90,7 @@ const AppLayout = ({ role }: { role: Role }) => {
             </aside>
 
             <main className="flex-1 p-8">
-                <Outlet context={{ role } satisfies AppLayoutContext} />
+                <Outlet />
             </main>
         </div>
     )
