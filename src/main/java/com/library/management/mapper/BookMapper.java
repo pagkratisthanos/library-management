@@ -28,6 +28,7 @@ public class BookMapper {
     public BookReadOnlyDTO mapToBookReadOnlyDTO(Book book) {
 
         Set<AuthorReadOnlyDTO> authors = book.getAllAuthors().stream()
+                .filter(author -> !author.isDeleted())
                 .map(author -> new AuthorReadOnlyDTO(
                         author.getId(),
                         author.getFirstname(),
