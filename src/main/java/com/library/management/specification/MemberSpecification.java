@@ -8,12 +8,27 @@ public class MemberSpecification {
 
     public static Specification<Member> build(MemberFilters filters) {
         return Specification.allOf(
+                hasSearch(filters.getSearch()),
                 hasFirstname(filters.getFirstname()),
                 hasLastname(filters.getLastname()),
                 hasEmail(filters.getEmail()),
                 hasPhoneNumber(filters.getPhoneNumber()),
                 isDeleted(false)
         );
+    }
+
+    /** Free-text search across name, email and phone number. */
+    private static Specification<Member> hasSearch(String search) {
+        return (root, query, cb) -> {
+            if (search == null || search.isBlank()) return cb.conjunction();
+            String pattern = "%" + search.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("firstname")), pattern),
+                    cb.like(cb.lower(root.get("lastname")), pattern),
+                    cb.like(cb.lower(root.get("email")), pattern),
+                    cb.like(root.get("phoneNumber"), "%" + search + "%")
+            );
+        };
     }
 
     private static Specification<Member> hasFirstname(String firstname) {

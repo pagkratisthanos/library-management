@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 @Builder
 public class AuthorFilters {
+    private String search;
     private String firstname;
     private String lastname;
     private String birthPlace;

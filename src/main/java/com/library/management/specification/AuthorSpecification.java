@@ -8,11 +8,24 @@ public class AuthorSpecification {
 
     public static Specification<Author> build(AuthorFilters filters) {
         return Specification.allOf(
+                hasSearch(filters.getSearch()),
                 hasFirstname(filters.getFirstname()),
                 hasLastname(filters.getLastname()),
                 hasBirthPlace(filters.getBirthPlace()),
                 isDeleted(false)
         );
+    }
+
+    /** Free-text search across the author's first and last name. */
+    private static Specification<Author> hasSearch(String search) {
+        return (root, query, cb) -> {
+            if (search == null || search.isBlank()) return cb.conjunction();
+            String pattern = "%" + search.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("firstname")), pattern),
+                    cb.like(cb.lower(root.get("lastname")), pattern)
+            );
+        };
     }
 
     private static Specification<Author> hasFirstname(String firstname) {
