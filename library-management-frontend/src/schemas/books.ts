@@ -1,11 +1,4 @@
-export type Author = {
-    id: string
-    firstname: string
-    lastname: string
-    birthDate: string
-    birthPlace: string | null
-    bio: string | null
-}
+import type { Author } from "@/schemas/authors"
 
 export type Book = {
     id: string
