@@ -78,4 +78,24 @@ class BookMapperTest {
         BookReadOnlyDTO dto = bookMapper.mapToBookReadOnlyDTO(book);
         assertThat(dto.authorReadOnlyDTOs()).isEmpty();
     }
+
+    @Test
+    void mapToBookReadOnlyDTO_whenOneAuthorIsDeleted_shouldReturnOnlyActiveAuthors() {
+        Author activeAuthor = new Author();
+        activeAuthor.setFirstname("George");
+        activeAuthor.setLastname("Orwell");
+
+        Author deletedAuthor = new Author();
+        deletedAuthor.setFirstname("John");
+        deletedAuthor.setLastname("Tolkien");
+        deletedAuthor.softDelete();
+
+        book.addAuthor(activeAuthor);
+        book.addAuthor(deletedAuthor);
+
+        BookReadOnlyDTO dto = bookMapper.mapToBookReadOnlyDTO(book);
+
+        assertThat(dto.authorReadOnlyDTOs()).hasSize(1);
+        assertThat(dto.authorReadOnlyDTOs().iterator().next().firstname()).isEqualTo("George");
+    }
 }

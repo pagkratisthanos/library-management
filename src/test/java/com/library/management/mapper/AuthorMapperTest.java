@@ -77,4 +77,28 @@ class AuthorMapperTest {
         AuthorReadOnlyDTO dto = authorMapper.mapToAuthorReadOnlyDTO(author);
         assertThat(dto.bookReadOnlyDTOs()).isEmpty();
     }
+
+    @Test
+    void mapToAuthorReadOnlyDTO_whenOneBookIsDeleted_shouldReturnOnlyActiveBooks() {
+        Book activeBook = new Book();
+        activeBook.setTitle("Animal Farm");
+        activeBook.setIsbn("978-0-452-28424-4");
+        activeBook.setLanguage("English");
+        activeBook.setDailyCost(BigDecimal.valueOf(1.20));
+
+        Book deletedBook = new Book();
+        deletedBook.setTitle("1984");
+        deletedBook.setIsbn("978-0-452-28423-4");
+        deletedBook.setLanguage("English");
+        deletedBook.setDailyCost(BigDecimal.valueOf(1.50));
+        deletedBook.softDelete();
+
+        author.addBook(activeBook);
+        author.addBook(deletedBook);
+
+        AuthorReadOnlyDTO dto = authorMapper.mapToAuthorReadOnlyDTO(author);
+
+        assertThat(dto.bookReadOnlyDTOs()).hasSize(1);
+        assertThat(dto.bookReadOnlyDTOs().iterator().next().title()).isEqualTo("Animal Farm");
+    }
 }
