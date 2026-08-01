@@ -10,6 +10,7 @@ import lombok.*;
 @ToString
 @Builder
 public class CopyFilters {
+    private String bookTitle;
     private Boolean available;
     private CopyCondition condition;
 }
