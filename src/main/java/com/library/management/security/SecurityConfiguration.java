@@ -70,7 +70,6 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/rentals/**").hasAuthority("VIEW_RENTAL")
                         .requestMatchers(HttpMethod.POST, "/api/rentals/**").hasAuthority("MANAGE_RENTAL")
                         .requestMatchers(HttpMethod.PUT, "/api/rentals/**").hasAuthority("MANAGE_RENTAL")
-                        .requestMatchers(HttpMethod.DELETE, "/api/rentals/**").hasAuthority("MANAGE_RENTAL")
                         .requestMatchers(HttpMethod.POST, "/api/users/**").hasAuthority("MANAGE_USERS")
                         .requestMatchers(HttpMethod.GET, "/api/users/**").hasAuthority("MANAGE_USERS")
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("MANAGE_USERS")
