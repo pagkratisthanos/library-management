@@ -10,6 +10,7 @@ import java.util.UUID;
 @ToString
 @Builder
 public class RentalFilters {
+    private String search;
     private UUID memberUuid;
     private UUID copyUuid;
     private String active;
