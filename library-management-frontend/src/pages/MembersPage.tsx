@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Pencil, Plus, Search, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -10,67 +11,72 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import TablePagination from "@/components/TablePagination"
+import { deleteMember, getMembers } from "@/api/members"
+import type { Member } from "@/schemas/members"
+import type { Page } from "@/schemas/common"
+import { useDebounce } from "@/hooks/useDebounce"
 
-type Member = {
-    id: string
-    firstname: string
-    lastname: string
-    email: string
-    phoneNumber: string
-    street: string
-    streetNumber: string
-    city: string
-    postalCode: string
-    membershipDate: string
-}
-
-const mockMembers: Member[] = [
-    {
-        id: "1",
-        firstname: "Thanos",
-        lastname: "Pagkratis",
-        email: "thanos@example.com",
-        phoneNumber: "6912345678",
-        street: "Ermou",
-        streetNumber: "15",
-        city: "Athens",
-        postalCode: "10563",
-        membershipDate: "2026-01-15",
-    },
-    {
-        id: "2",
-        firstname: "Maria",
-        lastname: "Ioannou",
-        email: "maria@example.com",
-        phoneNumber: "6987654321",
-        street: "Tsimiski",
-        streetNumber: "42",
-        city: "Thessaloniki",
-        postalCode: "54623",
-        membershipDate: "2026-03-02",
-    },
-    {
-        id: "3",
-        firstname: "Nikos",
-        lastname: "Dimitriou",
-        email: "nikos@example.com",
-        phoneNumber: "6900112233",
-        street: "Korinthou",
-        streetNumber: "8",
-        city: "Patras",
-        postalCode: "26221",
-        membershipDate: "2026-05-20",
-    },
-]
+const PAGE_SIZE = 10
 
 const MembersPage = () => {
     const [search, setSearch] = useState("")
+    const [page, setPage] = useState(0)
+    const [data, setData] = useState<Page<Member> | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [reloadKey, setReloadKey] = useState(0)
 
-    const members = mockMembers.filter((member) =>
-        `${member.firstname} ${member.lastname} ${member.email}`
-            .toLowerCase()
-            .includes(search.toLowerCase()),
-    )
+    const debouncedSearch = useDebounce(search)
+
+    const handleSearchChange = (value: string) => {
+        setSearch(value)
+        setPage(0)
+    }
+
+    useEffect(() => {
+        let cancelled = false
+
+        const load = async () => {
+            setLoading(true)
+            setError(null)
+
+            try {
+                const result = await getMembers(
+                    { search: debouncedSearch || undefined },
+                    { page, size: PAGE_SIZE },
+                )
+                if (!cancelled) setData(result)
+            } catch (err) {
+                if (!cancelled) {
+                    setError(err instanceof Error ? err.message : "Failed to load members")
+                }
+            } finally {
+                if (!cancelled) setLoading(false)
+            }
+        }
+
+        void load()
+
+        return () => {
+            cancelled = true
+        }
+    }, [debouncedSearch, page, reloadKey])
+
+    const handleDelete = async (member: Member) => {
+        const fullName = `${member.firstname} ${member.lastname}`
+        if (!window.confirm(`Delete "${fullName}"?`)) return
+
+        try {
+            await deleteMember(member.id)
+            toast.success(`"${fullName}" was deleted`)
+            setReloadKey((key) => key + 1)
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to delete the member")
+        }
+    }
+
+    const members = data?.content ?? []
 
     return (
         <div className="space-y-6">
@@ -90,10 +96,10 @@ const MembersPage = () => {
             <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                    placeholder="Search by name or email..."
+                    placeholder="Search by name, email or phone..."
                     className="pl-9"
                     value={search}
-                    onChange={(event) => setSearch(event.target.value)}
+                    onChange={(event) => handleSearchChange(event.target.value)}
                 />
             </div>
 
@@ -111,7 +117,23 @@ const MembersPage = () => {
                     </TableHeader>
 
                     <TableBody>
-                        {members.length === 0 && (
+                        {loading && (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && error && (
+                            <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center text-destructive">
+                                    {error}
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && !error && members.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                                     No members found.
@@ -119,30 +141,51 @@ const MembersPage = () => {
                             </TableRow>
                         )}
 
-                        {members.map((member) => (
-                            <TableRow key={member.id}>
-                                <TableCell className="font-medium">
-                                    {member.firstname} {member.lastname}
-                                </TableCell>
-                                <TableCell>{member.email}</TableCell>
-                                <TableCell>{member.phoneNumber}</TableCell>
-                                <TableCell>
-                                    {member.street} {member.streetNumber}, {member.city} {member.postalCode}
-                                </TableCell>
-                                <TableCell>{member.membershipDate}</TableCell>
-                                <TableCell className="text-right space-x-2">
-                                    <Button variant="outline" size="icon" aria-label="Edit">
-                                        <Pencil className="size-4" />
-                                    </Button>
-                                    <Button variant="outline" size="icon" aria-label="Delete">
-                                        <Trash2 className="size-4" />
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {!loading &&
+                            !error &&
+                            members.map((member) => {
+                                const address = member.addressReadOnlyDTO
+
+                                return (
+                                    <TableRow key={member.id}>
+                                        <TableCell className="font-medium">
+                                            {member.firstname} {member.lastname}
+                                        </TableCell>
+                                        <TableCell>{member.email}</TableCell>
+                                        <TableCell>{member.phoneNumber}</TableCell>
+                                        <TableCell>
+                                            {address.street} {address.streetNumber}, {address.city}{" "}
+                                            {address.postalCode}
+                                        </TableCell>
+                                        <TableCell>{member.membershipDate}</TableCell>
+                                        <TableCell className="text-right space-x-2">
+                                            <Button variant="outline" size="icon" aria-label="Edit">
+                                                <Pencil className="size-4" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Delete"
+                                                onClick={() => handleDelete(member)}
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                     </TableBody>
                 </Table>
             </div>
+
+            {data && (
+                <TablePagination
+                    page={data.number}
+                    totalPages={data.totalPages}
+                    totalElements={data.totalElements}
+                    onPageChange={setPage}
+                />
+            )}
         </div>
     )
 }
