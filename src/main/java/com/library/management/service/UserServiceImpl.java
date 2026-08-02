@@ -3,11 +3,13 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.UserFilters;
 import com.library.management.dto.UserInsertDTO;
 import com.library.management.model.Role;
 import com.library.management.model.User;
 import com.library.management.repository.RoleRepository;
 import com.library.management.repository.UserRepository;
+import com.library.management.specification.UserSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -110,8 +112,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<User> getAllUsers(Pageable pageable) {
-        Page<User> users = userRepository.findAll(pageable);
+    public Page<User> getAllUsers(UserFilters filters, Pageable pageable) {
+        Page<User> users = userRepository.findAll(UserSpecification.build(filters), pageable);
         log.info("Get all users returned page={} size={}", users.getNumber(), users.getSize());
         return users;
     }

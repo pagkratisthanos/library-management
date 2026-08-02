@@ -3,6 +3,7 @@ package com.library.management.api;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.UserFilters;
 import com.library.management.dto.UserInsertDTO;
 import com.library.management.dto.UserReadOnlyDTO;
 import com.library.management.mapper.UserMapper;
@@ -67,8 +68,9 @@ public class UserRestController {
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping
     public ResponseEntity<Page<UserReadOnlyDTO>> getAllUsers(
+            @ModelAttribute UserFilters filters,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-        Page<User> users = userService.getAllUsers(pageable);
+        Page<User> users = userService.getAllUsers(filters, pageable);
         return ResponseEntity.ok(users.map(userMapper::mapToUserReadOnlyDTO));
     }
 }

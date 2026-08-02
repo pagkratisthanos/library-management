@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.UserFilters;
 import com.library.management.dto.UserInsertDTO;
 import com.library.management.model.Role;
 import com.library.management.model.User;
@@ -154,8 +155,53 @@ class UserServiceTest {
 
     @Test
     void getAllUsers_shouldReturnAllUsers() {
-        Page<User> users = userService.getAllUsers(PageRequest.of(0, 10));
+        Page<User> users = userService.getAllUsers(new UserFilters(), PageRequest.of(0, 10));
         assertThat(users).isNotNull();
         assertThat(users.getContent()).hasSize(1);
+    }
+
+    @Test
+    void getAllUsers_withSearch_shouldReturnOnlyMatchingUsers() {
+        User librarian = new User();
+        librarian.setUsername("librarian1");
+        librarian.setPassword("$2a$10$hashedpassword");
+        adminRole.addUser(librarian);
+        userRepository.save(librarian);
+
+        Page<User> users = userService.getAllUsers(
+                UserFilters.builder().search("libr").build(),
+                PageRequest.of(0, 10));
+
+        assertThat(users.getContent()).hasSize(1);
+        assertThat(users.getContent().get(0).getUsername()).isEqualTo("librarian1");
+    }
+
+    @Test
+    void getAllUsers_withRoleFilter_shouldReturnOnlyUsersOfThatRole() {
+        Role librarianRole = new Role();
+        librarianRole.setName("LIBRARIAN");
+        roleRepository.save(librarianRole);
+
+        User librarian = new User();
+        librarian.setUsername("librarian1");
+        librarian.setPassword("$2a$10$hashedpassword");
+        librarianRole.addUser(librarian);
+        userRepository.save(librarian);
+
+        Page<User> users = userService.getAllUsers(
+                UserFilters.builder().role("LIBRARIAN").build(),
+                PageRequest.of(0, 10));
+
+        assertThat(users.getContent()).hasSize(1);
+        assertThat(users.getContent().get(0).getUsername()).isEqualTo("librarian1");
+    }
+
+    @Test
+    void getAllUsers_shouldNotReturnDeletedUsers() throws EntityNotFoundException {
+        userService.deleteUserByUuid(existingUser.getId());
+
+        Page<User> users = userService.getAllUsers(new UserFilters(), PageRequest.of(0, 10));
+
+        assertThat(users.getContent()).isEmpty();
     }
 }

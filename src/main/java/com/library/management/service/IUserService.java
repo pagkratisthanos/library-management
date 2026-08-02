@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
+import com.library.management.core.filters.UserFilters;
 import com.library.management.dto.UserInsertDTO;
 import com.library.management.model.User;
 import org.springframework.data.domain.Page;
@@ -23,5 +24,5 @@ public interface IUserService {
 
     void deleteUserByUuid(UUID uuid) throws EntityNotFoundException;
 
-    Page<User> getAllUsers(Pageable pageable);
+    Page<User> getAllUsers(UserFilters filters, Pageable pageable);
 }

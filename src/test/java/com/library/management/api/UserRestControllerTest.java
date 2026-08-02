@@ -151,7 +151,7 @@ class UserRestControllerTest {
     @Test
     void getAllUsers_shouldReturn200WithPage() throws Exception {
         Page<User> page = new PageImpl<>(List.of(user), PageRequest.of(0, 10), 1);
-        when(userService.getAllUsers(any())).thenReturn(page);
+        when(userService.getAllUsers(any(), any())).thenReturn(page);
         when(userMapper.mapToUserReadOnlyDTO(any())).thenReturn(userReadOnlyDTO);
 
         mockMvc.perform(get("/api/users"))
