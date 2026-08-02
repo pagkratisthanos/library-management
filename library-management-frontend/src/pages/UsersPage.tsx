@@ -1,8 +1,16 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Plus, Search, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import {
     Table,
     TableBody,
@@ -11,25 +19,92 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import TablePagination from "@/components/TablePagination"
+import { deleteUser, getRoles, getUsers } from "@/api/users"
+import type { RoleOption, User } from "@/schemas/users"
+import type { Page } from "@/schemas/common"
+import { useAuth } from "@/hooks/useAuth"
+import { useDebounce } from "@/hooks/useDebounce"
 
-type User = {
-    id: string
-    username: string
-    role: "ADMIN" | "LIBRARIAN"
-}
-
-const mockUsers: User[] = [
-    { id: "1", username: "admin", role: "ADMIN" },
-    { id: "2", username: "maria.lib", role: "LIBRARIAN" },
-    { id: "3", username: "nikos.lib", role: "LIBRARIAN" },
-]
+const PAGE_SIZE = 10
 
 const UsersPage = () => {
-    const [search, setSearch] = useState("")
+    const { username: currentUsername } = useAuth()
 
-    const users = mockUsers.filter((user) =>
-        user.username.toLowerCase().includes(search.toLowerCase()),
-    )
+    const [search, setSearch] = useState("")
+    const [role, setRole] = useState("ALL")
+    const [page, setPage] = useState(0)
+
+    const [roles, setRoles] = useState<RoleOption[]>([])
+    const [data, setData] = useState<Page<User> | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [reloadKey, setReloadKey] = useState(0)
+
+    const debouncedSearch = useDebounce(search)
+
+    const handleSearchChange = (value: string) => {
+        setSearch(value)
+        setPage(0)
+    }
+
+    const handleRoleChange = (value: string) => {
+        setRole(value)
+        setPage(0)
+    }
+
+    // the list of roles never changes while the page is open
+    useEffect(() => {
+        getRoles()
+            .then(setRoles)
+            .catch(() => toast.error("Failed to load roles"))
+    }, [])
+
+    useEffect(() => {
+        let cancelled = false
+
+        const load = async () => {
+            setLoading(true)
+            setError(null)
+
+            try {
+                const result = await getUsers(
+                    {
+                        search: debouncedSearch || undefined,
+                        role: role === "ALL" ? undefined : role,
+                    },
+                    { page, size: PAGE_SIZE },
+                )
+                if (!cancelled) setData(result)
+            } catch (err) {
+                if (!cancelled) {
+                    setError(err instanceof Error ? err.message : "Failed to load users")
+                }
+            } finally {
+                if (!cancelled) setLoading(false)
+            }
+        }
+
+        void load()
+
+        return () => {
+            cancelled = true
+        }
+    }, [debouncedSearch, role, page, reloadKey])
+
+    const handleDelete = async (user: User) => {
+        if (!window.confirm(`Delete user "${user.username}"?`)) return
+
+        try {
+            await deleteUser(user.id)
+            toast.success(`"${user.username}" was deleted`)
+            setReloadKey((key) => key + 1)
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Failed to delete the user")
+        }
+    }
+
+    const users = data?.content ?? []
 
     return (
         <div className="space-y-6">
@@ -46,14 +121,30 @@ const UsersPage = () => {
                 </Button>
             </div>
 
-            <div className="relative max-w-sm">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                    placeholder="Search by username..."
-                    className="pl-9"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                />
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="relative max-w-sm flex-1">
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by username..."
+                        className="pl-9"
+                        value={search}
+                        onChange={(event) => handleSearchChange(event.target.value)}
+                    />
+                </div>
+
+                <Select value={role} onValueChange={handleRoleChange}>
+                    <SelectTrigger className="w-44">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ALL">All roles</SelectItem>
+                        {roles.map((option) => (
+                            <SelectItem key={option.id} value={option.name}>
+                                {option.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className="rounded-lg border bg-background">
@@ -67,7 +158,23 @@ const UsersPage = () => {
                     </TableHeader>
 
                     <TableBody>
-                        {users.length === 0 && (
+                        {loading && (
+                            <TableRow>
+                                <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && error && (
+                            <TableRow>
+                                <TableCell colSpan={3} className="h-24 text-center text-destructive">
+                                    {error}
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && !error && users.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
                                     No users found.
@@ -75,24 +182,52 @@ const UsersPage = () => {
                             </TableRow>
                         )}
 
-                        {users.map((user) => (
-                            <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.username}</TableCell>
-                                <TableCell>
-                                    <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
-                                        {user.role}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Button variant="outline" size="icon" aria-label="Delete">
-                                        <Trash2 className="size-4" />
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                        {!loading &&
+                            !error &&
+                            users.map((user) => {
+                                const isCurrentUser = user.username === currentUsername
+
+                                return (
+                                    <TableRow key={user.id}>
+                                        <TableCell className="font-medium">
+                                            {user.username}
+                                            {isCurrentUser && (
+                                                <span className="ml-2 text-xs text-muted-foreground">
+                                                    (you)
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
+                                                {user.role}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Delete"
+                                                disabled={isCurrentUser}
+                                                onClick={() => handleDelete(user)}
+                                            >
+                                                <Trash2 className="size-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                     </TableBody>
                 </Table>
             </div>
+
+            {data && (
+                <TablePagination
+                    page={data.number}
+                    totalPages={data.totalPages}
+                    totalElements={data.totalElements}
+                    onPageChange={setPage}
+                />
+            )}
         </div>
     )
 }
