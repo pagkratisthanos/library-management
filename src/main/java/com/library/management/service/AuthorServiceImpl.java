@@ -84,7 +84,10 @@ public class AuthorServiceImpl implements IAuthorService {
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
 
             boolean hasBookWithSingleAuthor = author.getAllBooks().stream()
-                    .anyMatch(book -> book.getAllAuthors().size() == 1);
+                    .filter(book -> !book.isDeleted())
+                    .anyMatch(book -> book.getAllAuthors().stream()
+                            .filter(otherAuthor -> !otherAuthor.isDeleted())
+                            .count() == 1);
 
             if (hasBookWithSingleAuthor) {
                 throw new EntityInvalidArgumentException("Author",

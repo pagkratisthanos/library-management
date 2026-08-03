@@ -133,6 +133,31 @@ class AuthorServiceTest {
     }
 
     @Test
+    void deleteAuthorByUuid_whenOnlyBookIsDeleted_shouldSoftDelete()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Book book = new Book();
+        book.setTitle("Animal Farm");
+        book.setIsbn("978-0-452-28424-4");
+        book.setLanguage("English");
+        book.setDailyCost(BigDecimal.valueOf(1.20));
+        bookRepository.save(book);
+
+        existingAuthor.addBook(book);
+        book.addAuthor(existingAuthor);
+        authorRepository.save(existingAuthor);
+        bookRepository.save(book);
+
+        // the book leaves the catalogue, so it can no longer be orphaned
+        book.softDelete();
+        bookRepository.save(book);
+
+        authorService.deleteAuthorByUuid(existingAuthor.getId());
+
+        Author deleted = authorRepository.findById(existingAuthor.getId()).orElseThrow();
+        assertThat(deleted.isDeleted()).isTrue();
+    }
+
+    @Test
     void getAuthorByUUIDDeletedFalse_whenExists_shouldReturnAuthor() throws EntityNotFoundException {
         Author found = authorService.getAuthorByUUIDDeletedFalse(existingAuthor.getId());
         assertThat(found).isNotNull();
