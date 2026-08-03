@@ -107,9 +107,17 @@ class BookRestControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    BookUpdateDTO dto = new BookUpdateDTO(
+            "Animal Farm", "978-0-452-28424-4", LocalDate.of(1945, 8, 17),
+            "Greek", BigDecimal.valueOf(2.00), "Updated"
+    );
+
     @Test
     void updateBook_whenExists_shouldReturn200() throws Exception {
-        BookUpdateDTO dto = new BookUpdateDTO("Greek", BigDecimal.valueOf(2.00), "Updated");
+        BookUpdateDTO dto = new BookUpdateDTO(
+                "Animal Farm", "978-0-452-28424-4", LocalDate.of(1945, 8, 17),
+                "Greek", BigDecimal.valueOf(2.00), "Updated"
+        );
 
         when(bookService.updateBook(any(), any())).thenReturn(book);
         when(bookMapper.mapToBookReadOnlyDTO(any())).thenReturn(bookReadOnlyDTO);
@@ -123,7 +131,10 @@ class BookRestControllerTest {
 
     @Test
     void updateBook_whenNotFound_shouldReturn404() throws Exception {
-        BookUpdateDTO dto = new BookUpdateDTO("Greek", BigDecimal.valueOf(2.00), "Updated");
+        BookUpdateDTO dto = new BookUpdateDTO(
+                "Animal Farm", "978-0-452-28424-4", LocalDate.of(1945, 8, 17),
+                "Greek", BigDecimal.valueOf(2.00), "Updated"
+        );
 
         when(bookService.updateBook(any(), any()))
                 .thenThrow(new EntityNotFoundException("Book", "Not found"));

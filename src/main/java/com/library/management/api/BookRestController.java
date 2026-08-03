@@ -48,7 +48,7 @@ public class BookRestController {
     @PutMapping("/{uuid}")
     public ResponseEntity<BookReadOnlyDTO> updateBook(@PathVariable UUID uuid,
                                                       @Valid @RequestBody BookUpdateDTO dto)
-            throws EntityNotFoundException, EntityInvalidArgumentException {
+            throws EntityNotFoundException, EntityInvalidArgumentException, EntityAlreadyExistsException {
         Book updatedBook = bookService.updateBook(uuid, dto);
         return ResponseEntity.ok(bookMapper.mapToBookReadOnlyDTO(updatedBook));
     }

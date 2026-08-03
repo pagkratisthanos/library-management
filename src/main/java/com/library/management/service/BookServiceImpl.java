@@ -89,8 +89,10 @@ public class BookServiceImpl implements IBookService {
     }
 
     @Override
-    @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
-    public Book updateBook(UUID uuid, BookUpdateDTO dto) throws EntityNotFoundException, EntityInvalidArgumentException {
+    @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class,
+            EntityAlreadyExistsException.class})
+    public Book updateBook(UUID uuid, BookUpdateDTO dto)
+            throws EntityNotFoundException, EntityInvalidArgumentException, EntityAlreadyExistsException {
         try {
             Book book = bookRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid=" + uuid + " not found"));
@@ -99,6 +101,14 @@ public class BookServiceImpl implements IBookService {
                 throw new EntityInvalidArgumentException("Book", "Daily cost cannot be negative");
             }
 
+            if (!book.getIsbn().equals(dto.isbn()) && isBookExistByIsbn(dto.isbn())) {
+                throw new EntityAlreadyExistsException("Book",
+                        "Book with isbn=" + dto.isbn() + " already exists");
+            }
+
+            book.setTitle(dto.title());
+            book.setIsbn(dto.isbn());
+            book.setPublishedDate(dto.publishedDate());
             book.setLanguage(dto.language());
             book.setDailyCost(dto.dailyCost());
             book.setDescription(dto.description());
@@ -106,7 +116,7 @@ public class BookServiceImpl implements IBookService {
             Book updatedBook = bookRepository.save(book);
             log.info("Book updated with uuid={}", updatedBook.getId());
             return updatedBook;
-        } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
+        } catch (EntityNotFoundException | EntityInvalidArgumentException | EntityAlreadyExistsException e) {
             log.error("Update failed. {}", e.getMessage());
             throw e;
         }

@@ -16,7 +16,7 @@ public interface IBookService {
 
     Book saveBook(BookInsertDTO dto) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException ;
 
-    Book updateBook(UUID id, BookUpdateDTO dto) throws EntityNotFoundException, EntityInvalidArgumentException;
+    Book updateBook(UUID id, BookUpdateDTO dto) throws EntityNotFoundException, EntityInvalidArgumentException, EntityAlreadyExistsException;
 
     void deleteBookByUuid(UUID uuid) throws EntityNotFoundException, EntityInvalidArgumentException;
 

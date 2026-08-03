@@ -134,8 +134,15 @@ class BookServiceTest {
 
     @Test
     void updateBook_whenValidData_shouldUpdateAndReturn()
-            throws EntityNotFoundException, EntityInvalidArgumentException {
-        BookUpdateDTO dto = new BookUpdateDTO("Greek", BigDecimal.valueOf(2.00), "Updated description");
+            throws EntityNotFoundException, EntityInvalidArgumentException, EntityAlreadyExistsException {
+        BookUpdateDTO dto = new BookUpdateDTO(
+                "Animal Farm",
+                "978-0-452-28424-4",
+                LocalDate.of(1945, 8, 17),
+                "Greek",
+                BigDecimal.valueOf(2.00),
+                "Updated description"
+        );
 
         Book updated = bookService.updateBook(existingBook.getId(), dto);
 
@@ -146,7 +153,14 @@ class BookServiceTest {
 
     @Test
     void updateBook_whenNotFound_shouldThrowException() {
-        BookUpdateDTO dto = new BookUpdateDTO("Greek", BigDecimal.valueOf(2.00), "Updated description");
+        BookUpdateDTO dto = new BookUpdateDTO(
+                "Animal Farm",
+                "978-0-452-28424-4",
+                LocalDate.of(1945, 8, 17),
+                "Greek",
+                BigDecimal.valueOf(2.00),
+                "Updated description"
+        );
 
         assertThatThrownBy(() -> bookService.updateBook(UUID.randomUUID(), dto))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -154,10 +168,40 @@ class BookServiceTest {
 
     @Test
     void updateBook_whenDailyCostNegative_shouldThrowException() {
-        BookUpdateDTO dto = new BookUpdateDTO("Greek", BigDecimal.valueOf(-1.00), "Updated description");
+        BookUpdateDTO dto = new BookUpdateDTO(
+                "Animal Farm",
+                "978-0-452-28424-4",
+                LocalDate.of(1945, 8, 17),
+                "Greek",
+                BigDecimal.valueOf(-1.00),
+                "Updated description"
+        );
 
         assertThatThrownBy(() -> bookService.updateBook(existingBook.getId(), dto))
                 .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void updateBook_whenIsbnBelongsToAnotherBook_shouldThrowException() {
+        Book otherBook = new Book();
+        otherBook.setTitle("1984");
+        otherBook.setIsbn("978-0-452-28423-4");
+        otherBook.setLanguage("English");
+        otherBook.setDailyCost(BigDecimal.valueOf(1.50));
+        bookRepository.save(otherBook);
+
+        // try to give the existing book the other book's ISBN
+        BookUpdateDTO dto = new BookUpdateDTO(
+                "Animal Farm",
+                "978-0-452-28423-4",
+                LocalDate.of(1945, 8, 17),
+                "English",
+                BigDecimal.valueOf(1.20),
+                "A political allegory"
+        );
+
+        assertThatThrownBy(() -> bookService.updateBook(existingBook.getId(), dto))
+                .isInstanceOf(EntityAlreadyExistsException.class);
     }
 
     @Test
