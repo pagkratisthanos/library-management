@@ -12,6 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import AuthorFormDialog from "@/components/AuthorFormDialog"
 import { deleteAuthor, getAuthors } from "@/api/authors"
 import type { Author } from "@/schemas/authors"
 import type { Page } from "@/schemas/common"
@@ -31,12 +32,27 @@ const AuthorsPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [editingAuthor, setEditingAuthor] = useState<Author | null>(null)
+
     const debouncedSearch = useDebounce(search)
 
     const handleSearchChange = (value: string) => {
         setSearch(value)
         setPage(0)
     }
+
+    const openCreateDialog = () => {
+        setEditingAuthor(null)
+        setDialogOpen(true)
+    }
+
+    const openEditDialog = (author: Author) => {
+        setEditingAuthor(author)
+        setDialogOpen(true)
+    }
+
+    const reload = () => setReloadKey((key) => key + 1)
 
     useEffect(() => {
         let cancelled = false
@@ -74,7 +90,7 @@ const AuthorsPage = () => {
         try {
             await deleteAuthor(author.id)
             toast.success(`"${fullName}" was deleted`)
-            setReloadKey((key) => key + 1)
+            reload()
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to delete the author")
         }
@@ -93,7 +109,7 @@ const AuthorsPage = () => {
                     </p>
                 </div>
                 {canEdit && (
-                    <Button>
+                    <Button onClick={openCreateDialog}>
                         <Plus className="size-4" />
                         New author
                     </Button>
@@ -161,7 +177,12 @@ const AuthorsPage = () => {
                                     </TableCell>
                                     {canEdit && (
                                         <TableCell className="text-right space-x-2">
-                                            <Button variant="outline" size="icon" aria-label="Edit">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Edit"
+                                                onClick={() => openEditDialog(author)}
+                                            >
                                                 <Pencil className="size-4" />
                                             </Button>
                                             <Button
@@ -188,6 +209,13 @@ const AuthorsPage = () => {
                     onPageChange={setPage}
                 />
             )}
+
+            <AuthorFormDialog
+                open={dialogOpen}
+                author={editingAuthor}
+                onOpenChange={setDialogOpen}
+                onSaved={reload}
+            />
         </div>
     )
 }
