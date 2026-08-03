@@ -13,10 +13,12 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import SortableTableHead from "@/components/SortableTableHead"
 import { getRentals, returnRental } from "@/api/rentals"
 import type { Rental } from "@/schemas/rentals"
 import type { Page } from "@/schemas/common"
 import { useDebounce } from "@/hooks/useDebounce"
+import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
@@ -38,6 +40,7 @@ const RentalsPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const { sort, toggleSort, sortParam } = useSort({ field: "dueDate", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
     const handleSearchChange = (value: string) => {
@@ -47,6 +50,11 @@ const RentalsPage = () => {
 
     const handleStatusChange = (value: StatusFilter) => {
         setStatus(value)
+        setPage(0)
+    }
+
+    const handleSort = (field: string) => {
+        toggleSort(field)
         setPage(0)
     }
 
@@ -64,7 +72,7 @@ const RentalsPage = () => {
                         active:
                             status === "ALL" ? undefined : status === "ACTIVE" ? "true" : "false",
                     },
-                    { page, size: PAGE_SIZE },
+                    { page, size: PAGE_SIZE, sort: sortParam },
                 )
                 if (!cancelled) setData(result)
             } catch (err) {
@@ -81,7 +89,7 @@ const RentalsPage = () => {
         return () => {
             cancelled = true
         }
-    }, [debouncedSearch, status, page, reloadKey])
+    }, [debouncedSearch, status, page, sortParam, reloadKey])
 
     const handleReturn = async (rental: Rental) => {
         if (!window.confirm(`Return "${rental.bookTitle}"?`)) return
@@ -142,10 +150,18 @@ const RentalsPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Member</TableHead>
-                            <TableHead>Book</TableHead>
-                            <TableHead>Rented on</TableHead>
-                            <TableHead>Due date</TableHead>
+                            <SortableTableHead field="member.lastname" sort={sort} onSort={handleSort}>
+                                Member
+                            </SortableTableHead>
+                            <SortableTableHead field="copy.book.title" sort={sort} onSort={handleSort}>
+                                Book
+                            </SortableTableHead>
+                            <SortableTableHead field="rentalDate" sort={sort} onSort={handleSort}>
+                                Rented on
+                            </SortableTableHead>
+                            <SortableTableHead field="dueDate" sort={sort} onSort={handleSort}>
+                                Due date
+                            </SortableTableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="w-32 text-right">Actions</TableHead>
                         </TableRow>

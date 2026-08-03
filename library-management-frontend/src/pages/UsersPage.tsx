@@ -20,11 +20,13 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import SortableTableHead from "@/components/SortableTableHead"
 import { deleteUser, getRoles, getUsers } from "@/api/users"
 import type { RoleOption, User } from "@/schemas/users"
 import type { Page } from "@/schemas/common"
 import { useAuth } from "@/hooks/useAuth"
 import { useDebounce } from "@/hooks/useDebounce"
+import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
@@ -41,6 +43,7 @@ const UsersPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const { sort, toggleSort, sortParam } = useSort({ field: "username", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
     const handleSearchChange = (value: string) => {
@@ -50,6 +53,11 @@ const UsersPage = () => {
 
     const handleRoleChange = (value: string) => {
         setRole(value)
+        setPage(0)
+    }
+
+    const handleSort = (field: string) => {
+        toggleSort(field)
         setPage(0)
     }
 
@@ -73,7 +81,7 @@ const UsersPage = () => {
                         search: debouncedSearch || undefined,
                         role: role === "ALL" ? undefined : role,
                     },
-                    { page, size: PAGE_SIZE },
+                    { page, size: PAGE_SIZE, sort: sortParam },
                 )
                 if (!cancelled) setData(result)
             } catch (err) {
@@ -90,7 +98,7 @@ const UsersPage = () => {
         return () => {
             cancelled = true
         }
-    }, [debouncedSearch, role, page, reloadKey])
+    }, [debouncedSearch, role, page, sortParam, reloadKey])
 
     const handleDelete = async (user: User) => {
         if (!window.confirm(`Delete user "${user.username}"?`)) return
@@ -151,8 +159,12 @@ const UsersPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Username</TableHead>
-                            <TableHead>Role</TableHead>
+                            <SortableTableHead field="username" sort={sort} onSort={handleSort}>
+                                Username
+                            </SortableTableHead>
+                            <SortableTableHead field="role.name" sort={sort} onSort={handleSort}>
+                                Role
+                            </SortableTableHead>
                             <TableHead className="w-28 text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>

@@ -20,10 +20,12 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import SortableTableHead from "@/components/SortableTableHead"
 import { deleteCopy, getCopies } from "@/api/copies"
 import { COPY_CONDITIONS, type Copy, type CopyCondition } from "@/schemas/copies"
 import type { Page } from "@/schemas/common"
 import { useDebounce } from "@/hooks/useDebounce"
+import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
@@ -41,6 +43,7 @@ const CopiesPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const { sort, toggleSort, sortParam } = useSort({ field: "book.title", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
     const handleSearchChange = (value: string) => {
@@ -55,6 +58,11 @@ const CopiesPage = () => {
 
     const handleConditionChange = (value: ConditionFilter) => {
         setCondition(value)
+        setPage(0)
+    }
+
+    const handleSort = (field: string) => {
+        toggleSort(field)
         setPage(0)
     }
 
@@ -73,7 +81,7 @@ const CopiesPage = () => {
                             availability === "ALL" ? undefined : availability === "AVAILABLE",
                         condition: condition === "ALL" ? undefined : condition,
                     },
-                    { page, size: PAGE_SIZE },
+                    { page, size: PAGE_SIZE, sort: sortParam },
                 )
                 if (!cancelled) setData(result)
             } catch (err) {
@@ -90,7 +98,7 @@ const CopiesPage = () => {
         return () => {
             cancelled = true
         }
-    }, [debouncedSearch, availability, condition, page, reloadKey])
+    }, [debouncedSearch, availability, condition, page, sortParam, reloadKey])
 
     const handleDelete = async (copy: Copy) => {
         if (!window.confirm(`Delete this copy of "${copy.bookTitle}"?`)) return
@@ -167,9 +175,15 @@ const CopiesPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Book</TableHead>
-                            <TableHead>Availability</TableHead>
-                            <TableHead>Condition</TableHead>
+                            <SortableTableHead field="book.title" sort={sort} onSort={handleSort}>
+                                Book
+                            </SortableTableHead>
+                            <SortableTableHead field="available" sort={sort} onSort={handleSort}>
+                                Availability
+                            </SortableTableHead>
+                            <SortableTableHead field="conditionRank" sort={sort} onSort={handleSort}>
+                                Condition
+                            </SortableTableHead>
                             <TableHead className="w-28 text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>

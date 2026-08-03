@@ -12,10 +12,12 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import SortableTableHead from "@/components/SortableTableHead"
 import { deleteMember, getMembers } from "@/api/members"
 import type { Member } from "@/schemas/members"
 import type { Page } from "@/schemas/common"
 import { useDebounce } from "@/hooks/useDebounce"
+import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
@@ -27,10 +29,16 @@ const MembersPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const { sort, toggleSort, sortParam } = useSort({ field: "lastname", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
     const handleSearchChange = (value: string) => {
         setSearch(value)
+        setPage(0)
+    }
+
+    const handleSort = (field: string) => {
+        toggleSort(field)
         setPage(0)
     }
 
@@ -44,7 +52,7 @@ const MembersPage = () => {
             try {
                 const result = await getMembers(
                     { search: debouncedSearch || undefined },
-                    { page, size: PAGE_SIZE },
+                    { page, size: PAGE_SIZE, sort: sortParam },
                 )
                 if (!cancelled) setData(result)
             } catch (err) {
@@ -61,7 +69,7 @@ const MembersPage = () => {
         return () => {
             cancelled = true
         }
-    }, [debouncedSearch, page, reloadKey])
+    }, [debouncedSearch, page, sortParam, reloadKey])
 
     const handleDelete = async (member: Member) => {
         const fullName = `${member.firstname} ${member.lastname}`
@@ -107,11 +115,25 @@ const MembersPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                            <TableHead>Address</TableHead>
-                            <TableHead>Member since</TableHead>
+                            <SortableTableHead field="lastname" sort={sort} onSort={handleSort}>
+                                Name
+                            </SortableTableHead>
+                            <SortableTableHead field="email" sort={sort} onSort={handleSort}>
+                                Email
+                            </SortableTableHead>
+                            <SortableTableHead field="phoneNumber" sort={sort} onSort={handleSort}>
+                                Phone
+                            </SortableTableHead>
+                            <SortableTableHead field="address.city" sort={sort} onSort={handleSort}>
+                                Address
+                            </SortableTableHead>
+                            <SortableTableHead
+                                field="membershipDate"
+                                sort={sort}
+                                onSort={handleSort}
+                            >
+                                Member since
+                            </SortableTableHead>
                             <TableHead className="w-28 text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
