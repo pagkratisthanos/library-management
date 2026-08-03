@@ -2,6 +2,7 @@ package com.library.management.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.util.*;
 
@@ -29,6 +30,16 @@ public class Copy extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CopyCondition condition;
+
+    /** Semantic order for sorting: best condition first. Read-only, computed by the database. */
+    @Formula("CASE condition " +
+            "WHEN 'NEW' THEN 1 " +
+            "WHEN 'GOOD' THEN 2 " +
+            "WHEN 'FAIR' THEN 3 " +
+            "WHEN 'POOR' THEN 4 " +
+            "WHEN 'DAMAGED' THEN 5 " +
+            "ELSE 6 END")
+    private Integer conditionRank;
 
     public List<Rental> getAllRentals() {
         return Collections.unmodifiableList(rentals);
