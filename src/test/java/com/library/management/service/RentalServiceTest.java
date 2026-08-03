@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -156,6 +157,24 @@ class RentalServiceTest {
 
         RentalInsertDTO dto = new RentalInsertDTO(
                 Instant.now().minusSeconds(86400),
+                existingMember.getId(),
+                availableCopy.getId()
+        );
+
+        assertThatThrownBy(() -> rentalService.saveRental(dto))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void saveRental_whenDueDateBeyondMaxPeriod_shouldThrowException() {
+        Copy availableCopy = new Copy();
+        availableCopy.setBook(bookRepository.findAll().get(0));
+        availableCopy.setAvailable(true);
+        availableCopy.setCondition(CopyCondition.NEW);
+        copyRepository.save(availableCopy);
+
+        RentalInsertDTO dto = new RentalInsertDTO(
+                Instant.now().plus(Duration.ofDays(120)),
                 existingMember.getId(),
                 availableCopy.getId()
         );

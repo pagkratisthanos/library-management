@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class RentalServiceImpl implements IRentalService {
     private final RentalRepository rentalRepository;
     private final MemberRepository memberRepository;
     private final CopyRepository copyRepository;
+    private static final int MAX_RENTAL_DAYS = 90;
 
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
@@ -48,6 +50,15 @@ public class RentalServiceImpl implements IRentalService {
 
             if (dto.dueDate().isBefore(Instant.now())) {
                 throw new EntityInvalidArgumentException("Rental", "Due date cannot be in the past");
+            }
+
+            if (dto.dueDate().isBefore(Instant.now())) {
+                throw new EntityInvalidArgumentException("Rental", "Due date cannot be in the past");
+            }
+
+            if (dto.dueDate().isAfter(Instant.now().plus(Duration.ofDays(MAX_RENTAL_DAYS)))) {
+                throw new EntityInvalidArgumentException("Rental",
+                        "Due date cannot be more than " + MAX_RENTAL_DAYS + " days from today");
             }
 
             Rental rental = new Rental();
