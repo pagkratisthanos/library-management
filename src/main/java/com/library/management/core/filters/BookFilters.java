@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 @Builder
 public class BookFilters {
+    private String search;
     private String title;
     private String isbn;
     private String language;
