@@ -4,9 +4,9 @@ import type { Page, Pagination } from "@/schemas/common"
 
 export function getRentals(
     filters: RentalFilters,
-    { page, size }: Pagination,
+    { page, size, sort }: Pagination,
 ): Promise<Page<Rental>> {
-    const query = buildQuery({ ...filters, page, size })
+    const query = buildQuery({ ...filters, page, size, sort })
     return api.get<Page<Rental>>(`/rentals${query}`)
 }
 

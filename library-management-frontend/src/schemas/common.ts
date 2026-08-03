@@ -14,4 +14,6 @@ export type Page<T> = {
 export type Pagination = {
     page: number
     size: number
+    /** Spring's format, e.g. "title,asc" */
+    sort?: string
 }

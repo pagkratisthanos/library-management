@@ -12,11 +12,14 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import SortableTableHead from "@/components/SortableTableHead"
+import BookFormDialog from "@/components/BookFormDialog"
 import { deleteBook, getBooks } from "@/api/books"
 import type { Book } from "@/schemas/books"
 import type { Page } from "@/schemas/common"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useRole } from "@/hooks/useRole"
+import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
@@ -31,13 +34,34 @@ const BooksPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [editingBook, setEditingBook] = useState<Book | null>(null)
+
+    const { sort, toggleSort, sortParam } = useSort({ field: "title", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
-    // a new search always starts from the first page
     const handleSearchChange = (value: string) => {
         setSearch(value)
         setPage(0)
     }
+
+    // a different order always starts from the first page
+    const handleSort = (field: string) => {
+        toggleSort(field)
+        setPage(0)
+    }
+
+    const openCreateDialog = () => {
+        setEditingBook(null)
+        setDialogOpen(true)
+    }
+
+    const openEditDialog = (book: Book) => {
+        setEditingBook(book)
+        setDialogOpen(true)
+    }
+
+    const reload = () => setReloadKey((key) => key + 1)
 
     useEffect(() => {
         let cancelled = false
@@ -48,8 +72,8 @@ const BooksPage = () => {
 
             try {
                 const result = await getBooks(
-                    { title: debouncedSearch || undefined },
-                    { page, size: PAGE_SIZE },
+                    { search: debouncedSearch || undefined },
+                    { page, size: PAGE_SIZE, sort: sortParam },
                 )
                 if (!cancelled) setData(result)
             } catch (err) {
@@ -66,7 +90,7 @@ const BooksPage = () => {
         return () => {
             cancelled = true
         }
-    }, [debouncedSearch, page, reloadKey])
+    }, [debouncedSearch, page, sortParam, reloadKey])
 
     const handleDelete = async (book: Book) => {
         if (!window.confirm(`Delete "${book.title}"?`)) return
@@ -74,7 +98,7 @@ const BooksPage = () => {
         try {
             await deleteBook(book.id)
             toast.success(`"${book.title}" was deleted`)
-            setReloadKey((key) => key + 1)
+            reload()
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to delete the book")
         }
@@ -93,7 +117,7 @@ const BooksPage = () => {
                     </p>
                 </div>
                 {canEdit && (
-                    <Button>
+                    <Button onClick={openCreateDialog}>
                         <Plus className="size-4" />
                         New book
                     </Button>
@@ -103,7 +127,7 @@ const BooksPage = () => {
             <div className="relative max-w-sm">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                    placeholder="Search by title..."
+                    placeholder="Search by title, ISBN or author..."
                     className="pl-9"
                     value={search}
                     onChange={(event) => handleSearchChange(event.target.value)}
@@ -114,11 +138,24 @@ const BooksPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Title</TableHead>
-                            <TableHead>ISBN</TableHead>
-                            <TableHead>Language</TableHead>
+                            <SortableTableHead field="title" sort={sort} onSort={handleSort}>
+                                Title
+                            </SortableTableHead>
+                            <SortableTableHead field="isbn" sort={sort} onSort={handleSort}>
+                                ISBN
+                            </SortableTableHead>
+                            <SortableTableHead field="language" sort={sort} onSort={handleSort}>
+                                Language
+                            </SortableTableHead>
                             <TableHead>Authors</TableHead>
-                            <TableHead className="text-right">Daily cost</TableHead>
+                            <SortableTableHead
+                                field="dailyCost"
+                                sort={sort}
+                                onSort={handleSort}
+                                className="text-right"
+                            >
+                                Daily cost
+                            </SortableTableHead>
                             {canEdit && <TableHead className="w-28 text-right">Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
@@ -167,7 +204,12 @@ const BooksPage = () => {
                                     </TableCell>
                                     {canEdit && (
                                         <TableCell className="text-right space-x-2">
-                                            <Button variant="outline" size="icon" aria-label="Edit">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Edit"
+                                                onClick={() => openEditDialog(book)}
+                                            >
                                                 <Pencil className="size-4" />
                                             </Button>
                                             <Button
@@ -194,6 +236,13 @@ const BooksPage = () => {
                     onPageChange={setPage}
                 />
             )}
+
+            <BookFormDialog
+                open={dialogOpen}
+                book={editingBook}
+                onOpenChange={setDialogOpen}
+                onSaved={reload}
+            />
         </div>
     )
 }

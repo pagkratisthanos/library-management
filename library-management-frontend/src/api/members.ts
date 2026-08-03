@@ -4,9 +4,9 @@ import type { Page, Pagination } from "@/schemas/common"
 
 export function getMembers(
     filters: MemberFilters,
-    { page, size }: Pagination,
+    { page, size, sort }: Pagination,
 ): Promise<Page<Member>> {
-    const query = buildQuery({ ...filters, page, size })
+    const query = buildQuery({ ...filters, page, size, sort })
     return api.get<Page<Member>>(`/members${query}`)
 }
 

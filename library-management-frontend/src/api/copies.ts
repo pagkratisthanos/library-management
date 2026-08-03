@@ -4,9 +4,9 @@ import type { Page, Pagination } from "@/schemas/common"
 
 export function getCopies(
     filters: CopyFilters,
-    { page, size }: Pagination,
+    { page, size, sort }: Pagination,
 ): Promise<Page<Copy>> {
-    const query = buildQuery({ ...filters, page, size })
+    const query = buildQuery({ ...filters, page, size, sort })
     return api.get<Page<Copy>>(`/copies${query}`)
 }
 
