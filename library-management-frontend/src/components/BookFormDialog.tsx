@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Search } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -41,6 +42,7 @@ type BookFormDialogProps = {
 const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogProps) => {
     const isEditing = book !== null
     const [authors, setAuthors] = useState<Author[]>([])
+    const [authorSearch, setAuthorSearch] = useState("")
 
     const {
         register,
@@ -60,7 +62,9 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
     useEffect(() => {
         if (!open || isEditing) return
 
-        getAuthors({}, { page: 0, size: 200 })
+        setAuthorSearch("")
+
+        getAuthors({}, { page: 0, size: 200, sort: "lastname,asc" })
             .then((result) => setAuthors(result.content))
             .catch(() => toast.error("Failed to load authors"))
     }, [open, isEditing])
@@ -92,6 +96,15 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                 : [...current, uuid],
         )
     }
+
+    // filtered locally — the list is small enough not to need another request
+    const visibleAuthors = authors.filter((author) =>
+        `${author.firstname} ${author.lastname}`
+            .toLowerCase()
+            .includes(authorSearch.toLowerCase()),
+    )
+
+    const selectedCount = selectedAuthorUuids?.length ?? 0
 
     const onSubmit = async (values: BookFields) => {
         try {
@@ -205,7 +218,14 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                     </Field>
 
                     <Field className="min-w-0">
-                        <FieldLabel>Authors</FieldLabel>
+                        <FieldLabel>
+                            Authors
+                            {!isEditing && selectedCount > 0 && (
+                                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                    {selectedCount} selected
+                                </span>
+                            )}
+                        </FieldLabel>
 
                         {isEditing ? (
                             <p className="text-sm text-muted-foreground">
@@ -216,25 +236,39 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                                     : "No authors linked."}
                             </p>
                         ) : (
-                            <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-3">
-                                {authors.length === 0 && (
-                                    <p className="text-sm text-muted-foreground">
-                                        No authors available yet.
-                                    </p>
-                                )}
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Filter authors..."
+                                        className="w-full min-w-0 pl-9"
+                                        value={authorSearch}
+                                        onChange={(event) => setAuthorSearch(event.target.value)}
+                                    />
+                                </div>
 
-                                {authors.map((author) => (
-                                    <label
-                                        key={author.id}
-                                        className="flex items-center gap-2 text-sm"
-                                    >
-                                        <Checkbox
-                                            checked={selectedAuthorUuids?.includes(author.id)}
-                                            onCheckedChange={() => toggleAuthor(author.id)}
-                                        />
-                                        {author.firstname} {author.lastname}
-                                    </label>
-                                ))}
+                                <div className="max-h-40 space-y-2 overflow-y-auto rounded-md border p-3">
+                                    {visibleAuthors.length === 0 && (
+                                        <p className="text-sm text-muted-foreground">
+                                            {authors.length === 0
+                                                ? "No authors available yet."
+                                                : "No authors match your filter."}
+                                        </p>
+                                    )}
+
+                                    {visibleAuthors.map((author) => (
+                                        <label
+                                            key={author.id}
+                                            className="flex items-center gap-2 text-sm"
+                                        >
+                                            <Checkbox
+                                                checked={selectedAuthorUuids?.includes(author.id)}
+                                                onCheckedChange={() => toggleAuthor(author.id)}
+                                            />
+                                            {author.firstname} {author.lastname}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </Field>
