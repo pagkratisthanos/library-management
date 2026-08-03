@@ -12,12 +12,14 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
+import SortableTableHead from "@/components/SortableTableHead"
 import AuthorFormDialog from "@/components/AuthorFormDialog"
 import { deleteAuthor, getAuthors } from "@/api/authors"
 import type { Author } from "@/schemas/authors"
 import type { Page } from "@/schemas/common"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useRole } from "@/hooks/useRole"
+import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
@@ -35,10 +37,16 @@ const AuthorsPage = () => {
     const [dialogOpen, setDialogOpen] = useState(false)
     const [editingAuthor, setEditingAuthor] = useState<Author | null>(null)
 
+    const { sort, toggleSort, sortParam } = useSort({ field: "lastname", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
     const handleSearchChange = (value: string) => {
         setSearch(value)
+        setPage(0)
+    }
+
+    const handleSort = (field: string) => {
+        toggleSort(field)
         setPage(0)
     }
 
@@ -64,7 +72,7 @@ const AuthorsPage = () => {
             try {
                 const result = await getAuthors(
                     { search: debouncedSearch || undefined },
-                    { page, size: PAGE_SIZE },
+                    { page, size: PAGE_SIZE, sort: sortParam },
                 )
                 if (!cancelled) setData(result)
             } catch (err) {
@@ -81,7 +89,7 @@ const AuthorsPage = () => {
         return () => {
             cancelled = true
         }
-    }, [debouncedSearch, page, reloadKey])
+    }, [debouncedSearch, page, sortParam, reloadKey])
 
     const handleDelete = async (author: Author) => {
         const fullName = `${author.firstname} ${author.lastname}`
@@ -130,9 +138,15 @@ const AuthorsPage = () => {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Birth date</TableHead>
-                            <TableHead>Birth place</TableHead>
+                            <SortableTableHead field="lastname" sort={sort} onSort={handleSort}>
+                                Name
+                            </SortableTableHead>
+                            <SortableTableHead field="birthDate" sort={sort} onSort={handleSort}>
+                                Birth date
+                            </SortableTableHead>
+                            <SortableTableHead field="birthPlace" sort={sort} onSort={handleSort}>
+                                Birth place
+                            </SortableTableHead>
                             <TableHead className="text-right">Books</TableHead>
                             {canEdit && <TableHead className="w-28 text-right">Actions</TableHead>}
                         </TableRow>
