@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
 import SortableTableHead from "@/components/SortableTableHead"
+import MemberFormDialog from "@/components/MemberFormDialog"
 import { deleteMember, getMembers } from "@/api/members"
 import type { Member } from "@/schemas/members"
 import type { Page } from "@/schemas/common"
@@ -29,6 +30,9 @@ const MembersPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [editingMember, setEditingMember] = useState<Member | null>(null)
+
     const { sort, toggleSort, sortParam } = useSort({ field: "lastname", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
@@ -41,6 +45,18 @@ const MembersPage = () => {
         toggleSort(field)
         setPage(0)
     }
+
+    const openCreateDialog = () => {
+        setEditingMember(null)
+        setDialogOpen(true)
+    }
+
+    const openEditDialog = (member: Member) => {
+        setEditingMember(member)
+        setDialogOpen(true)
+    }
+
+    const reload = () => setReloadKey((key) => key + 1)
 
     useEffect(() => {
         let cancelled = false
@@ -78,7 +94,7 @@ const MembersPage = () => {
         try {
             await deleteMember(member.id)
             toast.success(`"${fullName}" was deleted`)
-            setReloadKey((key) => key + 1)
+            reload()
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to delete the member")
         }
@@ -95,7 +111,7 @@ const MembersPage = () => {
                         People registered to borrow from the library.
                     </p>
                 </div>
-                <Button>
+                <Button onClick={openCreateDialog}>
                     <Plus className="size-4" />
                     New member
                 </Button>
@@ -127,11 +143,7 @@ const MembersPage = () => {
                             <SortableTableHead field="address.city" sort={sort} onSort={handleSort}>
                                 Address
                             </SortableTableHead>
-                            <SortableTableHead
-                                field="membershipDate"
-                                sort={sort}
-                                onSort={handleSort}
-                            >
+                            <SortableTableHead field="membershipDate" sort={sort} onSort={handleSort}>
                                 Member since
                             </SortableTableHead>
                             <TableHead className="w-28 text-right">Actions</TableHead>
@@ -181,7 +193,12 @@ const MembersPage = () => {
                                         </TableCell>
                                         <TableCell>{member.membershipDate}</TableCell>
                                         <TableCell className="text-right space-x-2">
-                                            <Button variant="outline" size="icon" aria-label="Edit">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Edit"
+                                                onClick={() => openEditDialog(member)}
+                                            >
                                                 <Pencil className="size-4" />
                                             </Button>
                                             <Button
@@ -208,6 +225,13 @@ const MembersPage = () => {
                     onPageChange={setPage}
                 />
             )}
+
+            <MemberFormDialog
+                open={dialogOpen}
+                member={editingMember}
+                onOpenChange={setDialogOpen}
+                onSaved={reload}
+            />
         </div>
     )
 }

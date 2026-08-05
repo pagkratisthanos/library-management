@@ -1,5 +1,5 @@
 import { api, buildQuery } from "@/api/client"
-import type { Member, MemberFilters } from "@/schemas/members"
+import type { Member, MemberFilters, MemberPayload } from "@/schemas/members"
 import type { Page, Pagination } from "@/schemas/common"
 
 export function getMembers(
@@ -12,6 +12,14 @@ export function getMembers(
 
 export function getMember(uuid: string): Promise<Member> {
     return api.get<Member>(`/members/${uuid}`)
+}
+
+export function createMember(payload: MemberPayload): Promise<Member> {
+    return api.post<Member>("/members", payload)
+}
+
+export function updateMember(uuid: string, payload: MemberPayload): Promise<Member> {
+    return api.put<Member>(`/members/${uuid}`, payload)
 }
 
 export function deleteMember(uuid: string): Promise<void> {
