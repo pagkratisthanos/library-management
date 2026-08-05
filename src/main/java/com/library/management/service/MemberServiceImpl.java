@@ -95,6 +95,10 @@ public class MemberServiceImpl implements IMemberService {
                 throw new EntityAlreadyExistsException("Member", "Member with phone number: " + dto.phoneNumber() + " already exists");
             }
 
+            if (dto.birthDate() != null && dto.birthDate().isAfter(LocalDate.now())) {
+                throw new EntityInvalidArgumentException("Member", "Birth date cannot be in the future");
+            }
+
             if (dto.membershipDate() != null && dto.membershipDate().isAfter(LocalDate.now())) {
                 throw new EntityInvalidArgumentException("Member", "Membership date cannot be in the future");
             }
@@ -104,6 +108,14 @@ public class MemberServiceImpl implements IMemberService {
             member.setPhoneNumber(dto.phoneNumber());
             member.setLastname(dto.lastname());
             member.setFirstname(dto.firstname());
+            member.setBirthDate(dto.birthDate());
+
+            Address address = member.getAddress();
+            address.setStreet(dto.addressInsertDTO().street());
+            address.setStreetNumber(dto.addressInsertDTO().streetNumber());
+            address.setCity(dto.addressInsertDTO().city());
+            address.setCountry(dto.addressInsertDTO().country());
+            address.setPostalCode(dto.addressInsertDTO().postalCode());
 
             Member updatedMember = memberRepository.save(member);
             log.info("Member updated with uuid={}.", updatedMember.getId());

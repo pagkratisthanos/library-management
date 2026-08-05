@@ -436,4 +436,49 @@ class MemberServiceTest {
         assertThat(members.getContent()).hasSize(1);
         assertThat(members.getContent().get(0).getLastname()).isEqualTo("Pagkratis");
     }
+
+    @Test
+    void updateMember_whenAddressChanged_shouldUpdateTheExistingAddress()
+            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
+        UUID originalAddressId = existingMember.getAddress().getId();
+
+        MemberUpdateDTO dto = new MemberUpdateDTO(
+                new AddressInsertDTO("Alfeiou", "4", "Thessaloniki", "Greece", "54622"),
+                "Thanos", "Pagkratis", "6912345678",
+                "thanos@example.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1)
+        );
+
+        Member updated = memberService.updateMember(existingMember.getId(), dto);
+
+        assertThat(updated.getAddress().getStreet()).isEqualTo("Alfeiou");
+        assertThat(updated.getAddress().getStreetNumber()).isEqualTo("4");
+        assertThat(updated.getAddress().getCity()).isEqualTo("Thessaloniki");
+        assertThat(updated.getAddress().getPostalCode()).isEqualTo("54622");
+        // the address row is updated in place, not replaced
+        assertThat(updated.getAddress().getId()).isEqualTo(originalAddressId);
+    }
+
+    @Test
+    void updateMember_whenBirthDateChanged_shouldUpdateBirthDate()
+            throws EntityNotFoundException, EntityAlreadyExistsException, EntityInvalidArgumentException {
+        MemberUpdateDTO dto = new MemberUpdateDTO(
+                createAddressDTO(), "Thanos", "Pagkratis", "6912345678",
+                "thanos@example.com", LocalDate.of(1980, 11, 11), LocalDate.of(2024, 1, 1)
+        );
+
+        Member updated = memberService.updateMember(existingMember.getId(), dto);
+
+        assertThat(updated.getBirthDate()).isEqualTo(LocalDate.of(1980, 11, 11));
+    }
+
+    @Test
+    void updateMember_whenBirthDateInFuture_shouldThrowException() {
+        MemberUpdateDTO dto = new MemberUpdateDTO(
+                createAddressDTO(), "Thanos", "Pagkratis", "6912345678",
+                "thanos@example.com", LocalDate.now().plusDays(1), LocalDate.of(2024, 1, 1)
+        );
+
+        assertThatThrownBy(() -> memberService.updateMember(existingMember.getId(), dto))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
 }
