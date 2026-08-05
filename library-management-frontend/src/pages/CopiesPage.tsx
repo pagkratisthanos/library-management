@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
 import SortableTableHead from "@/components/SortableTableHead"
+import CopyFormDialog from "@/components/CopyFormDialog"
 import { deleteCopy, getCopies } from "@/api/copies"
 import { COPY_CONDITIONS, type Copy, type CopyCondition } from "@/schemas/copies"
 import type { Page } from "@/schemas/common"
@@ -29,7 +30,7 @@ import { useSort } from "@/hooks/useSort"
 
 const PAGE_SIZE = 10
 
-type Availability = "ALL" | "AVAILABLE" | "RENTED"
+type Availability = "ALL" | "AVAILABLE" | "UNAVAILABLE"
 type ConditionFilter = "ALL" | CopyCondition
 
 const CopiesPage = () => {
@@ -42,6 +43,9 @@ const CopiesPage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
+
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [editingCopy, setEditingCopy] = useState<Copy | null>(null)
 
     const { sort, toggleSort, sortParam } = useSort({ field: "book.title", direction: "asc" })
     const debouncedSearch = useDebounce(search)
@@ -65,6 +69,18 @@ const CopiesPage = () => {
         toggleSort(field)
         setPage(0)
     }
+
+    const openCreateDialog = () => {
+        setEditingCopy(null)
+        setDialogOpen(true)
+    }
+
+    const openEditDialog = (copy: Copy) => {
+        setEditingCopy(copy)
+        setDialogOpen(true)
+    }
+
+    const reload = () => setReloadKey((key) => key + 1)
 
     useEffect(() => {
         let cancelled = false
@@ -106,7 +122,7 @@ const CopiesPage = () => {
         try {
             await deleteCopy(copy.id)
             toast.success("Copy was deleted")
-            setReloadKey((key) => key + 1)
+            reload()
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to delete the copy")
         }
@@ -123,7 +139,7 @@ const CopiesPage = () => {
                         Physical copies available for rental.
                     </p>
                 </div>
-                <Button>
+                <Button onClick={openCreateDialog}>
                     <Plus className="size-4" />
                     New copy
                 </Button>
@@ -141,7 +157,7 @@ const CopiesPage = () => {
                 </div>
 
                 <div className="flex gap-1">
-                    {(["ALL", "AVAILABLE", "RENTED"] as Availability[]).map((option) => (
+                    {(["ALL", "AVAILABLE", "UNAVAILABLE"] as Availability[]).map((option) => (
                         <Button
                             key={option}
                             variant={availability === option ? "default" : "outline"}
@@ -220,14 +236,19 @@ const CopiesPage = () => {
                                     <TableCell className="font-medium">{copy.bookTitle}</TableCell>
                                     <TableCell>
                                         <Badge variant={copy.available ? "default" : "secondary"}>
-                                            {copy.available ? "Available" : "Rented"}
+                                            {copy.available ? "Available" : "Unavailable"}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant="outline">{copy.condition}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right space-x-2">
-                                        <Button variant="outline" size="icon" aria-label="Edit">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            aria-label="Edit"
+                                            onClick={() => openEditDialog(copy)}
+                                        >
                                             <Pencil className="size-4" />
                                         </Button>
                                         <Button
@@ -253,6 +274,13 @@ const CopiesPage = () => {
                     onPageChange={setPage}
                 />
             )}
+
+            <CopyFormDialog
+                open={dialogOpen}
+                copy={editingCopy}
+                onOpenChange={setDialogOpen}
+                onSaved={reload}
+            />
         </div>
     )
 }

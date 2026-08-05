@@ -1,5 +1,10 @@
 import { api, buildQuery } from "@/api/client"
-import type { Copy, CopyFilters } from "@/schemas/copies"
+import type {
+    Copy,
+    CopyCreatePayload,
+    CopyFilters,
+    CopyUpdatePayload,
+} from "@/schemas/copies"
 import type { Page, Pagination } from "@/schemas/common"
 
 export function getCopies(
@@ -12,6 +17,14 @@ export function getCopies(
 
 export function getCopy(uuid: string): Promise<Copy> {
     return api.get<Copy>(`/copies/${uuid}`)
+}
+
+export function createCopy(payload: CopyCreatePayload): Promise<Copy> {
+    return api.post<Copy>("/copies", payload)
+}
+
+export function updateCopy(uuid: string, payload: CopyUpdatePayload): Promise<Copy> {
+    return api.put<Copy>(`/copies/${uuid}`, payload)
 }
 
 export function deleteCopy(uuid: string): Promise<void> {
