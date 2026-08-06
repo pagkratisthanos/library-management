@@ -4,7 +4,10 @@ import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.core.filters.UserFilters;
+import com.library.management.dto.PasswordChangeDTO;
 import com.library.management.dto.UserInsertDTO;
+import com.library.management.dto.UserPasswordUpdateDTO;
+import com.library.management.dto.UserRoleUpdateDTO;
 import com.library.management.model.Role;
 import com.library.management.model.User;
 import com.library.management.repository.RoleRepository;
@@ -16,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
@@ -37,7 +41,11 @@ class UserServiceTest {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private Role adminRole;
+    private Role librarianRole;
     private User existingUser;
 
     @BeforeEach
@@ -46,11 +54,21 @@ class UserServiceTest {
         adminRole.setName("ADMIN");
         roleRepository.save(adminRole);
 
+        librarianRole = new Role();
+        librarianRole.setName("LIBRARIAN");
+        roleRepository.save(librarianRole);
+
         existingUser = new User();
         existingUser.setUsername("admin");
         existingUser.setPassword("$2a$10$hashedpassword");
         adminRole.addUser(existingUser);
         userRepository.save(existingUser);
+    }
+
+    /** Goes through the service so the password is encoded with the real encoder. */
+    private User createLibrarian() throws EntityAlreadyExistsException, EntityInvalidArgumentException {
+        return userService.saveUser(
+                new UserInsertDTO("librarian1", "Librarian1!", librarianRole.getId()));
     }
 
     @Test
@@ -178,10 +196,6 @@ class UserServiceTest {
 
     @Test
     void getAllUsers_withRoleFilter_shouldReturnOnlyUsersOfThatRole() {
-        Role librarianRole = new Role();
-        librarianRole.setName("LIBRARIAN");
-        roleRepository.save(librarianRole);
-
         User librarian = new User();
         librarian.setUsername("librarian1");
         librarian.setPassword("$2a$10$hashedpassword");
@@ -203,5 +217,105 @@ class UserServiceTest {
         Page<User> users = userService.getAllUsers(new UserFilters(), PageRequest.of(0, 10));
 
         assertThat(users.getContent()).isEmpty();
+    }
+
+    @Test
+    void updateUserRole_whenPromotingALibrarian_shouldChangeTheRole()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
+        User librarian = createLibrarian();
+
+        User updated = userService.updateUserRole(
+                librarian.getId(), new UserRoleUpdateDTO(adminRole.getId()));
+
+        assertThat(updated.getRole().getName()).isEqualTo("ADMIN");
+    }
+
+    @Test
+    void updateUserRole_whenDemotingTheLastAdmin_shouldThrowException() {
+        assertThatThrownBy(() -> userService.updateUserRole(
+                existingUser.getId(), new UserRoleUpdateDTO(librarianRole.getId())))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void updateUserRole_whenAnotherAdminExists_shouldAllowTheDemotion()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
+        userService.saveUser(new UserInsertDTO("admin2", "Admin2Pass!", adminRole.getId()));
+
+        User updated = userService.updateUserRole(
+                existingUser.getId(), new UserRoleUpdateDTO(librarianRole.getId()));
+
+        assertThat(updated.getRole().getName()).isEqualTo("LIBRARIAN");
+    }
+
+    @Test
+    void updateUserRole_whenRoleDoesNotExist_shouldThrowException() {
+        assertThatThrownBy(() -> userService.updateUserRole(
+                existingUser.getId(), new UserRoleUpdateDTO(999L)))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void updateUserRole_whenUserNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> userService.updateUserRole(
+                UUID.randomUUID(), new UserRoleUpdateDTO(adminRole.getId())))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void updateUserPassword_shouldStoreTheNewPasswordEncoded()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
+        User librarian = createLibrarian();
+
+        User updated = userService.updateUserPassword(
+                librarian.getId(), new UserPasswordUpdateDTO("ResetPass1!"));
+
+        assertThat(updated.getPassword()).isNotEqualTo("ResetPass1!");
+        assertThat(passwordEncoder.matches("ResetPass1!", updated.getPassword())).isTrue();
+    }
+
+    @Test
+    void updateUserPassword_whenUserNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> userService.updateUserPassword(
+                UUID.randomUUID(), new UserPasswordUpdateDTO("ResetPass1!")))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    void changeOwnPassword_whenValid_shouldChangeThePassword()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
+        createLibrarian();
+
+        User updated = userService.changeOwnPassword(
+                "librarian1", new PasswordChangeDTO("Librarian1!", "MyOwnPass1!"));
+
+        assertThat(passwordEncoder.matches("MyOwnPass1!", updated.getPassword())).isTrue();
+    }
+
+    @Test
+    void changeOwnPassword_whenCurrentPasswordIsWrong_shouldThrowException()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException {
+        createLibrarian();
+
+        assertThatThrownBy(() -> userService.changeOwnPassword(
+                "librarian1", new PasswordChangeDTO("WrongPass1!", "MyOwnPass1!")))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void changeOwnPassword_whenNewPasswordEqualsTheCurrentOne_shouldThrowException()
+            throws EntityAlreadyExistsException, EntityInvalidArgumentException {
+        createLibrarian();
+
+        assertThatThrownBy(() -> userService.changeOwnPassword(
+                "librarian1", new PasswordChangeDTO("Librarian1!", "Librarian1!")))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void changeOwnPassword_whenUserNotFound_shouldThrowException() {
+        assertThatThrownBy(() -> userService.changeOwnPassword(
+                "nobody", new PasswordChangeDTO("Librarian1!", "MyOwnPass1!")))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 }

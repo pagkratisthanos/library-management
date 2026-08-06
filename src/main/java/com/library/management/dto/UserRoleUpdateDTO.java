@@ -1,4 +1,9 @@
 package com.library.management.dto;
 
-public class UserRoleUpdateDTO {
-}
+import jakarta.validation.constraints.NotNull;
+
+public record UserRoleUpdateDTO(
+
+        @NotNull
+        Long roleId
+) {}

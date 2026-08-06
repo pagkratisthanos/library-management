@@ -4,7 +4,10 @@ import com.library.management.core.exceptions.EntityAlreadyExistsException;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.core.filters.UserFilters;
+import com.library.management.dto.PasswordChangeDTO;
 import com.library.management.dto.UserInsertDTO;
+import com.library.management.dto.UserPasswordUpdateDTO;
+import com.library.management.dto.UserRoleUpdateDTO;
 import com.library.management.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,4 +28,13 @@ public interface IUserService {
     void deleteUserByUuid(UUID uuid) throws EntityNotFoundException;
 
     Page<User> getAllUsers(UserFilters filters, Pageable pageable);
+
+    User changeOwnPassword(String username, PasswordChangeDTO dto)
+            throws EntityNotFoundException, EntityInvalidArgumentException;
+
+    User updateUserRole(UUID uuid, UserRoleUpdateDTO dto)
+            throws EntityNotFoundException, EntityInvalidArgumentException;
+
+    User updateUserPassword(UUID uuid, UserPasswordUpdateDTO dto)
+            throws EntityNotFoundException;
 }
