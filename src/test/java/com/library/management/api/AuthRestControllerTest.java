@@ -46,7 +46,7 @@ class AuthRestControllerTest {
     }
 
     @Test
-    void authenticate_whenInvalidCredentials_shouldReturn500() throws Exception {
+    void authenticate_whenInvalidCredentials_shouldReturn401() throws Exception {
         AuthenticationRequestDTO dto = new AuthenticationRequestDTO("admin", "wrongpassword");
 
         when(authenticationService.authenticate(any()))
@@ -55,6 +55,8 @@ class AuthRestControllerTest {
         mockMvc.perform(post("/api/auth/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("BAD_CREDENTIALS"))
+                .andExpect(jsonPath("$.description").value("Invalid username or password"));
     }
 }
