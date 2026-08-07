@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
 import SortableTableHead from "@/components/SortableTableHead"
+import RentalFormDialog from "@/components/RentalFormDialog"
 import { getRentals, returnRental } from "@/api/rentals"
 import type { Rental } from "@/schemas/rentals"
 import type { Page } from "@/schemas/common"
@@ -40,6 +41,8 @@ const RentalsPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const [dialogOpen, setDialogOpen] = useState(false)
+
     const { sort, toggleSort, sortParam } = useSort({ field: "dueDate", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
@@ -57,6 +60,8 @@ const RentalsPage = () => {
         toggleSort(field)
         setPage(0)
     }
+
+    const reload = () => setReloadKey((key) => key + 1)
 
     useEffect(() => {
         let cancelled = false
@@ -97,7 +102,7 @@ const RentalsPage = () => {
         try {
             await returnRental(rental.id)
             toast.success(`"${rental.bookTitle}" was returned`)
-            setReloadKey((key) => key + 1)
+            reload()
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to return the rental")
         }
@@ -115,7 +120,7 @@ const RentalsPage = () => {
                         Books currently borrowed and past loans.
                     </p>
                 </div>
-                <Button>
+                <Button onClick={() => setDialogOpen(true)}>
                     <Plus className="size-4" />
                     New rental
                 </Button>
@@ -244,6 +249,12 @@ const RentalsPage = () => {
                     onPageChange={setPage}
                 />
             )}
+
+            <RentalFormDialog
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+                onSaved={reload}
+            />
         </div>
     )
 }
