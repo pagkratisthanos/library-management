@@ -22,6 +22,22 @@ export function deleteUser(uuid: string): Promise<void> {
     return api.delete<void>(`/users/${uuid}`)
 }
 
+export function updateUserRole(uuid: string, roleId: number): Promise<User> {
+    return api.put<User>(`/users/${uuid}/role`, { roleId })
+}
+
+export function resetUserPassword(uuid: string, password: string): Promise<User> {
+    return api.put<User>(`/users/${uuid}/password`, { password })
+}
+
+/** Changes the password of the signed-in user; the backend reads the identity from the token. */
+export function changeOwnPassword(
+    currentPassword: string,
+    newPassword: string,
+): Promise<User> {
+    return api.put<User>("/users/me/password", { currentPassword, newPassword })
+}
+
 export function getRoles(): Promise<RoleOption[]> {
     return api.get<RoleOption[]>("/roles")
 }

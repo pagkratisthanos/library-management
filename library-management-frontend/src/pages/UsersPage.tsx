@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Plus, Search, Trash2 } from "lucide-react"
+import { KeyRound, Plus, Search, Trash2, UserCog } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/table"
 import TablePagination from "@/components/TablePagination"
 import SortableTableHead from "@/components/SortableTableHead"
+import UserFormDialog from "@/components/UserFormDialog"
+import UserRoleDialog from "@/components/UserRoleDialog"
+import ResetPasswordDialog from "@/components/ResetPasswordDialog"
 import { deleteUser, getRoles, getUsers } from "@/api/users"
 import type { RoleOption, User } from "@/schemas/users"
 import type { Page } from "@/schemas/common"
@@ -43,6 +46,11 @@ const UsersPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
+    const [createOpen, setCreateOpen] = useState(false)
+    const [roleDialogOpen, setRoleDialogOpen] = useState(false)
+    const [resetDialogOpen, setResetDialogOpen] = useState(false)
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
+
     const { sort, toggleSort, sortParam } = useSort({ field: "username", direction: "asc" })
     const debouncedSearch = useDebounce(search)
 
@@ -59,6 +67,18 @@ const UsersPage = () => {
     const handleSort = (field: string) => {
         toggleSort(field)
         setPage(0)
+    }
+
+    const reload = () => setReloadKey((key) => key + 1)
+
+    const openRoleDialog = (user: User) => {
+        setSelectedUser(user)
+        setRoleDialogOpen(true)
+    }
+
+    const openResetDialog = (user: User) => {
+        setSelectedUser(user)
+        setResetDialogOpen(true)
     }
 
     // the list of roles never changes while the page is open
@@ -106,7 +126,7 @@ const UsersPage = () => {
         try {
             await deleteUser(user.id)
             toast.success(`"${user.username}" was deleted`)
-            setReloadKey((key) => key + 1)
+            reload()
         } catch (err) {
             toast.error(err instanceof Error ? err.message : "Failed to delete the user")
         }
@@ -123,7 +143,7 @@ const UsersPage = () => {
                         Accounts that can sign in to the system.
                     </p>
                 </div>
-                <Button>
+                <Button onClick={() => setCreateOpen(true)}>
                     <Plus className="size-4" />
                     New user
                 </Button>
@@ -165,7 +185,7 @@ const UsersPage = () => {
                             <SortableTableHead field="role.name" sort={sort} onSort={handleSort}>
                                 Role
                             </SortableTableHead>
-                            <TableHead className="w-28 text-right">Actions</TableHead>
+                            <TableHead className="w-40 text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -214,11 +234,32 @@ const UsersPage = () => {
                                                 {user.role}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right space-x-2">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Change role"
+                                                title="Change role"
+                                                disabled={isCurrentUser}
+                                                onClick={() => openRoleDialog(user)}
+                                            >
+                                                <UserCog className="size-4" />
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                aria-label="Reset password"
+                                                title="Reset password"
+                                                disabled={isCurrentUser}
+                                                onClick={() => openResetDialog(user)}
+                                            >
+                                                <KeyRound className="size-4" />
+                                            </Button>
                                             <Button
                                                 variant="outline"
                                                 size="icon"
                                                 aria-label="Delete"
+                                                title="Delete"
                                                 disabled={isCurrentUser}
                                                 onClick={() => handleDelete(user)}
                                             >
@@ -240,6 +281,27 @@ const UsersPage = () => {
                     onPageChange={setPage}
                 />
             )}
+
+            <UserFormDialog
+                open={createOpen}
+                roles={roles}
+                onOpenChange={setCreateOpen}
+                onSaved={reload}
+            />
+
+            <UserRoleDialog
+                open={roleDialogOpen}
+                user={selectedUser}
+                roles={roles}
+                onOpenChange={setRoleDialogOpen}
+                onSaved={reload}
+            />
+
+            <ResetPasswordDialog
+                open={resetDialogOpen}
+                user={selectedUser}
+                onOpenChange={setResetDialogOpen}
+            />
         </div>
     )
 }
