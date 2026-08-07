@@ -1,9 +1,11 @@
+import { useState } from "react"
 import { Link, NavLink, Outlet, useNavigate } from "react-router"
 import type { LucideIcon } from "lucide-react"
 import {
     BookCopy,
     BookOpen,
     ClipboardList,
+    KeyRound,
     LayoutDashboard,
     LogOut,
     PenLine,
@@ -11,6 +13,7 @@ import {
     Users,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import ChangePasswordDialog from "@/components/ChangePasswordDialog"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/useAuth"
 
@@ -37,6 +40,8 @@ const adminOnlyItems: NavItem[] = [
 const AppLayout = () => {
     const navigate = useNavigate()
     const { role, username, logoutUser } = useAuth()
+
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false)
 
     const items = role === "ADMIN" ? [...sharedItems, ...adminOnlyItems] : sharedItems
 
@@ -81,6 +86,14 @@ const AppLayout = () => {
                     <Button
                         variant="outline"
                         className="w-full justify-start gap-3"
+                        onClick={() => setPasswordDialogOpen(true)}
+                    >
+                        <KeyRound className="size-4" />
+                        Change password
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="w-full justify-start gap-3"
                         onClick={handleSignOut}
                     >
                         <LogOut className="size-4" />
@@ -92,6 +105,12 @@ const AppLayout = () => {
             <main className="flex-1 p-8">
                 <Outlet />
             </main>
+
+            <ChangePasswordDialog
+                open={passwordDialogOpen}
+                onOpenChange={setPasswordDialogOpen}
+                onChanged={handleSignOut}
+            />
         </div>
     )
 }
