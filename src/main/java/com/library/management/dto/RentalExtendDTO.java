@@ -4,13 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Builder
-public record RentalUpdateDTO(
+public record RentalExtendDTO(
 
         @NotNull
-        Instant dueDate,
-
-        Instant returnDate
+        Instant dueDate
 ) {}

@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.core.filters.RentalFilters;
+import com.library.management.dto.RentalExtendDTO;
 import com.library.management.dto.RentalInsertDTO;
 import com.library.management.model.*;
 import com.library.management.repository.*;
@@ -277,5 +278,76 @@ class RentalServiceTest {
         assertThat(rentals).isNotNull();
         assertThat(rentals.getContent()).hasSize(1);
         assertThat(rentals.getContent().get(0).getReturnDate()).isNull();
+    }
+
+    @Test
+    void extendRental_whenValid_shouldMoveTheDueDateForward()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Instant newDueDate = Instant.now().plus(Duration.ofDays(14));
+
+        Rental extended = rentalService.extendRental(
+                existingRental.getId(), new RentalExtendDTO(newDueDate));
+
+        assertThat(extended.getDueDate()).isEqualTo(newDueDate);
+        assertThat(extended.isActive()).isTrue();
+    }
+
+    @Test
+    void extendRental_whenNewDueDateIsEarlier_shouldThrowException() {
+        Instant earlier = Instant.now().plus(Duration.ofDays(3));
+
+        assertThatThrownBy(() -> rentalService.extendRental(
+                existingRental.getId(), new RentalExtendDTO(earlier)))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void extendRental_whenNewDueDateEqualsTheCurrentOne_shouldThrowException() {
+        Instant sameDate = existingRental.getDueDate();
+
+        assertThatThrownBy(() -> rentalService.extendRental(
+                existingRental.getId(), new RentalExtendDTO(sameDate)))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void extendRental_whenTotalPeriodExceedsTheLimit_shouldThrowException() {
+        Instant tooFar = existingRental.getRentalDate().plus(Duration.ofDays(91));
+
+        assertThatThrownBy(() -> rentalService.extendRental(
+                existingRental.getId(), new RentalExtendDTO(tooFar)))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void extendRental_whenAtTheExactLimit_shouldSucceed()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Instant lastAllowed = existingRental.getRentalDate().plus(Duration.ofDays(90));
+
+        Rental extended = rentalService.extendRental(
+                existingRental.getId(), new RentalExtendDTO(lastAllowed));
+
+        assertThat(extended.getDueDate()).isEqualTo(lastAllowed);
+    }
+
+    @Test
+    void extendRental_whenAlreadyReturned_shouldThrowException()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        rentalService.returnRental(existingRental.getId());
+
+        Instant newDueDate = Instant.now().plus(Duration.ofDays(14));
+
+        assertThatThrownBy(() -> rentalService.extendRental(
+                existingRental.getId(), new RentalExtendDTO(newDueDate)))
+                .isInstanceOf(EntityInvalidArgumentException.class);
+    }
+
+    @Test
+    void extendRental_whenNotFound_shouldThrowException() {
+        Instant newDueDate = Instant.now().plus(Duration.ofDays(14));
+
+        assertThatThrownBy(() -> rentalService.extendRental(
+                UUID.randomUUID(), new RentalExtendDTO(newDueDate)))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 }

@@ -53,6 +53,17 @@ public class RentalRestController {
         return ResponseEntity.ok(rentalMapper.mapToRentalReadOnlyDTO(returnedRental));
     }
 
+    @Operation(summary = "Extend a rental")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @PutMapping("/{uuid}/extend")
+    public ResponseEntity<RentalReadOnlyDTO> extendRental(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody RentalExtendDTO dto)
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Rental extendedRental = rentalService.extendRental(uuid, dto);
+        return ResponseEntity.ok(rentalMapper.mapToRentalReadOnlyDTO(extendedRental));
+    }
+
     @Operation(summary = "Get a rental by uuid")
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/{uuid}")

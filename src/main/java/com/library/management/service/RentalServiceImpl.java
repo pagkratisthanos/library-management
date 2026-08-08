@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.core.filters.RentalFilters;
+import com.library.management.dto.RentalExtendDTO;
 import com.library.management.dto.RentalInsertDTO;
 import com.library.management.model.Copy;
 import com.library.management.model.Member;
@@ -46,10 +47,6 @@ public class RentalServiceImpl implements IRentalService {
 
             if (!copy.getAvailable()) {
                 throw new EntityInvalidArgumentException("Rental", "Copy is not available for rental");
-            }
-
-            if (dto.dueDate().isBefore(Instant.now())) {
-                throw new EntityInvalidArgumentException("Rental", "Due date cannot be in the past");
             }
 
             if (dto.dueDate().isBefore(Instant.now())) {
@@ -102,6 +99,41 @@ public class RentalServiceImpl implements IRentalService {
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
             log.error("Return rental failed. {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
+    public Rental extendRental(UUID uuid, RentalExtendDTO dto)
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        try {
+            Rental rental = rentalRepository.findById(uuid)
+                    .orElseThrow(() -> new EntityNotFoundException("Rental", "Rental with uuid=" + uuid + " not found"));
+
+            if (!rental.isActive()) {
+                throw new EntityInvalidArgumentException("Rental", "A returned rental cannot be extended");
+            }
+
+            if (!dto.dueDate().isAfter(rental.getDueDate())) {
+                throw new EntityInvalidArgumentException("Rental", "The new due date must be later than the current one");
+            }
+
+            Instant latestAllowed = rental.getRentalDate().plus(Duration.ofDays(MAX_RENTAL_DAYS));
+
+            if (dto.dueDate().isAfter(latestAllowed)) {
+                throw new EntityInvalidArgumentException("Rental",
+                        "A rental cannot last more than " + MAX_RENTAL_DAYS + " days in total");
+            }
+
+            rental.setDueDate(dto.dueDate());
+
+            Rental extendedRental = rentalRepository.save(rental);
+            log.info("Rental with uuid={} extended to {}", uuid, dto.dueDate());
+            return extendedRental;
+
+        } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
+            log.error("Extend rental failed. {}", e.getMessage());
             throw e;
         }
     }

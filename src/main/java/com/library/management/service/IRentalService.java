@@ -3,6 +3,7 @@ package com.library.management.service;
 import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.core.filters.RentalFilters;
+import com.library.management.dto.RentalExtendDTO;
 import com.library.management.dto.RentalInsertDTO;
 import com.library.management.model.Rental;
 import org.springframework.data.domain.Page;
@@ -28,4 +29,7 @@ public interface IRentalService {
     Page<Rental> getActiveRentalsPaginated(Pageable pageable);
 
     Page<Rental> getRentalsPaginatedFiltered(Pageable pageable, RentalFilters filters);
+
+    Rental extendRental(UUID uuid, RentalExtendDTO dto)
+            throws EntityNotFoundException, EntityInvalidArgumentException;
 }
