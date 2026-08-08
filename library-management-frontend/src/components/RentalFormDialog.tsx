@@ -145,7 +145,7 @@ const RentalFormDialog = ({ open, onOpenChange, onSaved }: RentalFormDialogProps
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <Field className="min-w-0">
                         <FieldLabel htmlFor="memberUuid">Member</FieldLabel>
                         <SearchableSelect

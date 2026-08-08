@@ -21,3 +21,7 @@ export function createRental(payload: RentalInsert): Promise<Rental> {
 export function returnRental(uuid: string): Promise<Rental> {
     return api.put<Rental>(`/rentals/${uuid}/return`)
 }
+
+export function extendRental(uuid: string, dueDate: string): Promise<Rental> {
+    return api.put<Rental>(`/rentals/${uuid}/extend`, { dueDate })
+}

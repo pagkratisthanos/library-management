@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Plus, RotateCcw, Search } from "lucide-react"
+import { CalendarPlus, Plus, RotateCcw, Search } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ import {
 import TablePagination from "@/components/TablePagination"
 import SortableTableHead from "@/components/SortableTableHead"
 import RentalFormDialog from "@/components/RentalFormDialog"
+import ExtendRentalDialog from "@/components/ExtendRentalDialog"
 import { getRentals, returnRental } from "@/api/rentals"
 import type { Rental } from "@/schemas/rentals"
 import type { Page } from "@/schemas/common"
@@ -41,7 +42,9 @@ const RentalsPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [reloadKey, setReloadKey] = useState(0)
 
-    const [dialogOpen, setDialogOpen] = useState(false)
+    const [createOpen, setCreateOpen] = useState(false)
+    const [extendOpen, setExtendOpen] = useState(false)
+    const [selectedRental, setSelectedRental] = useState<Rental | null>(null)
 
     const { sort, toggleSort, sortParam } = useSort({ field: "dueDate", direction: "asc" })
     const debouncedSearch = useDebounce(search)
@@ -62,6 +65,11 @@ const RentalsPage = () => {
     }
 
     const reload = () => setReloadKey((key) => key + 1)
+
+    const openExtendDialog = (rental: Rental) => {
+        setSelectedRental(rental)
+        setExtendOpen(true)
+    }
 
     useEffect(() => {
         let cancelled = false
@@ -120,7 +128,7 @@ const RentalsPage = () => {
                         Books currently borrowed and past loans.
                     </p>
                 </div>
-                <Button onClick={() => setDialogOpen(true)}>
+                <Button onClick={() => setCreateOpen(true)}>
                     <Plus className="size-4" />
                     New rental
                 </Button>
@@ -168,7 +176,7 @@ const RentalsPage = () => {
                                 Due date
                             </SortableTableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead className="w-32 text-right">Actions</TableHead>
+                            <TableHead className="w-48 text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
 
@@ -222,16 +230,26 @@ const RentalsPage = () => {
                                                 </Badge>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right space-x-2">
                                             {isActive && (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleReturn(rental)}
-                                                >
-                                                    <RotateCcw className="size-4" />
-                                                    Return
-                                                </Button>
+                                                <>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openExtendDialog(rental)}
+                                                    >
+                                                        <CalendarPlus className="size-4" />
+                                                        Extend
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleReturn(rental)}
+                                                    >
+                                                        <RotateCcw className="size-4" />
+                                                        Return
+                                                    </Button>
+                                                </>
                                             )}
                                         </TableCell>
                                     </TableRow>
@@ -251,8 +269,15 @@ const RentalsPage = () => {
             )}
 
             <RentalFormDialog
-                open={dialogOpen}
-                onOpenChange={setDialogOpen}
+                open={createOpen}
+                onOpenChange={setCreateOpen}
+                onSaved={reload}
+            />
+
+            <ExtendRentalDialog
+                open={extendOpen}
+                rental={selectedRental}
+                onOpenChange={setExtendOpen}
                 onSaved={reload}
             />
         </div>

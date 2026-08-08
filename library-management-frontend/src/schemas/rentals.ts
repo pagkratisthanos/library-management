@@ -61,3 +61,20 @@ export const rentalSchema = z
     )
 
 export type RentalFields = z.infer<typeof rentalSchema>
+
+/** Builds a schema whose bounds depend on the rental being extended. */
+export function buildExtendSchema(minDate: string, maxDate: string) {
+    return z.object({
+        dueDate: z
+            .string()
+            .min(1, { error: "Due date is required" })
+            .refine((value) => value >= minDate, {
+                error: "The new due date must be later than the current one",
+            })
+            .refine((value) => value <= maxDate, {
+                error: `A rental cannot last more than ${MAX_RENTAL_DAYS} days in total`,
+            }),
+    })
+}
+
+export type ExtendRentalFields = { dueDate: string }
