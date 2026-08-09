@@ -22,6 +22,15 @@ export class ApiError extends Error {
     }
 }
 
+type UnauthorizedHandler = () => void
+
+let onUnauthorized: UnauthorizedHandler | null = null
+
+/** Lets the auth layer react to an expired session without importing React here. */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+    onUnauthorized = handler
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     const token = getCookie(TOKEN_COOKIE)
 
@@ -35,6 +44,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     })
 
     if (!response.ok) {
+        // a 401 while we were carrying a token means the session is no longer valid
+        if (response.status === 401 && token) {
+            onUnauthorized?.()
+        }
+
         let code = "UNKNOWN"
         let description = "Something went wrong. Please try again."
 

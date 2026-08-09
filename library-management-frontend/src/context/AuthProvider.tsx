@@ -1,7 +1,8 @@
-import { useState, type ReactNode } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { jwtDecode } from "jwt-decode"
+import { toast } from "sonner"
 import { login as loginRequest } from "@/api/auth"
-import { TOKEN_COOKIE } from "@/api/client"
+import { setUnauthorizedHandler, TOKEN_COOKIE } from "@/api/client"
 import { AuthContext } from "@/context/AuthContext"
 import type { JwtPayload, LoginFields, Role } from "@/schemas/auth"
 import { deleteCookie, getCookie, setCookie } from "@/utils/cookies"
@@ -46,6 +47,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         deleteCookie(TOKEN_COOKIE, { path: "/" })
         setToken(null)
     }
+
+    useEffect(() => {
+        setUnauthorizedHandler(() => {
+            deleteCookie(TOKEN_COOKIE, { path: "/" })
+            setToken(null)
+            toast.error("Your session has expired. Please sign in again.")
+        })
+
+        return () => setUnauthorizedHandler(null)
+    }, [])
 
     return (
         <AuthContext.Provider
