@@ -25,3 +25,8 @@ export function returnRental(uuid: string): Promise<Rental> {
 export function extendRental(uuid: string, dueDate: string): Promise<Rental> {
     return api.put<Rental>(`/rentals/${uuid}/extend`, { dueDate })
 }
+
+export function getOverdueRentals({ page, size, sort }: Pagination): Promise<Page<Rental>> {
+    const query = buildQuery({ page, size, sort })
+    return api.get<Page<Rental>>(`/rentals/overdue${query}`)
+}
