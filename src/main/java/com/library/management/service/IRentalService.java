@@ -32,4 +32,6 @@ public interface IRentalService {
 
     Rental extendRental(UUID uuid, RentalExtendDTO dto)
             throws EntityNotFoundException, EntityInvalidArgumentException;
+
+    Page<Rental> getOverdueRentalsPaginated(Pageable pageable);
 }

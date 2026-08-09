@@ -102,4 +102,13 @@ public class RentalRestController {
         Page<Rental> rentals = rentalService.getActiveRentalsPaginated(pageable);
         return ResponseEntity.ok(rentals.map(rentalMapper::mapToRentalReadOnlyDTO));
     }
+
+    @Operation(summary = "Get all overdue rentals paginated")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @GetMapping("/overdue")
+    public ResponseEntity<Page<RentalReadOnlyDTO>> getOverdueRentals(
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        Page<Rental> rentals = rentalService.getOverdueRentalsPaginated(pageable);
+        return ResponseEntity.ok(rentals.map(rentalMapper::mapToRentalReadOnlyDTO));
+    }
 }

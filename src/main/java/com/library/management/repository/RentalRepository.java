@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,5 +20,6 @@ public interface RentalRepository extends JpaRepository<Rental, UUID>, JpaSpecif
         List<Rental> findByCopy_Id(UUID copyUuid);
         Page<Rental> findByReturnDateIsNull(Pageable pageable);
         boolean existsById(UUID uuid);
+        Page<Rental> findByReturnDateIsNullAndDueDateBefore(Instant moment, Pageable pageable);
 
 }

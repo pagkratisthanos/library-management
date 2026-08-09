@@ -203,6 +203,16 @@ public class RentalServiceImpl implements IRentalService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<Rental> getOverdueRentalsPaginated(Pageable pageable) {
+        Page<Rental> rentalPage = rentalRepository
+                .findByReturnDateIsNullAndDueDateBefore(Instant.now(), pageable);
+        log.info("Get overdue rentals paginated returned successfully page={} and size={}",
+                rentalPage.getNumber(), rentalPage.getSize());
+        return rentalPage;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<Rental> getRentalsPaginatedFiltered(Pageable pageable, RentalFilters filters) {
         Page<Rental> rentalPage = rentalRepository.findAll(RentalSpecification.build(filters), pageable);
         log.info("Get filtered and paginated rentals returned successfully page={} and size={}",

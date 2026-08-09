@@ -350,4 +350,48 @@ class RentalServiceTest {
                 UUID.randomUUID(), new RentalExtendDTO(newDueDate)))
                 .isInstanceOf(EntityNotFoundException.class);
     }
+
+    /** A rental that started a month ago and was due five days ago. */
+    private Rental createOverdueRental() {
+        Copy copy = new Copy();
+        copy.setBook(bookRepository.findAll().get(0));
+        copy.setAvailable(false);
+        copy.setCondition(CopyCondition.GOOD);
+        copyRepository.save(copy);
+
+        Rental rental = new Rental();
+        rental.setMember(existingMember);
+        rental.setCopy(copy);
+        rental.setRentalDate(Instant.now().minus(Duration.ofDays(30)));
+        rental.setDueDate(Instant.now().minus(Duration.ofDays(5)));
+        return rentalRepository.save(rental);
+    }
+
+    @Test
+    void getOverdueRentalsPaginated_shouldReturnOnlyOverdueRentals() {
+        Rental overdue = createOverdueRental();
+
+        Page<Rental> result = rentalService.getOverdueRentalsPaginated(PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(overdue.getId());
+    }
+
+    @Test
+    void getOverdueRentalsPaginated_shouldIgnoreReturnedRentals()
+            throws EntityNotFoundException, EntityInvalidArgumentException {
+        Rental overdue = createOverdueRental();
+        rentalService.returnRental(overdue.getId());
+
+        Page<Rental> result = rentalService.getOverdueRentalsPaginated(PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void getOverdueRentalsPaginated_whenNothingIsOverdue_shouldReturnEmpty() {
+        Page<Rental> result = rentalService.getOverdueRentalsPaginated(PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).isEmpty();
+    }
 }
