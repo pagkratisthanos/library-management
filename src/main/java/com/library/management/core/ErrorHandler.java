@@ -4,12 +4,18 @@ import com.library.management.core.exceptions.*;
 import com.library.management.dto.ErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mapping.PropertyReferenceException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
@@ -59,6 +65,32 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDTO("INVALID_PROPERTY", e.getMessage()));
+    }
+
+    /**
+     * Replaces the default RFC 7807 body with the ErrorResponseDTO shape the clients expect,
+     * listing every field that failed validation.
+     */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException e,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+
+        String description = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        if (description.isBlank()) {
+            description = "The request body is not valid";
+        }
+
+        log.warn("Validation failed. Message={}", description);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDTO("VALIDATION_ERROR", description));
     }
 
     @ExceptionHandler(Exception.class)

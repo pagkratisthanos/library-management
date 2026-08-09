@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -157,5 +158,18 @@ class UserRestControllerTest {
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].username").value("admin"));
+    }
+
+    @Test
+    void saveUser_whenBodyFailsValidation_shouldReturn400WithFieldMessages() throws Exception {
+        UserInsertDTO dto = new UserInsertDTO("ab", "weak", 2L);
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.description").value(containsString("username")))
+                .andExpect(jsonPath("$.description").value(containsString("password")));
     }
 }
