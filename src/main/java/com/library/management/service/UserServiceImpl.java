@@ -118,7 +118,8 @@ public class UserServiceImpl implements IUserService {
     @Transactional(readOnly = true)
     public Page<User> getAllUsers(UserFilters filters, Pageable pageable) {
         Page<User> users = userRepository.findAll(UserSpecification.build(filters), pageable);
-        log.info("Get all users returned page={} size={}", users.getNumber(), users.getSize());
+        log.debug
+                ("Get all users returned page={} size={}", users.getNumber(), users.getSize());
         return users;
     }
 

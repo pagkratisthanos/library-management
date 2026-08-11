@@ -107,7 +107,7 @@ public class CopyServiceImpl implements ICopyService {
         try {
             Copy copy = copyRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found."));
-            log.info("Copy with uuid={} returned successfully.", uuid);
+            log.debug("Copy with uuid={} returned successfully.", uuid);
             return copy;
         } catch (EntityNotFoundException e) {
             log.error("Get copy by uuid failed. {}", e.getMessage());
@@ -121,7 +121,7 @@ public class CopyServiceImpl implements ICopyService {
         try {
             Copy copy = copyRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + uuid + " not found."));
-            log.info("Copy with uuid={} and deleted false returned successfully.", uuid);
+            log.debug("Copy with uuid={} and deleted false returned successfully.", uuid);
             return copy;
         } catch (EntityNotFoundException e) {
             log.error("Get copy by uuid failed. {}", e.getMessage());
@@ -133,7 +133,7 @@ public class CopyServiceImpl implements ICopyService {
     @Transactional(readOnly = true)
     public Page<Copy> getCopiesPaginated(Pageable pageable) {
         Page<Copy> copyPage = copyRepository.findAll(pageable);
-        log.info("Get paginated returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
+        log.debug("Get paginated returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
         return copyPage;
     }
 
@@ -141,7 +141,7 @@ public class CopyServiceImpl implements ICopyService {
     @Transactional(readOnly = true)
     public Page<Copy> getCopiesPaginatedAndDeletedFalse(Pageable pageable) {
         Page<Copy> copyPage = copyRepository.findByDeletedFalse(pageable);
-        log.info("Get paginated not deleted returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
+        log.debug("Get paginated not deleted returned successfully page={} and size={}", copyPage.getNumber(), copyPage.getSize());
         return copyPage;
     }
 
@@ -149,7 +149,7 @@ public class CopyServiceImpl implements ICopyService {
     @Transactional(readOnly = true)
     public Page<Copy> getCopiesPaginatedFilteredAndDeletedFalse(Pageable pageable, CopyFilters filters) {
         Page<Copy> copyPage = copyRepository.findAll(CopySpecification.build(filters), pageable);
-        log.info("Get filtered and paginated copies returned successfully page={} and size={}",
+        log.debug("Get filtered and paginated copies returned successfully page={} and size={}",
                 copyPage.getNumber(), copyPage.getSize());
         return copyPage;
     }

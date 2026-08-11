@@ -20,7 +20,7 @@ public class RoleServiceImpl implements IRoleService {
     @Transactional(readOnly = true)
     public List<Role> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
-        log.info("Get all roles returned {} roles", roles.size());
+        log.debug("Get all roles returned {} roles", roles.size());
         return roles;
     }
 }

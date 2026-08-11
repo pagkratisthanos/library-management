@@ -154,7 +154,7 @@ public class BookServiceImpl implements IBookService {
         try {
             Book book = bookRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid " + uuid + " not found"));
-            log.info("Get book by uuid={} returned successfully.", uuid);
+            log.debug("Get book by uuid={} returned successfully.", uuid);
             return book;
         } catch (EntityNotFoundException e) {
             log.error("Get book by uuid={} failed. {}", uuid, e.getMessage());
@@ -168,7 +168,7 @@ public class BookServiceImpl implements IBookService {
         try {
             Book book = bookRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Book", "Book with uuid: " + uuid + " not found"));
-            log.info("Get non-deleted book by uuid={} returned successfully.", uuid);
+            log.debug("Get non-deleted book by uuid={} returned successfully.", uuid);
             return book;
         } catch (EntityNotFoundException e) {
             log.error("Get book by uuid={} failed. {}", uuid, e.getMessage());
@@ -180,7 +180,7 @@ public class BookServiceImpl implements IBookService {
     @Transactional(readOnly = true)
     public Page<Book> getBooksPaginated(Pageable pageable) {
         Page<Book> bookPage = bookRepository.findAll(pageable);
-        log.info("Get paginated returned successfully page={} and size={}", bookPage.getNumber(), bookPage.getSize());
+        log.debug("Get paginated returned successfully page={} and size={}", bookPage.getNumber(), bookPage.getSize());
         return bookPage;
     }
 
@@ -188,7 +188,7 @@ public class BookServiceImpl implements IBookService {
     @Transactional(readOnly = true)
     public Page<Book> getBooksPaginatedAndDeletedFalse(Pageable pageable) {
         Page<Book> bookPage = bookRepository.findByDeletedFalse(pageable);
-        log.info("Get paginated not deleted returned successfully page={} and size={}", bookPage.getNumber(), bookPage.getSize());
+        log.debug("Get paginated not deleted returned successfully page={} and size={}", bookPage.getNumber(), bookPage.getSize());
         return bookPage;
     }
 
@@ -202,7 +202,7 @@ public class BookServiceImpl implements IBookService {
     @Transactional(readOnly = true)
     public Page<Book> getBooksPaginatedFilteredAndDeletedFalse(Pageable pageable, BookFilters filters) {
         Page<Book> bookPage = bookRepository.findAll(BookSpecification.build(filters), pageable);
-        log.info("Get filtered and paginated books returned successfully page={} and size={}",
+        log.debug("Get filtered and paginated books returned successfully page={} and size={}",
                 bookPage.getNumber(), bookPage.getSize());
         return bookPage;
     }

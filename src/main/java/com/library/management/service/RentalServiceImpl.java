@@ -159,7 +159,7 @@ public class RentalServiceImpl implements IRentalService {
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid= " + memberUuid + " not found."));
 
             List<Rental> rentals = rentalRepository.findByMember_Id(memberUuid);
-            log.info("Get rentals by memberUuid={} returned successfully", memberUuid);
+            log.debug("Get rentals by memberUuid={} returned successfully", memberUuid);
             return rentals;
 
         } catch (EntityNotFoundException e) {
@@ -176,7 +176,7 @@ public class RentalServiceImpl implements IRentalService {
                     .orElseThrow(() -> new EntityNotFoundException("Copy", "Copy with uuid= " + copyUuid + " not found."));
 
             List<Rental> rentals = rentalRepository.findByCopy_Id(copyUuid);
-            log.info("Get rentals by copyUuid={} returned successfully", copyUuid);
+            log.debug("Get rentals by copyUuid={} returned successfully", copyUuid);
             return rentals;
 
         } catch (EntityNotFoundException e) {
@@ -189,7 +189,7 @@ public class RentalServiceImpl implements IRentalService {
     @Transactional(readOnly = true)
     public Page<Rental> getRentalsPaginated(Pageable pageable) {
         Page<Rental> rentalPage = rentalRepository.findAll(pageable);
-        log.info("Get rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
+        log.debug("Get rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
         return rentalPage;
     }
 
@@ -197,7 +197,7 @@ public class RentalServiceImpl implements IRentalService {
     @Transactional(readOnly = true)
     public Page<Rental> getActiveRentalsPaginated(Pageable pageable) {
         Page<Rental> rentalPage = rentalRepository.findByReturnDateIsNull(pageable);
-        log.info("Get active rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
+        log.debug("Get active rentals paginated returned successfully page={} and size={}", rentalPage.getNumber(), rentalPage.getSize());
         return rentalPage;
     }
 
@@ -206,7 +206,7 @@ public class RentalServiceImpl implements IRentalService {
     public Page<Rental> getOverdueRentalsPaginated(Pageable pageable) {
         Page<Rental> rentalPage = rentalRepository
                 .findByReturnDateIsNullAndDueDateBefore(Instant.now(), pageable);
-        log.info("Get overdue rentals paginated returned successfully page={} and size={}",
+        log.debug("Get overdue rentals paginated returned successfully page={} and size={}",
                 rentalPage.getNumber(), rentalPage.getSize());
         return rentalPage;
     }
@@ -215,7 +215,7 @@ public class RentalServiceImpl implements IRentalService {
     @Transactional(readOnly = true)
     public Page<Rental> getRentalsPaginatedFiltered(Pageable pageable, RentalFilters filters) {
         Page<Rental> rentalPage = rentalRepository.findAll(RentalSpecification.build(filters), pageable);
-        log.info("Get filtered and paginated rentals returned successfully page={} and size={}",
+        log.debug("Get filtered and paginated rentals returned successfully page={} and size={}",
                 rentalPage.getNumber(), rentalPage.getSize());
         return rentalPage;
     }

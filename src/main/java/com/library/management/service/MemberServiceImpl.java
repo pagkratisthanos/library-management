@@ -167,7 +167,7 @@ public class MemberServiceImpl implements IMemberService {
         try {
             Member member = memberRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid=" + uuid + " not found"));
-            log.info("Get member by uuid={} returned successfully", uuid);
+            log.debug("Get member by uuid={} returned successfully", uuid);
             return member;
         } catch (EntityNotFoundException e) {
             log.error("Get member by uuid={} failed", uuid);
@@ -181,7 +181,7 @@ public class MemberServiceImpl implements IMemberService {
         try {
             Member member = memberRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with uuid=" + uuid + " not found"));
-            log.info("Get non-deleted member by uuid={} returned successfully", uuid);
+            log.debug("Get non-deleted member by uuid={} returned successfully", uuid);
             return member;
         } catch (EntityNotFoundException e) {
             log.error("Get member by uuid={} failed", uuid);
@@ -193,7 +193,7 @@ public class MemberServiceImpl implements IMemberService {
     @Transactional(readOnly = true)
     public Page<Member> getMembersPaginated(Pageable pageable) {
         Page<Member> memberPage = memberRepository.findAll(pageable);
-        log.info("Get paginated returned successfully page={} and size={}", memberPage.getNumber(), memberPage.getSize());
+        log.debug("Get paginated returned successfully page={} and size={}", memberPage.getNumber(), memberPage.getSize());
         return memberPage;
     }
 
@@ -201,7 +201,7 @@ public class MemberServiceImpl implements IMemberService {
     @Transactional(readOnly = true)
     public Page<Member> getMembersPaginatedAndDeletedFalse(Pageable pageable) {
         Page<Member> memberPage = memberRepository.findByDeletedFalse(pageable);
-        log.info("Get paginated not deleted returned successfully page={} and size={}", memberPage.getNumber(), memberPage.getSize());
+        log.debug("Get paginated not deleted returned successfully page={} and size={}", memberPage.getNumber(), memberPage.getSize());
         return memberPage;
     }
 
@@ -217,7 +217,7 @@ public class MemberServiceImpl implements IMemberService {
         try {
             Member member = memberRepository.findByEmail(email)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with email=" + email + " not found"));
-            log.info("Member with email={} returned successfully", email);
+            log.debug("Member with email={} returned successfully", email);
             return member;
         } catch (EntityNotFoundException e) {
             log.error("Get member by email={} failed. {}", email, e.getMessage());
@@ -231,7 +231,7 @@ public class MemberServiceImpl implements IMemberService {
         try {
             Member member = memberRepository.findByPhoneNumber(phoneNumber)
                     .orElseThrow(() -> new EntityNotFoundException("Member", "Member with phone=" + phoneNumber + " not found"));
-            log.info("Member with phone={} returned successfully", phoneNumber);
+            log.debug("Member with phone={} returned successfully", phoneNumber);
             return member;
         } catch (EntityNotFoundException e) {
             log.error("Get member by phone={} failed. {}", phoneNumber, e.getMessage());
@@ -243,7 +243,7 @@ public class MemberServiceImpl implements IMemberService {
     @Transactional(readOnly = true)
     public Page<Member> getMembersPaginatedFilteredAndDeletedFalse(Pageable pageable, MemberFilters filters) {
         Page<Member> memberPage = memberRepository.findAll(MemberSpecification.build(filters), pageable);
-        log.info("Get filtered and paginated members returned successfully page={} and size={}",
+        log.debug("Get filtered and paginated members returned successfully page={} and size={}",
                 memberPage.getNumber(), memberPage.getSize());
         return memberPage;
     }

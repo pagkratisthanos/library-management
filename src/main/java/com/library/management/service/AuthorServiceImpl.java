@@ -109,7 +109,7 @@ public class AuthorServiceImpl implements IAuthorService {
         try {
             Author author = authorRepository.findById(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
-            log.info("Get author by uuid={} returned successfully", uuid);
+            log.debug("Get author by uuid={} returned successfully", uuid);
             return author;
         } catch (EntityNotFoundException e) {
             log.error("Get author by id failed. {}", e.getMessage());
@@ -123,7 +123,7 @@ public class AuthorServiceImpl implements IAuthorService {
         try {
             Author author = authorRepository.findByIdAndDeletedFalse(uuid)
                     .orElseThrow(() -> new EntityNotFoundException("Author", "Author with uuid= " + uuid + " not found."));
-            log.info("Get author by uuid={} and deleted false returned successfully", uuid);
+            log.debug("Get author by uuid={} and deleted false returned successfully", uuid);
             return author;
         } catch (EntityNotFoundException e) {
             log.error("Get author by uuid and deleted false failed. {}", e.getMessage());
@@ -135,7 +135,7 @@ public class AuthorServiceImpl implements IAuthorService {
     @Transactional(readOnly = true)
     public Page<Author> getAuthorsPaginated(Pageable pageable) {
         Page<Author> authorsPage = authorRepository.findAll(pageable);
-        log.info("Get authors paginated returned successfully page={} and size={}", authorsPage.getNumber(), authorsPage.getSize());
+        log.debug("Get authors paginated returned successfully page={} and size={}", authorsPage.getNumber(), authorsPage.getSize());
         return authorsPage;
     }
 
@@ -143,7 +143,7 @@ public class AuthorServiceImpl implements IAuthorService {
     @Transactional(readOnly = true)
     public Page<Author> getAuthorsPaginatedAndDeletedFalse(Pageable pageable) {
         Page<Author> authorsPage = authorRepository.findByDeletedFalse(pageable);
-        log.info("Get authors paginated and deleted false returned successfully page={} and size={}", authorsPage.getNumber(), authorsPage.getSize());
+        log.debug("Get authors paginated and deleted false returned successfully page={} and size={}", authorsPage.getNumber(), authorsPage.getSize());
         return authorsPage;
     }
 
@@ -161,7 +161,7 @@ public class AuthorServiceImpl implements IAuthorService {
                 throw new EntityNotFoundException("Book", "Book with uuid=" + bookUuid + " not found");
             }
             List<Author> authors = authorRepository.findByBooks_Id(bookUuid);
-            log.info("Get authors by bookUuid={} returned successfully", bookUuid);
+            log.debug("Get authors by bookUuid={} returned successfully", bookUuid);
             return authors;
         } catch (EntityNotFoundException e) {
             log.error("Get authors by bookUuid={} failed. {}", bookUuid, e.getMessage());
@@ -173,7 +173,7 @@ public class AuthorServiceImpl implements IAuthorService {
     @Transactional(readOnly = true)
     public Page<Author> getAuthorsPaginatedFilteredAndDeletedFalse(Pageable pageable, AuthorFilters filters) {
         Page<Author> authorsPage = authorRepository.findAll(AuthorSpecification.build(filters), pageable);
-        log.info("Get filtered and paginated authors returned successfully page={} and size={}",
+        log.debug("Get filtered and paginated authors returned successfully page={} and size={}",
                 authorsPage.getNumber(), authorsPage.getSize());
         return authorsPage;
     }
