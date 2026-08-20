@@ -32,7 +32,7 @@ public class Copy extends AbstractEntity {
     private CopyCondition condition;
 
     /** Semantic order for sorting: best condition first. Read-only, computed by the database. */
-    @Formula("CASE condition " +
+    @Formula("CASE {alias}.condition " +
             "WHEN 'NEW' THEN 1 " +
             "WHEN 'GOOD' THEN 2 " +
             "WHEN 'FAIR' THEN 3 " +
