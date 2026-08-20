@@ -70,10 +70,10 @@ public class MemberServiceImpl implements IMemberService {
             return savedMember;
 
         } catch (EntityAlreadyExistsException e) {
-            log.error("Save failed. Member already exists. {}", e.getMessage());
+            log.warn("Save failed. Member already exists. {}", e.getMessage());
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Save failed. Invalid argument for member. {}", e.getMessage());
+            log.warn("Save failed. Invalid argument for member. {}", e.getMessage());
             throw e;
         }
     }
@@ -122,13 +122,13 @@ public class MemberServiceImpl implements IMemberService {
             return updatedMember;
 
         } catch (EntityNotFoundException e) {
-            log.error("Member not found. {}", e.getMessage());
+            log.warn("Member not found. {}", e.getMessage());
             throw e;
         } catch (EntityAlreadyExistsException e) {
-            log.error("Member already exists. {}", e.getMessage());
+            log.warn("Member already exists. {}", e.getMessage());
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Invalid argument. {}", e.getMessage());
+            log.warn("Invalid argument. {}", e.getMessage());
             throw e;
         }
     }
@@ -153,10 +153,10 @@ public class MemberServiceImpl implements IMemberService {
             log.info("Member with uuid={} deleted successfully", uuid);
 
         } catch (EntityNotFoundException e) {
-            log.error("Delete failed for member with uuid={}. Member not found", uuid);
+            log.warn("Delete failed for member with uuid={}. Member not found", uuid);
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Delete failed. {}", e.getMessage());
+            log.warn("Delete failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -170,7 +170,7 @@ public class MemberServiceImpl implements IMemberService {
             log.debug("Get member by uuid={} returned successfully", uuid);
             return member;
         } catch (EntityNotFoundException e) {
-            log.error("Get member by uuid={} failed", uuid);
+            log.warn("Get member by uuid={} failed", uuid);
             throw e;
         }
     }
@@ -184,7 +184,7 @@ public class MemberServiceImpl implements IMemberService {
             log.debug("Get non-deleted member by uuid={} returned successfully", uuid);
             return member;
         } catch (EntityNotFoundException e) {
-            log.error("Get member by uuid={} failed", uuid);
+            log.warn("Get member by uuid={} failed", uuid);
             throw e;
         }
     }
@@ -220,7 +220,7 @@ public class MemberServiceImpl implements IMemberService {
             log.debug("Member with email={} returned successfully", email);
             return member;
         } catch (EntityNotFoundException e) {
-            log.error("Get member by email={} failed. {}", email, e.getMessage());
+            log.warn("Get member by email={} failed. {}", email, e.getMessage());
             throw e;
         }
     }
@@ -234,7 +234,7 @@ public class MemberServiceImpl implements IMemberService {
             log.debug("Member with phone={} returned successfully", phoneNumber);
             return member;
         } catch (EntityNotFoundException e) {
-            log.error("Get member by phone={} failed. {}", phoneNumber, e.getMessage());
+            log.warn("Get member by phone={} failed. {}", phoneNumber, e.getMessage());
             throw e;
         }
     }

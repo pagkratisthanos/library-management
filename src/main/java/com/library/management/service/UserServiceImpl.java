@@ -55,10 +55,10 @@ public class UserServiceImpl implements IUserService {
             return savedUser;
 
         } catch (EntityAlreadyExistsException e) {
-            log.error("Save failed. User with username={} already exists", dto.username());
+            log.warn("Save failed. User with username={} already exists", dto.username());
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Save failed. Invalid arguments for user with username={}", dto.username());
+            log.warn("Save failed. Invalid arguments for user with username={}", dto.username());
             throw e;
         }
     }
@@ -72,7 +72,7 @@ public class UserServiceImpl implements IUserService {
             log.debug("User with uuid={} found successfully", uuid);
             return user;
         } catch (EntityNotFoundException e) {
-            log.error("Get failed. User with uuid={} not found", uuid);
+            log.warn("Get failed. User with uuid={} not found", uuid);
             throw e;
         }
     }
@@ -86,7 +86,7 @@ public class UserServiceImpl implements IUserService {
             log.debug("Active user with uuid={} found successfully", uuid);
             return user;
         } catch (EntityNotFoundException e) {
-            log.error("Get failed. Active user with uuid={} not found", uuid);
+            log.warn("Get failed. Active user with uuid={} not found", uuid);
             throw e;
         }
     }
@@ -109,7 +109,7 @@ public class UserServiceImpl implements IUserService {
             log.info("User with uuid={} deleted successfully", uuid);
 
         } catch (EntityNotFoundException e) {
-            log.error("Delete failed. User with uuid={} not found", uuid);
+            log.warn("Delete failed. User with uuid={} not found", uuid);
             throw e;
         }
     }
@@ -156,10 +156,10 @@ public class UserServiceImpl implements IUserService {
             return updatedUser;
 
         } catch (EntityNotFoundException e) {
-            log.error("Role change failed. User with uuid={} not found", uuid);
+            log.warn("Role change failed. User with uuid={} not found", uuid);
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Role change failed. {}", e.getMessage());
+            log.warn("Role change failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -179,7 +179,7 @@ public class UserServiceImpl implements IUserService {
             return updatedUser;
 
         } catch (EntityNotFoundException e) {
-            log.error("Password change failed. User with uuid={} not found", uuid);
+            log.warn("Password change failed. User with uuid={} not found", uuid);
             throw e;
         }
     }
@@ -207,10 +207,10 @@ public class UserServiceImpl implements IUserService {
             return updatedUser;
 
         } catch (EntityNotFoundException e) {
-            log.error("Password change failed. User with username={} not found", username);
+            log.warn("Password change failed. User with username={} not found", username);
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Password change failed for username={}. {}", username, e.getMessage());
+            log.warn("Password change failed for username={}. {}", username, e.getMessage());
             throw e;
         }
     }

@@ -48,7 +48,7 @@ public class AuthorServiceImpl implements IAuthorService {
             log.info("Author saved with uuid={}", savedAuthor.getId());
             return savedAuthor;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Save author failed. {}", e.getMessage());
+            log.warn("Save author failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -71,7 +71,7 @@ public class AuthorServiceImpl implements IAuthorService {
             log.info("Author with uuid={} has successfully been updated", updatedAuthor.getId());
             return updatedAuthor;
         } catch (EntityNotFoundException e) {
-            log.error("Update author with uuid={} failed. {}", id, e.getMessage());
+            log.warn("Update author with uuid={} failed. {}", id, e.getMessage());
             throw e;
         }
     }
@@ -98,7 +98,7 @@ public class AuthorServiceImpl implements IAuthorService {
             authorRepository.save(author);
             log.info("Author with uuid={} has successfully been deleted", uuid);
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Delete author failed. {}", e.getMessage());
+            log.warn("Delete author failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -112,7 +112,7 @@ public class AuthorServiceImpl implements IAuthorService {
             log.debug("Get author by uuid={} returned successfully", uuid);
             return author;
         } catch (EntityNotFoundException e) {
-            log.error("Get author by id failed. {}", e.getMessage());
+            log.warn("Get author by id failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -126,7 +126,7 @@ public class AuthorServiceImpl implements IAuthorService {
             log.debug("Get author by uuid={} and deleted false returned successfully", uuid);
             return author;
         } catch (EntityNotFoundException e) {
-            log.error("Get author by uuid and deleted false failed. {}", e.getMessage());
+            log.warn("Get author by uuid and deleted false failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -164,7 +164,7 @@ public class AuthorServiceImpl implements IAuthorService {
             log.debug("Get authors by bookUuid={} returned successfully", bookUuid);
             return authors;
         } catch (EntityNotFoundException e) {
-            log.error("Get authors by bookUuid={} failed. {}", bookUuid, e.getMessage());
+            log.warn("Get authors by bookUuid={} failed. {}", bookUuid, e.getMessage());
             throw e;
         }
     }

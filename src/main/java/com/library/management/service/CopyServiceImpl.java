@@ -48,7 +48,7 @@ public class CopyServiceImpl implements ICopyService {
             log.info("Copy saved with uuid={}", savedCopy.getId());
             return savedCopy;
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Save copy failed. {}", e.getMessage());
+            log.warn("Save copy failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -73,7 +73,7 @@ public class CopyServiceImpl implements ICopyService {
             log.info("Copy updated with uuid={}", updatedCopy.getId());
             return updatedCopy;
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Update copy failed. {}", e.getMessage());
+            log.warn("Update copy failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -96,7 +96,7 @@ public class CopyServiceImpl implements ICopyService {
             copyRepository.save(copy);
             log.info("Copy with uuid={} deleted successfully", uuid);
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Delete copy by uuid failed.{}", e.getMessage());
+            log.warn("Delete copy by uuid failed.{}", e.getMessage());
             throw e;
         }
     }
@@ -110,7 +110,7 @@ public class CopyServiceImpl implements ICopyService {
             log.debug("Copy with uuid={} returned successfully.", uuid);
             return copy;
         } catch (EntityNotFoundException e) {
-            log.error("Get copy by uuid failed. {}", e.getMessage());
+            log.warn("Get copy by uuid failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -124,7 +124,7 @@ public class CopyServiceImpl implements ICopyService {
             log.debug("Copy with uuid={} and deleted false returned successfully.", uuid);
             return copy;
         } catch (EntityNotFoundException e) {
-            log.error("Get copy by uuid failed. {}", e.getMessage());
+            log.warn("Get copy by uuid failed. {}", e.getMessage());
             throw e;
         }
     }

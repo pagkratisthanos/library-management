@@ -72,7 +72,7 @@ public class RentalServiceImpl implements IRentalService {
             return savedRental;
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Save rental failed. {}", e.getMessage());
+            log.warn("Save rental failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -98,7 +98,7 @@ public class RentalServiceImpl implements IRentalService {
             return returnedRental;
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Return rental failed. {}", e.getMessage());
+            log.warn("Return rental failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -133,7 +133,7 @@ public class RentalServiceImpl implements IRentalService {
             return extendedRental;
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Extend rental failed. {}", e.getMessage());
+            log.warn("Extend rental failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -146,7 +146,7 @@ public class RentalServiceImpl implements IRentalService {
                     .orElseThrow(() -> new EntityNotFoundException("Rental", "Rental with uuid=" + uuid + " not found"));
             return rental;
         } catch (EntityNotFoundException e) {
-            log.error("Get rental by uuid failed. {}", e.getMessage());
+            log.warn("Get rental by uuid failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -163,7 +163,7 @@ public class RentalServiceImpl implements IRentalService {
             return rentals;
 
         } catch (EntityNotFoundException e) {
-            log.error("Get rentals by memberUuid={} failed. {}", memberUuid, e.getMessage());
+            log.warn("Get rentals by memberUuid={} failed. {}", memberUuid, e.getMessage());
             throw e;
         }
     }
@@ -180,7 +180,7 @@ public class RentalServiceImpl implements IRentalService {
             return rentals;
 
         } catch (EntityNotFoundException e) {
-            log.error("Get rentals by copyUuid={} failed. {}", copyUuid, e.getMessage());
+            log.warn("Get rentals by copyUuid={} failed. {}", copyUuid, e.getMessage());
             throw e;
         }
     }

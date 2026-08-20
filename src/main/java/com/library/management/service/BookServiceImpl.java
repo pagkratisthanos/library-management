@@ -83,7 +83,7 @@ public class BookServiceImpl implements IBookService {
             return savedBook;
 
         } catch (EntityNotFoundException | EntityAlreadyExistsException | EntityInvalidArgumentException e) {
-            log.error("Save book failed. {}", e.getMessage());
+            log.warn("Save book failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -117,7 +117,7 @@ public class BookServiceImpl implements IBookService {
             log.info("Book updated with uuid={}", updatedBook.getId());
             return updatedBook;
         } catch (EntityNotFoundException | EntityInvalidArgumentException | EntityAlreadyExistsException e) {
-            log.error("Update failed. {}", e.getMessage());
+            log.warn("Update failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -143,7 +143,7 @@ public class BookServiceImpl implements IBookService {
             log.info("Book with uuid={} has successfully been deleted", uuid);
 
         } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
-            log.error("Book delete failed. {}", e.getMessage());
+            log.warn("Book delete failed. {}", e.getMessage());
             throw e;
         }
     }
@@ -157,7 +157,7 @@ public class BookServiceImpl implements IBookService {
             log.debug("Get book by uuid={} returned successfully.", uuid);
             return book;
         } catch (EntityNotFoundException e) {
-            log.error("Get book by uuid={} failed. {}", uuid, e.getMessage());
+            log.warn("Get book by uuid={} failed. {}", uuid, e.getMessage());
             throw e;
         }
     }
@@ -171,7 +171,7 @@ public class BookServiceImpl implements IBookService {
             log.debug("Get non-deleted book by uuid={} returned successfully.", uuid);
             return book;
         } catch (EntityNotFoundException e) {
-            log.error("Get book by uuid={} failed. {}", uuid, e.getMessage());
+            log.warn("Get book by uuid={} failed. {}", uuid, e.getMessage());
             throw e;
         }
     }
