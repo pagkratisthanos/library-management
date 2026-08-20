@@ -12,6 +12,10 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
+    # The services return entities and the controllers map them to DTOs, so the
+    # persistence context must stay open for the whole request. Lazy loading that
+    # this could hide is handled explicitly with @EntityGraph and @BatchSize.
+    open-in-view: true
     hibernate:
       ddl-auto: validate
     properties:
