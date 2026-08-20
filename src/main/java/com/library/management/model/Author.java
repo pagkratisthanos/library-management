@@ -2,6 +2,7 @@ package com.library.management.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -19,6 +20,7 @@ public class Author extends AbstractEntity{
     @Setter(AccessLevel.PRIVATE)
     @ManyToMany
     @JoinTable(name = "authors_books", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+    @BatchSize(size = 20)
     private Set<Book> books = new HashSet<>();
 
     @Column(nullable = false)

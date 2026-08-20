@@ -12,9 +12,11 @@ import java.util.UUID;
 
 public interface AuthorRepository extends JpaRepository<Author, UUID>, JpaSpecificationExecutor<Author> {
 
+    @Override
     Optional<Author> findById(UUID uuid);
     Optional<Author> findByIdAndDeletedFalse(UUID uuid);
     Page<Author> findByDeletedFalse(Pageable pageable);
+    @Override
     boolean existsById(UUID uuid);
     boolean existsByLastname(String lastname);
     List<Author> findByBooks_Id(UUID bookUuid);

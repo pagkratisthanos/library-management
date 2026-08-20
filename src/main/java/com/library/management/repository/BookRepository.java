@@ -12,6 +12,7 @@ import java.util.UUID;
 
 public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificationExecutor<Book> {
 
+    @Override
     @EntityGraph(attributePaths = {"authors"})
     Optional<Book> findById(UUID uuid);
 
@@ -20,6 +21,7 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
     Optional<Book> findByIsbn(String isbn);
     boolean existsByIsbnAndDeletedFalse(String isbn);
     boolean existsByIsbn(String isbn);
+    @Override
     boolean existsById(UUID uuid);
     boolean existsByIsbnAndIdNot(String isbn, UUID id);
 
