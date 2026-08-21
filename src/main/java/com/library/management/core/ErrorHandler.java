@@ -1,7 +1,10 @@
 package com.library.management.core;
 
-import com.library.management.core.exceptions.*;
+import com.library.management.core.exceptions.EntityAlreadyExistsException;
+import com.library.management.core.exceptions.EntityInvalidArgumentException;
+import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.ErrorResponseDTO;
+import com.library.management.dto.ValidationErrorResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
@@ -9,13 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 @Slf4j
@@ -68,8 +73,8 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Replaces the default RFC 7807 body with the ErrorResponseDTO shape the clients expect,
-     * listing every field that failed validation.
+     * Replaces the default RFC 7807 body with a map of field to message, so the client
+     * can show each error next to the input it belongs to.
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
@@ -78,19 +83,19 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status,
             WebRequest request) {
 
-        String description = e.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-
-        if (description.isBlank()) {
-            description = "The request body is not valid";
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
-        log.warn("Validation failed. Message={}", description);
+        log.warn("Validation failed for fields={}", errors.keySet());
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponseDTO("VALIDATION_ERROR", description));
+                .body(new ValidationErrorResponseDTO(
+                        "VALIDATION_ERROR",
+                        "The request body is not valid",
+                        errors));
     }
 
     @ExceptionHandler(Exception.class)
