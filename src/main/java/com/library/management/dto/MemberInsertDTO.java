@@ -1,10 +1,7 @@
 package com.library.management.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -33,8 +30,10 @@ public record MemberInsertDTO(
         message = "Invalid email format")
         String email,
 
+        @PastOrPresent(message = "Birth date cannot be in the future")
         LocalDate birthDate,
 
         @NotNull
+        @PastOrPresent(message = "Membership date cannot be in the future")
         LocalDate membershipDate
 ) {}
