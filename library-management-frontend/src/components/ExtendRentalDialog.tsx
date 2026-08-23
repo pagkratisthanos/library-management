@@ -14,6 +14,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { extendRental } from "@/api/rentals"
+import { applyServerErrors } from "@/lib/formErrors"
 import {
     buildExtendSchema,
     type ExtendRentalFields,
@@ -55,6 +56,7 @@ const ExtendRentalDialog = ({
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<ExtendRentalFields>({
         resolver: zodResolver(schema),
@@ -77,7 +79,9 @@ const ExtendRentalDialog = ({
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to extend the rental")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to extend the rental")
+            }
         }
     }
 

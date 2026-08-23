@@ -20,6 +20,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { updateUserRole } from "@/api/users"
+import { applyServerErrors } from "@/lib/formErrors"
 import { type RoleChangeFields, roleChangeSchema, type RoleOption, type User } from "@/schemas/users"
 
 type UserRoleDialogProps = {
@@ -36,6 +37,7 @@ const UserRoleDialog = ({ open, user, roles, onOpenChange, onSaved }: UserRoleDi
         reset,
         watch,
         setValue,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<RoleChangeFields>({
         resolver: zodResolver(roleChangeSchema),
@@ -61,7 +63,9 @@ const UserRoleDialog = ({ open, user, roles, onOpenChange, onSaved }: UserRoleDi
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to change the role")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to change the role")
+            }
         }
     }
 
@@ -77,7 +81,7 @@ const UserRoleDialog = ({ open, user, roles, onOpenChange, onSaved }: UserRoleDi
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <Field className="min-w-0">
                         <FieldLabel htmlFor="roleId">Role</FieldLabel>
                         <Select

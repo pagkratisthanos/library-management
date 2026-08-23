@@ -15,6 +15,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { createAuthor, updateAuthor } from "@/api/authors"
+import { applyServerErrors } from "@/lib/formErrors"
 import { type Author, type AuthorFields, authorSchema } from "@/schemas/authors"
 
 const emptyValues: AuthorFields = {
@@ -45,6 +46,7 @@ const AuthorFormDialog = ({
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<AuthorFields>({
         resolver: zodResolver(authorSchema),
@@ -91,7 +93,9 @@ const AuthorFormDialog = ({
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to save the author")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to save the author")
+            }
         }
     }
 
@@ -107,7 +111,7 @@ const AuthorFormDialog = ({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <Field className="min-w-0">
                             <FieldLabel htmlFor="firstname">First name</FieldLabel>
@@ -144,6 +148,11 @@ const AuthorFormDialog = ({
                         <Field className="min-w-0">
                             <FieldLabel htmlFor="birthPlace">Birth place</FieldLabel>
                             <Input id="birthPlace" className="w-full min-w-0" {...register("birthPlace")} />
+                            {errors.birthPlace && (
+                                <p className="text-sm text-destructive">
+                                    {errors.birthPlace.message}
+                                </p>
+                            )}
                         </Field>
                     </div>
 
@@ -155,6 +164,9 @@ const AuthorFormDialog = ({
                             className="w-full min-w-0 resize-none break-all"
                             {...register("bio")}
                         />
+                        {errors.bio && (
+                            <p className="text-sm text-destructive">{errors.bio.message}</p>
+                        )}
                     </Field>
 
                     <DialogFooter>

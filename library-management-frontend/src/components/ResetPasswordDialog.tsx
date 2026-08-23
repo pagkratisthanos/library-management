@@ -14,6 +14,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field"
 import PasswordInput from "@/components/PasswordInput"
 import { resetUserPassword } from "@/api/users"
+import { applyServerErrors } from "@/lib/formErrors"
 import { type PasswordResetFields, passwordResetSchema, type User } from "@/schemas/users"
 
 type ResetPasswordDialogProps = {
@@ -27,6 +28,7 @@ const ResetPasswordDialog = ({ open, user, onOpenChange }: ResetPasswordDialogPr
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<PasswordResetFields>({
         resolver: zodResolver(passwordResetSchema),
@@ -47,7 +49,9 @@ const ResetPasswordDialog = ({ open, user, onOpenChange }: ResetPasswordDialogPr
             toast.success(`The password of "${user.username}" was reset`)
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to reset the password")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to reset the password")
+            }
         }
     }
 
@@ -63,7 +67,7 @@ const ResetPasswordDialog = ({ open, user, onOpenChange }: ResetPasswordDialogPr
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <Field className="min-w-0">
                         <FieldLabel htmlFor="password">New password</FieldLabel>
                         <PasswordInput

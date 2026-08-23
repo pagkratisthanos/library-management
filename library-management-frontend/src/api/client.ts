@@ -4,21 +4,30 @@ const API_URL = import.meta.env.VITE_API_URL
 
 export const TOKEN_COOKIE = "access_token"
 
-/** Mirrors ErrorResponseDTO from the backend. */
+/** Mirrors ErrorResponseDTO and ValidationErrorResponseDTO from the backend. */
 type ApiErrorBody = {
     code: string
     description: string
+    errors?: Record<string, string>
 }
 
 export class ApiError extends Error {
     readonly status: number
     readonly code: string
+    /** Field name to message. Present only when validation failed. */
+    readonly errors?: Record<string, string>
 
-    constructor(status: number, code: string, description: string) {
+    constructor(
+        status: number,
+        code: string,
+        description: string,
+        errors?: Record<string, string>,
+    ) {
         super(description)
         this.name = "ApiError"
         this.status = status
         this.code = code
+        this.errors = errors
     }
 }
 
@@ -51,18 +60,20 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
         let code = "UNKNOWN"
         let description = "Something went wrong. Please try again."
+        let errors: Record<string, string> | undefined
 
         try {
             const body = (await response.json()) as ApiErrorBody
             if (body?.description) {
                 code = body.code
                 description = body.description
+                errors = body.errors
             }
         } catch {
             // the response had no JSON body — keep the defaults
         }
 
-        throw new ApiError(response.status, code, description)
+        throw new ApiError(response.status, code, description, errors)
     }
 
     // 204 No Content — nothing to parse

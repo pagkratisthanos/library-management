@@ -15,6 +15,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { createMember, updateMember } from "@/api/members"
+import { applyServerErrors, stripAddressPrefix } from "@/lib/formErrors"
 import { type Member, type MemberFields, memberSchema } from "@/schemas/members"
 
 /** Today in the yyyy-MM-dd format the date input expects. */
@@ -54,6 +55,7 @@ const MemberFormDialog = ({
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<MemberFields>({
         resolver: zodResolver(memberSchema),
@@ -114,7 +116,9 @@ const MemberFormDialog = ({
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to save the member")
+            if (!applyServerErrors(err, setError, stripAddressPrefix)) {
+                toast.error(err instanceof Error ? err.message : "Failed to save the member")
+            }
         }
     }
 
@@ -130,7 +134,7 @@ const MemberFormDialog = ({
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <Field className="min-w-0">
                             <FieldLabel htmlFor="firstname">First name</FieldLabel>
@@ -179,6 +183,9 @@ const MemberFormDialog = ({
                                 className="w-full min-w-0"
                                 {...register("birthDate")}
                             />
+                            {errors.birthDate && (
+                                <p className="text-sm text-destructive">{errors.birthDate.message}</p>
+                            )}
                         </Field>
                     </div>
 

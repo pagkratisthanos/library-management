@@ -17,6 +17,7 @@ import SearchableSelect, { type SelectOption } from "@/components/SearchableSele
 import { createRental } from "@/api/rentals"
 import { getMembers } from "@/api/members"
 import { getCopies } from "@/api/copies"
+import { applyServerErrors } from "@/lib/formErrors"
 import {
     MAX_RENTAL_DAYS,
     type RentalFields,
@@ -59,6 +60,7 @@ const RentalFormDialog = ({ open, onOpenChange, onSaved }: RentalFormDialogProps
         reset,
         watch,
         setValue,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<RentalFields>({
         resolver: zodResolver(rentalSchema),
@@ -131,7 +133,9 @@ const RentalFormDialog = ({ open, onOpenChange, onSaved }: RentalFormDialogProps
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to create the rental")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to create the rental")
+            }
         }
     }
 

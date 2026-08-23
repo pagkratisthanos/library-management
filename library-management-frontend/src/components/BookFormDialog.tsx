@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { getAuthors } from "@/api/authors"
 import { createBook, updateBook } from "@/api/books"
+import { applyServerErrors } from "@/lib/formErrors"
 import type { Author } from "@/schemas/authors"
 import { type Book, type BookFields, bookSchema } from "@/schemas/books"
 
@@ -50,6 +51,7 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
         reset,
         watch,
         setValue,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<BookFields>({
         resolver: zodResolver(bookSchema),
@@ -134,7 +136,9 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to save the book")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to save the book")
+            }
         }
     }
 
@@ -150,7 +154,7 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <Field className="min-w-0">
                         <FieldLabel htmlFor="title">Title</FieldLabel>
                         <Input id="title" className="w-full min-w-0" {...register("title")} />
@@ -176,6 +180,11 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                                 className="w-full min-w-0"
                                 {...register("publishedDate")}
                             />
+                            {errors.publishedDate && (
+                                <p className="text-sm text-destructive">
+                                    {errors.publishedDate.message}
+                                </p>
+                            )}
                         </Field>
                     </div>
 
@@ -187,6 +196,11 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                                 className="w-full min-w-0"
                                 {...register("language")}
                             />
+                            {errors.language && (
+                                <p className="text-sm text-destructive">
+                                    {errors.language.message}
+                                </p>
+                            )}
                         </Field>
 
                         <Field className="min-w-0">
@@ -215,6 +229,11 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                             className="w-full min-w-0 resize-none break-all"
                             {...register("description")}
                         />
+                        {errors.description && (
+                            <p className="text-sm text-destructive">
+                                {errors.description.message}
+                            </p>
+                        )}
                     </Field>
 
                     <Field className="min-w-0">
@@ -270,6 +289,12 @@ const BookFormDialog = ({ open, book, onOpenChange, onSaved }: BookFormDialogPro
                                     ))}
                                 </div>
                             </div>
+                        )}
+
+                        {errors.authorUuids && (
+                            <p className="text-sm text-destructive">
+                                {errors.authorUuids.message}
+                            </p>
                         )}
                     </Field>
 

@@ -20,8 +20,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import SearchableSelect from "@/components/SearchableSelect"
 import { getBooks } from "@/api/books"
 import { createCopy, updateCopy } from "@/api/copies"
+import { applyServerErrors } from "@/lib/formErrors"
 import type { Book } from "@/schemas/books"
 import {
     COPY_CONDITIONS,
@@ -30,7 +32,6 @@ import {
     type CopyFields,
     copySchema,
 } from "@/schemas/copies"
-import SearchableSelect from "@/components/SearchableSelect.tsx";
 
 const emptyValues: CopyFields = {
     bookUuid: "",
@@ -55,6 +56,7 @@ const CopyFormDialog = ({ open, copy, onOpenChange, onSaved }: CopyFormDialogPro
         reset,
         watch,
         setValue,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<CopyFields>({
         resolver: zodResolver(copySchema),
@@ -108,7 +110,9 @@ const CopyFormDialog = ({ open, copy, onOpenChange, onSaved }: CopyFormDialogPro
             onSaved()
             onOpenChange(false)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to save the copy")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to save the copy")
+            }
         }
     }
 
@@ -124,32 +128,29 @@ const CopyFormDialog = ({ open, copy, onOpenChange, onSaved }: CopyFormDialogPro
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <Field className="min-w-0">
                         <FieldLabel htmlFor="bookUuid">Book</FieldLabel>
 
                         {isEditing ? (
                             <p className="text-sm text-muted-foreground">{copy.bookTitle}</p>
                         ) : (
-                            <>
-                                <SearchableSelect
-                                    id="bookUuid"
-                                    value={bookUuid}
-                                    onChange={(value) => setValue("bookUuid", value)}
-                                    options={books.map((book) => ({
-                                        value: book.id,
-                                        label: `${book.title} · ${book.isbn}`,
-                                    }))}
-                                    placeholder="Select a book"
-                                    searchPlaceholder="Search by title or ISBN..."
-                                    emptyMessage="No books found."
-                                />
-                                {errors.bookUuid && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.bookUuid.message}
-                                    </p>
-                                )}
-                            </>
+                            <SearchableSelect
+                                id="bookUuid"
+                                value={bookUuid}
+                                onChange={(value) => setValue("bookUuid", value)}
+                                options={books.map((book) => ({
+                                    value: book.id,
+                                    label: `${book.title} · ${book.isbn}`,
+                                }))}
+                                placeholder="Select a book"
+                                searchPlaceholder="Search by title or ISBN..."
+                                emptyMessage="No books found."
+                            />
+                        )}
+
+                        {errors.bookUuid && (
+                            <p className="text-sm text-destructive">{errors.bookUuid.message}</p>
                         )}
                     </Field>
 
@@ -172,15 +173,25 @@ const CopyFormDialog = ({ open, copy, onOpenChange, onSaved }: CopyFormDialogPro
                                 ))}
                             </SelectContent>
                         </Select>
+                        {errors.condition && (
+                            <p className="text-sm text-destructive">{errors.condition.message}</p>
+                        )}
                     </Field>
 
-                    <label className="flex items-center gap-2 text-sm">
-                        <Checkbox
-                            checked={available}
-                            onCheckedChange={(checked) => setValue("available", checked === true)}
-                        />
-                        Available for rental
-                    </label>
+                    <div>
+                        <label className="flex items-center gap-2 text-sm">
+                            <Checkbox
+                                checked={available}
+                                onCheckedChange={(checked) => setValue("available", checked === true)}
+                            />
+                            Available for rental
+                        </label>
+                        {errors.available && (
+                            <p className="mt-1 text-sm text-destructive">
+                                {errors.available.message}
+                            </p>
+                        )}
+                    </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

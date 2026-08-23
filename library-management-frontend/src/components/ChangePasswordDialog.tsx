@@ -14,6 +14,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field"
 import PasswordInput from "@/components/PasswordInput"
 import { changeOwnPassword } from "@/api/users"
+import { applyServerErrors } from "@/lib/formErrors"
 import { type PasswordChangeFields, passwordChangeSchema } from "@/schemas/users"
 
 const emptyValues: PasswordChangeFields = {
@@ -34,6 +35,7 @@ const ChangePasswordDialog = ({ open, onOpenChange, onChanged }: ChangePasswordD
         register,
         handleSubmit,
         reset,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<PasswordChangeFields>({
         resolver: zodResolver(passwordChangeSchema),
@@ -53,7 +55,9 @@ const ChangePasswordDialog = ({ open, onOpenChange, onChanged }: ChangePasswordD
             onOpenChange(false)
             onChanged()
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Failed to change the password")
+            if (!applyServerErrors(err, setError)) {
+                toast.error(err instanceof Error ? err.message : "Failed to change the password")
+            }
         }
     }
 
@@ -67,7 +71,7 @@ const ChangePasswordDialog = ({ open, onOpenChange, onChanged }: ChangePasswordD
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate className="w-full min-w-0 space-y-4">
                     <Field className="min-w-0">
                         <FieldLabel htmlFor="currentPassword">Current password</FieldLabel>
                         <PasswordInput
