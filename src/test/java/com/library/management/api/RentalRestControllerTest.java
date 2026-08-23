@@ -77,7 +77,7 @@ class RentalRestControllerTest {
         when(rentalService.saveRental(any())).thenReturn(rental);
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
-        mockMvc.perform(post("/api/rentals")
+        mockMvc.perform(post("/api/v1/rentals")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -94,7 +94,7 @@ class RentalRestControllerTest {
         when(rentalService.saveRental(any()))
                 .thenThrow(new EntityInvalidArgumentException("Rental", "Copy not available"));
 
-        mockMvc.perform(post("/api/rentals")
+        mockMvc.perform(post("/api/v1/rentals")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -109,7 +109,7 @@ class RentalRestControllerTest {
         when(rentalService.saveRental(any()))
                 .thenThrow(new EntityNotFoundException("Member", "Not found"));
 
-        mockMvc.perform(post("/api/rentals")
+        mockMvc.perform(post("/api/v1/rentals")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound());
@@ -120,7 +120,7 @@ class RentalRestControllerTest {
         when(rentalService.returnRental(any())).thenReturn(rental);
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
-        mockMvc.perform(put("/api/rentals/{uuid}/return", rentalId))
+        mockMvc.perform(put("/api/v1/rentals/{uuid}/return", rentalId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.memberFirstname").value("Thanos"));
     }
@@ -130,7 +130,7 @@ class RentalRestControllerTest {
         when(rentalService.returnRental(any()))
                 .thenThrow(new EntityNotFoundException("Rental", "Not found"));
 
-        mockMvc.perform(put("/api/rentals/{uuid}/return", rentalId))
+        mockMvc.perform(put("/api/v1/rentals/{uuid}/return", rentalId))
                 .andExpect(status().isNotFound());
     }
 
@@ -139,7 +139,7 @@ class RentalRestControllerTest {
         when(rentalService.returnRental(any()))
                 .thenThrow(new EntityInvalidArgumentException("Rental", "Already returned"));
 
-        mockMvc.perform(put("/api/rentals/{uuid}/return", rentalId))
+        mockMvc.perform(put("/api/v1/rentals/{uuid}/return", rentalId))
                 .andExpect(status().isBadRequest());
     }
 
@@ -148,7 +148,7 @@ class RentalRestControllerTest {
         when(rentalService.getRentalByUuid(any())).thenReturn(rental);
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
-        mockMvc.perform(get("/api/rentals/{uuid}", rentalId))
+        mockMvc.perform(get("/api/v1/rentals/{uuid}", rentalId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.bookTitle").value("Animal Farm"));
     }
@@ -158,7 +158,7 @@ class RentalRestControllerTest {
         when(rentalService.getRentalByUuid(any()))
                 .thenThrow(new EntityNotFoundException("Rental", "Not found"));
 
-        mockMvc.perform(get("/api/rentals/{uuid}", rentalId))
+        mockMvc.perform(get("/api/v1/rentals/{uuid}", rentalId))
                 .andExpect(status().isNotFound());
     }
 
@@ -168,7 +168,7 @@ class RentalRestControllerTest {
         when(rentalService.getRentalsPaginatedFiltered(any(), any())).thenReturn(page);
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
-        mockMvc.perform(get("/api/rentals"))
+        mockMvc.perform(get("/api/v1/rentals"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].bookTitle").value("Animal Farm"));
     }
@@ -178,7 +178,7 @@ class RentalRestControllerTest {
         when(rentalService.getRentalsByMemberUuid(any())).thenReturn(List.of(rental));
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
-        mockMvc.perform(get("/api/rentals/member/{memberUuid}", memberId))
+        mockMvc.perform(get("/api/v1/rentals/member/{memberUuid}", memberId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].bookTitle").value("Animal Farm"));
     }
@@ -188,7 +188,7 @@ class RentalRestControllerTest {
         when(rentalService.getRentalsByMemberUuid(any()))
                 .thenThrow(new EntityNotFoundException("Member", "Not found"));
 
-        mockMvc.perform(get("/api/rentals/member/{memberUuid}", memberId))
+        mockMvc.perform(get("/api/v1/rentals/member/{memberUuid}", memberId))
                 .andExpect(status().isNotFound());
     }
 
@@ -198,7 +198,7 @@ class RentalRestControllerTest {
         when(rentalService.getActiveRentalsPaginated(any())).thenReturn(page);
         when(rentalMapper.mapToRentalReadOnlyDTO(any())).thenReturn(rentalReadOnlyDTO);
 
-        mockMvc.perform(get("/api/rentals/active"))
+        mockMvc.perform(get("/api/v1/rentals/active"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].bookTitle").value("Animal Farm"));
     }

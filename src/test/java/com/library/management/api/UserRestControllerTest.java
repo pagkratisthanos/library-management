@@ -69,7 +69,7 @@ class UserRestControllerTest {
         when(userService.saveUser(any())).thenReturn(user);
         when(userMapper.mapToUserReadOnlyDTO(any())).thenReturn(userReadOnlyDTO);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -84,7 +84,7 @@ class UserRestControllerTest {
         when(userService.saveUser(any()))
                 .thenThrow(new EntityAlreadyExistsException("User", "Already exists"));
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict());
@@ -97,7 +97,7 @@ class UserRestControllerTest {
         when(userService.saveUser(any()))
                 .thenThrow(new EntityInvalidArgumentException("Role", "Not found"));
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -108,7 +108,7 @@ class UserRestControllerTest {
         when(userService.getUserByUuidDeletedFalse(any())).thenReturn(user);
         when(userMapper.mapToUserReadOnlyDTO(any())).thenReturn(userReadOnlyDTO);
 
-        mockMvc.perform(get("/api/users/{uuid}", userId))
+        mockMvc.perform(get("/api/v1/users/{uuid}", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.role").value("ADMIN"));
@@ -119,7 +119,7 @@ class UserRestControllerTest {
         when(userService.getUserByUuidDeletedFalse(any()))
                 .thenThrow(new EntityNotFoundException("User", "Not found"));
 
-        mockMvc.perform(get("/api/users/{uuid}", userId))
+        mockMvc.perform(get("/api/v1/users/{uuid}", userId))
                 .andExpect(status().isNotFound());
     }
 
@@ -128,7 +128,7 @@ class UserRestControllerTest {
         when(userService.getUserByUuidDeletedFalse(any()))
                 .thenThrow(new EntityNotFoundException("User", "Not found"));
 
-        mockMvc.perform(get("/api/users/{uuid}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/v1/users/{uuid}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 
@@ -136,7 +136,7 @@ class UserRestControllerTest {
     void deleteUser_whenExists_shouldReturn204() throws Exception {
         doNothing().when(userService).deleteUserByUuid(any());
 
-        mockMvc.perform(delete("/api/users/{uuid}", userId))
+        mockMvc.perform(delete("/api/v1/users/{uuid}", userId))
                 .andExpect(status().isNoContent());
     }
 
@@ -145,7 +145,7 @@ class UserRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityNotFoundException("User", "Not found"))
                 .when(userService).deleteUserByUuid(any());
 
-        mockMvc.perform(delete("/api/users/{uuid}", userId))
+        mockMvc.perform(delete("/api/v1/users/{uuid}", userId))
                 .andExpect(status().isNotFound());
     }
 
@@ -155,7 +155,7 @@ class UserRestControllerTest {
         when(userService.getAllUsers(any(), any())).thenReturn(page);
         when(userMapper.mapToUserReadOnlyDTO(any())).thenReturn(userReadOnlyDTO);
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].username").value("admin"));
     }
@@ -164,7 +164,7 @@ class UserRestControllerTest {
     void saveUser_whenBodyFailsValidation_shouldReturn400WithFieldMessages() throws Exception {
         UserInsertDTO dto = new UserInsertDTO("ab", "weak", 2L);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())

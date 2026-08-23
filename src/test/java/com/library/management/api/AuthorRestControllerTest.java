@@ -76,7 +76,7 @@ class AuthorRestControllerTest {
         when(authorService.saveAuthor(any())).thenReturn(author);
         when(authorMapper.mapToAuthorReadOnlyDTO(any())).thenReturn(authorReadOnlyDTO);
 
-        mockMvc.perform(post("/api/authors")
+        mockMvc.perform(post("/api/v1/authors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -90,7 +90,7 @@ class AuthorRestControllerTest {
                 "", "", null, null, null
         );
 
-        mockMvc.perform(post("/api/authors")
+        mockMvc.perform(post("/api/v1/authors")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -101,7 +101,7 @@ class AuthorRestControllerTest {
         when(authorService.updateAuthor(any(), any())).thenReturn(author);
         when(authorMapper.mapToAuthorReadOnlyDTO(any())).thenReturn(authorReadOnlyDTO);
 
-        mockMvc.perform(put("/api/authors/{uuid}", authorId)
+        mockMvc.perform(put("/api/v1/authors/{uuid}", authorId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new AuthorUpdateDTO(
@@ -118,7 +118,7 @@ class AuthorRestControllerTest {
         when(authorService.updateAuthor(any(), any()))
                 .thenThrow(new EntityNotFoundException("Author", "Not found"));
 
-        mockMvc.perform(put("/api/authors/{uuid}", authorId)
+        mockMvc.perform(put("/api/v1/authors/{uuid}", authorId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new AuthorUpdateDTO(
@@ -133,7 +133,7 @@ class AuthorRestControllerTest {
     void deleteAuthor_whenExists_shouldReturn204() throws Exception {
         doNothing().when(authorService).deleteAuthorByUuid(any());
 
-        mockMvc.perform(delete("/api/authors/{uuid}", authorId))
+        mockMvc.perform(delete("/api/v1/authors/{uuid}", authorId))
                 .andExpect(status().isNoContent());
     }
 
@@ -142,7 +142,7 @@ class AuthorRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityNotFoundException("Author", "Not found"))
                 .when(authorService).deleteAuthorByUuid(any());
 
-        mockMvc.perform(delete("/api/authors/{uuid}", authorId))
+        mockMvc.perform(delete("/api/v1/authors/{uuid}", authorId))
                 .andExpect(status().isNotFound());
     }
 
@@ -151,7 +151,7 @@ class AuthorRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityInvalidArgumentException("Author", "Has books"))
                 .when(authorService).deleteAuthorByUuid(any());
 
-        mockMvc.perform(delete("/api/authors/{uuid}", authorId))
+        mockMvc.perform(delete("/api/v1/authors/{uuid}", authorId))
                 .andExpect(status().isBadRequest());
     }
 
@@ -160,7 +160,7 @@ class AuthorRestControllerTest {
         when(authorService.getAuthorByUUIDDeletedFalse(any())).thenReturn(author);
         when(authorMapper.mapToAuthorReadOnlyDTO(any())).thenReturn(authorReadOnlyDTO);
 
-        mockMvc.perform(get("/api/authors/{uuid}", authorId))
+        mockMvc.perform(get("/api/v1/authors/{uuid}", authorId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname").value("George"))
                 .andExpect(jsonPath("$.lastname").value("Orwell"));
@@ -171,7 +171,7 @@ class AuthorRestControllerTest {
         when(authorService.getAuthorByUUIDDeletedFalse(any()))
                 .thenThrow(new EntityNotFoundException("Author", "Not found"));
 
-        mockMvc.perform(get("/api/authors/{uuid}", authorId))
+        mockMvc.perform(get("/api/v1/authors/{uuid}", authorId))
                 .andExpect(status().isNotFound());
     }
 
@@ -181,7 +181,7 @@ class AuthorRestControllerTest {
         when(authorService.getAuthorsPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(authorMapper.mapToAuthorReadOnlyDTO(any())).thenReturn(authorReadOnlyDTO);
 
-        mockMvc.perform(get("/api/authors"))
+        mockMvc.perform(get("/api/v1/authors"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].firstname").value("George"));
     }
@@ -191,7 +191,7 @@ class AuthorRestControllerTest {
         when(authorService.getAuthorsByBookUuid(any())).thenReturn(List.of(author));
         when(authorMapper.mapToAuthorReadOnlyDTO(any())).thenReturn(authorReadOnlyDTO);
 
-        mockMvc.perform(get("/api/authors/book/{bookUuid}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/v1/authors/book/{bookUuid}", UUID.randomUUID()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].firstname").value("George"));
     }
@@ -201,7 +201,7 @@ class AuthorRestControllerTest {
         when(authorService.getAuthorsByBookUuid(any()))
                 .thenThrow(new EntityNotFoundException("Book", "Not found"));
 
-        mockMvc.perform(get("/api/authors/book/{bookUuid}", UUID.randomUUID()))
+        mockMvc.perform(get("/api/v1/authors/book/{bookUuid}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
 }

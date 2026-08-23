@@ -89,7 +89,7 @@ class MemberRestControllerTest {
         when(memberService.saveMember(any())).thenReturn(member);
         when(memberMapper.mapToMemberReadOnlyDTO(any())).thenReturn(memberReadOnlyDTO);
 
-        mockMvc.perform(post("/api/members")
+        mockMvc.perform(post("/api/v1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -107,7 +107,7 @@ class MemberRestControllerTest {
         when(memberService.saveMember(any()))
                 .thenThrow(new EntityAlreadyExistsException("Member", "Already exists"));
 
-        mockMvc.perform(post("/api/members")
+        mockMvc.perform(post("/api/v1/members")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict());
@@ -123,7 +123,7 @@ class MemberRestControllerTest {
         when(memberService.updateMember(any(), any())).thenReturn(member);
         when(memberMapper.mapToMemberReadOnlyDTO(any())).thenReturn(memberReadOnlyDTO);
 
-        mockMvc.perform(put("/api/members/{uuid}", memberId)
+        mockMvc.perform(put("/api/v1/members/{uuid}", memberId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -140,7 +140,7 @@ class MemberRestControllerTest {
         when(memberService.updateMember(any(), any()))
                 .thenThrow(new EntityNotFoundException("Member", "Not found"));
 
-        mockMvc.perform(put("/api/members/{uuid}", memberId)
+        mockMvc.perform(put("/api/v1/members/{uuid}", memberId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound());
@@ -150,7 +150,7 @@ class MemberRestControllerTest {
     void deleteMember_whenExists_shouldReturn204() throws Exception {
         doNothing().when(memberService).deleteMemberByUuid(any());
 
-        mockMvc.perform(delete("/api/members/{uuid}", memberId))
+        mockMvc.perform(delete("/api/v1/members/{uuid}", memberId))
                 .andExpect(status().isNoContent());
     }
 
@@ -159,7 +159,7 @@ class MemberRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityNotFoundException("Member", "Not found"))
                 .when(memberService).deleteMemberByUuid(any());
 
-        mockMvc.perform(delete("/api/members/{uuid}", memberId))
+        mockMvc.perform(delete("/api/v1/members/{uuid}", memberId))
                 .andExpect(status().isNotFound());
     }
 
@@ -168,7 +168,7 @@ class MemberRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityInvalidArgumentException("Member", "Has active rentals"))
                 .when(memberService).deleteMemberByUuid(any());
 
-        mockMvc.perform(delete("/api/members/{uuid}", memberId))
+        mockMvc.perform(delete("/api/v1/members/{uuid}", memberId))
                 .andExpect(status().isBadRequest());
     }
 
@@ -177,7 +177,7 @@ class MemberRestControllerTest {
         when(memberService.getMemberByUUIDDeletedFalse(any())).thenReturn(member);
         when(memberMapper.mapToMemberReadOnlyDTO(any())).thenReturn(memberReadOnlyDTO);
 
-        mockMvc.perform(get("/api/members/{uuid}", memberId))
+        mockMvc.perform(get("/api/v1/members/{uuid}", memberId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname").value("Thanos"))
                 .andExpect(jsonPath("$.email").value("thanos@example.com"));
@@ -188,7 +188,7 @@ class MemberRestControllerTest {
         when(memberService.getMemberByUUIDDeletedFalse(any()))
                 .thenThrow(new EntityNotFoundException("Member", "Not found"));
 
-        mockMvc.perform(get("/api/members/{uuid}", memberId))
+        mockMvc.perform(get("/api/v1/members/{uuid}", memberId))
                 .andExpect(status().isNotFound());
     }
 
@@ -198,7 +198,7 @@ class MemberRestControllerTest {
         when(memberService.getMembersPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(memberMapper.mapToMemberReadOnlyDTO(any())).thenReturn(memberReadOnlyDTO);
 
-        mockMvc.perform(get("/api/members"))
+        mockMvc.perform(get("/api/v1/members"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].firstname").value("Thanos"));
     }

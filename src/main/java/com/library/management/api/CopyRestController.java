@@ -21,7 +21,7 @@ import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/copies")
+@RequestMapping("/api/v1/copies")
 @RequiredArgsConstructor
 public class CopyRestController {
 

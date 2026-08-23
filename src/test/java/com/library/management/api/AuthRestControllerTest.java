@@ -38,7 +38,7 @@ class AuthRestControllerTest {
 
         when(authenticationService.authenticate(any())).thenReturn(responseDTO);
 
-        mockMvc.perform(post("/api/auth/authenticate")
+        mockMvc.perform(post("/api/v1/auth/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -52,7 +52,7 @@ class AuthRestControllerTest {
         when(authenticationService.authenticate(any()))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        mockMvc.perform(post("/api/auth/authenticate")
+        mockMvc.perform(post("/api/v1/auth/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isUnauthorized())

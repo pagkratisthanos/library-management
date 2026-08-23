@@ -82,7 +82,7 @@ class BookRestControllerTest {
         when(bookService.saveBook(any())).thenReturn(book);
         when(bookMapper.mapToBookReadOnlyDTO(any())).thenReturn(bookReadOnlyDTO);
 
-        mockMvc.perform(post("/api/books")
+        mockMvc.perform(post("/api/v1/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -101,7 +101,7 @@ class BookRestControllerTest {
         when(bookService.saveBook(any()))
                 .thenThrow(new EntityAlreadyExistsException("Book", "Already exists"));
 
-        mockMvc.perform(post("/api/books")
+        mockMvc.perform(post("/api/v1/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict());
@@ -122,7 +122,7 @@ class BookRestControllerTest {
         when(bookService.updateBook(any(), any())).thenReturn(book);
         when(bookMapper.mapToBookReadOnlyDTO(any())).thenReturn(bookReadOnlyDTO);
 
-        mockMvc.perform(put("/api/books/{uuid}", bookId)
+        mockMvc.perform(put("/api/v1/books/{uuid}", bookId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -139,7 +139,7 @@ class BookRestControllerTest {
         when(bookService.updateBook(any(), any()))
                 .thenThrow(new EntityNotFoundException("Book", "Not found"));
 
-        mockMvc.perform(put("/api/books/{uuid}", bookId)
+        mockMvc.perform(put("/api/v1/books/{uuid}", bookId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound());
@@ -149,7 +149,7 @@ class BookRestControllerTest {
     void deleteBook_whenExists_shouldReturn204() throws Exception {
         doNothing().when(bookService).deleteBookByUuid(any());
 
-        mockMvc.perform(delete("/api/books/{uuid}", bookId))
+        mockMvc.perform(delete("/api/v1/books/{uuid}", bookId))
                 .andExpect(status().isNoContent());
     }
 
@@ -158,7 +158,7 @@ class BookRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityNotFoundException("Book", "Not found"))
                 .when(bookService).deleteBookByUuid(any());
 
-        mockMvc.perform(delete("/api/books/{uuid}", bookId))
+        mockMvc.perform(delete("/api/v1/books/{uuid}", bookId))
                 .andExpect(status().isNotFound());
     }
 
@@ -167,7 +167,7 @@ class BookRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityInvalidArgumentException("Book", "Has active rentals"))
                 .when(bookService).deleteBookByUuid(any());
 
-        mockMvc.perform(delete("/api/books/{uuid}", bookId))
+        mockMvc.perform(delete("/api/v1/books/{uuid}", bookId))
                 .andExpect(status().isBadRequest());
     }
 
@@ -176,7 +176,7 @@ class BookRestControllerTest {
         when(bookService.getBookByUuidDeletedFalse(any())).thenReturn(book);
         when(bookMapper.mapToBookReadOnlyDTO(any())).thenReturn(bookReadOnlyDTO);
 
-        mockMvc.perform(get("/api/books/{uuid}", bookId))
+        mockMvc.perform(get("/api/v1/books/{uuid}", bookId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Animal Farm"));
     }
@@ -186,7 +186,7 @@ class BookRestControllerTest {
         when(bookService.getBookByUuidDeletedFalse(any()))
                 .thenThrow(new EntityNotFoundException("Book", "Not found"));
 
-        mockMvc.perform(get("/api/books/{uuid}", bookId))
+        mockMvc.perform(get("/api/v1/books/{uuid}", bookId))
                 .andExpect(status().isNotFound());
     }
 
@@ -196,7 +196,7 @@ class BookRestControllerTest {
         when(bookService.getBooksPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(bookMapper.mapToBookReadOnlyDTO(any())).thenReturn(bookReadOnlyDTO);
 
-        mockMvc.perform(get("/api/books"))
+        mockMvc.perform(get("/api/v1/books"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("Animal Farm"));
     }

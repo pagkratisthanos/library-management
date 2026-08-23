@@ -73,7 +73,7 @@ class CopyRestControllerTest {
         when(copyService.saveCopy(any())).thenReturn(copy);
         when(copyMapper.mapToCopyReadOnlyDTO(any())).thenReturn(copyReadOnlyDTO);
 
-        mockMvc.perform(post("/api/copies")
+        mockMvc.perform(post("/api/v1/copies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
@@ -88,7 +88,7 @@ class CopyRestControllerTest {
         when(copyService.saveCopy(any()))
                 .thenThrow(new EntityNotFoundException("Book", "Not found"));
 
-        mockMvc.perform(post("/api/copies")
+        mockMvc.perform(post("/api/v1/copies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound());
@@ -101,7 +101,7 @@ class CopyRestControllerTest {
         when(copyService.saveCopy(any()))
                 .thenThrow(new EntityInvalidArgumentException("Copy", "Book is deleted"));
 
-        mockMvc.perform(post("/api/copies")
+        mockMvc.perform(post("/api/v1/copies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -114,7 +114,7 @@ class CopyRestControllerTest {
         when(copyService.updateCopy(any(), any())).thenReturn(copy);
         when(copyMapper.mapToCopyReadOnlyDTO(any())).thenReturn(copyReadOnlyDTO);
 
-        mockMvc.perform(put("/api/copies/{uuid}", copyId)
+        mockMvc.perform(put("/api/v1/copies/{uuid}", copyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -128,7 +128,7 @@ class CopyRestControllerTest {
         when(copyService.updateCopy(any(), any()))
                 .thenThrow(new EntityNotFoundException("Copy", "Not found"));
 
-        mockMvc.perform(put("/api/copies/{uuid}", copyId)
+        mockMvc.perform(put("/api/v1/copies/{uuid}", copyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isNotFound());
@@ -138,7 +138,7 @@ class CopyRestControllerTest {
     void deleteCopy_whenExists_shouldReturn204() throws Exception {
         doNothing().when(copyService).deleteCopyByUuid(any());
 
-        mockMvc.perform(delete("/api/copies/{uuid}", copyId))
+        mockMvc.perform(delete("/api/v1/copies/{uuid}", copyId))
                 .andExpect(status().isNoContent());
     }
 
@@ -147,7 +147,7 @@ class CopyRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityNotFoundException("Copy", "Not found"))
                 .when(copyService).deleteCopyByUuid(any());
 
-        mockMvc.perform(delete("/api/copies/{uuid}", copyId))
+        mockMvc.perform(delete("/api/v1/copies/{uuid}", copyId))
                 .andExpect(status().isNotFound());
     }
 
@@ -156,7 +156,7 @@ class CopyRestControllerTest {
         org.mockito.Mockito.doThrow(new EntityInvalidArgumentException("Copy", "Has active rental"))
                 .when(copyService).deleteCopyByUuid(any());
 
-        mockMvc.perform(delete("/api/copies/{uuid}", copyId))
+        mockMvc.perform(delete("/api/v1/copies/{uuid}", copyId))
                 .andExpect(status().isBadRequest());
     }
 
@@ -165,7 +165,7 @@ class CopyRestControllerTest {
         when(copyService.getCopyByUuidDeletedFalse(any())).thenReturn(copy);
         when(copyMapper.mapToCopyReadOnlyDTO(any())).thenReturn(copyReadOnlyDTO);
 
-        mockMvc.perform(get("/api/copies/{uuid}", copyId))
+        mockMvc.perform(get("/api/v1/copies/{uuid}", copyId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.condition").value("NEW"));
     }
@@ -175,7 +175,7 @@ class CopyRestControllerTest {
         when(copyService.getCopyByUuidDeletedFalse(any()))
                 .thenThrow(new EntityNotFoundException("Copy", "Not found"));
 
-        mockMvc.perform(get("/api/copies/{uuid}", copyId))
+        mockMvc.perform(get("/api/v1/copies/{uuid}", copyId))
                 .andExpect(status().isNotFound());
     }
 
@@ -185,7 +185,7 @@ class CopyRestControllerTest {
         when(copyService.getCopiesPaginatedFilteredAndDeletedFalse(any(), any())).thenReturn(page);
         when(copyMapper.mapToCopyReadOnlyDTO(any())).thenReturn(copyReadOnlyDTO);
 
-        mockMvc.perform(get("/api/copies"))
+        mockMvc.perform(get("/api/v1/copies"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].condition").value("NEW"));
     }

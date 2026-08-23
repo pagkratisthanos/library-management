@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/rentals")
+@RequestMapping("/api/v1/rentals")
 @RequiredArgsConstructor
 public class RentalRestController {
 

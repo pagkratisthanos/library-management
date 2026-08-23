@@ -27,7 +27,7 @@ class CustomAccessDeniedHandlerTest {
         response = mock(HttpServletResponse.class);
         stringWriter = new StringWriter();
         when(response.getWriter()).thenReturn(new PrintWriter(stringWriter));
-        when(request.getRequestURI()).thenReturn("/api/authors");
+        when(request.getRequestURI()).thenReturn("/api/v1/authors");
     }
 
     @Test

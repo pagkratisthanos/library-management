@@ -49,7 +49,7 @@ class RoleRestControllerTest {
         when(roleMapper.mapToRoleReadOnlyDTO(adminRole)).thenReturn(new RoleReadOnlyDTO(1L, "ADMIN"));
         when(roleMapper.mapToRoleReadOnlyDTO(librarianRole)).thenReturn(new RoleReadOnlyDTO(2L, "LIBRARIAN"));
 
-        mockMvc.perform(get("/api/roles"))
+        mockMvc.perform(get("/api/v1/roles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("ADMIN"))
                 .andExpect(jsonPath("$[1].name").value("LIBRARIAN"));
@@ -59,7 +59,7 @@ class RoleRestControllerTest {
     void getAllRoles_whenEmpty_shouldReturn200WithEmptyList() throws Exception {
         when(roleService.getAllRoles()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/roles"))
+        mockMvc.perform(get("/api/v1/roles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
