@@ -5,6 +5,7 @@ import com.library.management.core.exceptions.EntityInvalidArgumentException;
 import com.library.management.core.exceptions.EntityNotFoundException;
 import com.library.management.dto.ErrorResponseDTO;
 import com.library.management.dto.ValidationErrorResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
@@ -55,8 +56,11 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(AuthenticationException e) {
-        log.warn("Authentication failed. Message={}", e.getMessage());
+    public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(
+            AuthenticationException e,
+            HttpServletRequest request) {
+
+        log.warn("Failed login attempt from IP={}", request.getRemoteAddr());
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
