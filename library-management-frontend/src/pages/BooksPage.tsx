@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Pencil, Plus, Search, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import {
     Table,
@@ -105,7 +106,7 @@ const BooksPage = () => {
     }
 
     const books = data?.content ?? []
-    const columnCount = canEdit ? 6 : 5
+    const columnCount = canEdit ? 7 : 6
 
     return (
         <div className="space-y-6">
@@ -148,6 +149,14 @@ const BooksPage = () => {
                                 Language
                             </SortableTableHead>
                             <TableHead>Authors</TableHead>
+                            <SortableTableHead
+                                field="availableCopies"
+                                sort={sort}
+                                onSort={handleSort}
+                                className="text-right"
+                            >
+                                Available
+                            </SortableTableHead>
                             <SortableTableHead
                                 field="dailyCost"
                                 sort={sort}
@@ -198,6 +207,19 @@ const BooksPage = () => {
                                                 .map((author) => `${author.firstname} ${author.lastname}`)
                                                 .join(", ")
                                             : "—"}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {book.totalCopies === 0 ? (
+                                            <span className="text-muted-foreground">—</span>
+                                        ) : book.availableCopies === 0 ? (
+                                            <Badge variant="secondary">
+                                                0 of {book.totalCopies}
+                                            </Badge>
+                                        ) : (
+                                            <Badge>
+                                                {book.availableCopies} of {book.totalCopies}
+                                            </Badge>
+                                        )}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         {book.dailyCost.toFixed(2)} €

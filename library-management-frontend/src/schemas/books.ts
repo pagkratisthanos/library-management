@@ -10,6 +10,8 @@ export type Book = {
     dailyCost: number
     description: string | null
     authorReadOnlyDTOs: Author[]
+    totalCopies: number
+    availableCopies: number
 }
 
 export type BookFilters = {
@@ -58,3 +60,4 @@ export type BookUpdatePayload = {
     dailyCost: number
     description?: string
 }
+

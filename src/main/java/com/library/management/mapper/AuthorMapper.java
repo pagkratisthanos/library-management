@@ -33,7 +33,9 @@ public class AuthorMapper {
                         book.getLanguage(),
                         book.getDailyCost(),
                         book.getDescription(),
-                        null
+                        null,
+                        book.getTotalCopies(),
+                        book.getAvailableCopies()
                 ))
                 .collect(Collectors.toSet());
 

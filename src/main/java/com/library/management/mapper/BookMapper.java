@@ -48,7 +48,9 @@ public class BookMapper {
                 book.getLanguage(),
                 book.getDailyCost(),
                 book.getDescription(),
-                authors
+                authors,
+                book.getTotalCopies(),
+                book.getAvailableCopies()
         );
     }
 }

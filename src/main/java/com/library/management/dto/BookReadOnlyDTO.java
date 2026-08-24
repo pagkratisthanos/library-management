@@ -8,6 +8,7 @@ import java.util.UUID;
 public record BookReadOnlyDTO(UUID id, String title, String isbn,
                               LocalDate publishedDate, String language,
                               BigDecimal dailyCost, String description,
-                              Set<AuthorReadOnlyDTO> authorReadOnlyDTOs
-                              ) {
+                              Set<AuthorReadOnlyDTO> authorReadOnlyDTOs,
+                              long totalCopies, long availableCopies
+) {
 }

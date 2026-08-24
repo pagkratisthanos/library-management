@@ -3,6 +3,7 @@ package com.library.management.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Formula;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -27,6 +28,16 @@ public class Book extends AbstractEntity {
     @ManyToMany(mappedBy = "books")
     @BatchSize(size = 20)
     private Set<Author> authors = new HashSet<>();
+
+    /** Copies of this book that have not been soft-deleted. Read-only, computed by the database. */
+    @Setter(AccessLevel.NONE)
+    @Formula("(select count(c.id) from copies c where c.book_id = {alias}.id and c.deleted = false)")
+    private long totalCopies;
+
+    /** Copies that are not currently lent out. Read-only, computed by the database. */
+    @Setter(AccessLevel.NONE)
+    @Formula("(select count(c.id) from copies c where c.book_id = {alias}.id and c.deleted = false and c.available = true)")
+    private long availableCopies;
 
     @Column(nullable = false)
     private String title;

@@ -67,7 +67,8 @@ class BookRestControllerTest {
         bookReadOnlyDTO = new BookReadOnlyDTO(
                 bookId, "Animal Farm", "978-0-452-28424-4",
                 LocalDate.of(1945, 8, 17), "English",
-                BigDecimal.valueOf(1.20), "A political allegory", Set.of()
+                BigDecimal.valueOf(1.20), "A political allegory", Set.of(),
+                0L, 0L
         );
     }
 
