@@ -3,6 +3,7 @@ package com.library.management.api;
 import com.library.management.authentication.AuthenticationService;
 import com.library.management.dto.AuthenticationRequestDTO;
 import com.library.management.dto.AuthenticationResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ public class AuthRestController {
 
     private final AuthenticationService authenticationService;
 
+    @Operation(summary = "Log in and receive a JWT token")
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponseDTO> authenticate(
             @RequestBody AuthenticationRequestDTO dto) {

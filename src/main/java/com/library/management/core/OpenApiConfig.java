@@ -32,7 +32,10 @@ public class OpenApiConfig {
                                 Provides endpoints for managing authors, books, members, copies and rentals.
                                 
                                 Authentication is done via JWT Bearer tokens.
-                                Obtain a token from /api/auth/authenticate before using secured endpoints.
+                                Obtain a token from /api/v1/auth/authenticate before using secured endpoints.
+                                
+                                Errors answer with {"code": "...", "description": "..."}.
+                                Validation failures add an "errors" map of field to message.
                         """)
                         .contact(new Contact()
                                 .name("Thanos Pagkratis")
@@ -42,6 +45,11 @@ public class OpenApiConfig {
                                 .url("https://opensource.org/licenses/MIT")));
     }
 
+    /**
+     * Adds the error responses every secured endpoint can return.
+     * This composes with the responses springdoc derives from the return type,
+     * whereas a declared @ApiResponses would replace them.
+     */
     @Bean
     public OperationCustomizer globalSecurityResponses() {
         return (operation, handlerMethod) -> {
@@ -50,8 +58,18 @@ public class OpenApiConfig {
 
             if (isSecured) {
                 operation.getResponses()
-                        .addApiResponse("401", new ApiResponse().description("Unauthorized - JWT token is missing or invalid"))
-                        .addApiResponse("403", new ApiResponse().description("Forbidden - You don't have permission to access this resource"));
+                        .addApiResponse("400", new ApiResponse()
+                                .description("Validation error or a broken business rule"))
+                        .addApiResponse("401", new ApiResponse()
+                                .description("Unauthorized - JWT token is missing or invalid"))
+                        .addApiResponse("403", new ApiResponse()
+                                .description("Forbidden - You don't have permission to access this resource"))
+                        .addApiResponse("404", new ApiResponse()
+                                .description("Entity not found"))
+                        .addApiResponse("409", new ApiResponse()
+                                .description("Entity already exists"))
+                        .addApiResponse("500", new ApiResponse()
+                                .description("Unexpected error"));
             }
             return operation;
         };
