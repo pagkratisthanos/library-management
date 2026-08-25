@@ -1,14 +1,17 @@
+import { lazy } from "react"
 import { Navigate, Route, Routes } from "react-router"
-import LoginPage from "@/pages/LoginPage.tsx"
-import AppLayout from "@/components/AppLayout.tsx"
-import ProtectedRoute from "@/components/ProtectedRoute.tsx"
-import DashboardPage from "@/pages/DashboardPage.tsx"
-import BooksPage from "@/pages/BooksPage.tsx"
-import AuthorsPage from "@/pages/AuthorsPage.tsx"
-import CopiesPage from "@/pages/CopiesPage.tsx"
-import MembersPage from "@/pages/MembersPage.tsx"
-import RentalsPage from "@/pages/RentalsPage.tsx"
-import UsersPage from "@/pages/UsersPage.tsx"
+import LoginPage from "@/pages/LoginPage"
+import AppLayout from "@/components/AppLayout"
+import ProtectedRoute from "@/components/ProtectedRoute"
+
+// each page becomes its own chunk, fetched the first time it is visited
+const DashboardPage = lazy(() => import("@/pages/DashboardPage"))
+const BooksPage = lazy(() => import("@/pages/BooksPage"))
+const AuthorsPage = lazy(() => import("@/pages/AuthorsPage"))
+const CopiesPage = lazy(() => import("@/pages/CopiesPage"))
+const MembersPage = lazy(() => import("@/pages/MembersPage"))
+const RentalsPage = lazy(() => import("@/pages/RentalsPage"))
+const UsersPage = lazy(() => import("@/pages/UsersPage"))
 
 function App() {
     return (

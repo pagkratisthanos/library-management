@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { Link, NavLink, Outlet, useNavigate } from "react-router"
 import type { LucideIcon } from "lucide-react"
 import {
@@ -103,7 +103,11 @@ const AppLayout = () => {
             </aside>
 
             <main className="flex-1 p-8">
-                <Outlet />
+                <Suspense
+                    fallback={<p className="text-sm text-muted-foreground">Loading...</p>}
+                >
+                    <Outlet />
+                </Suspense>
             </main>
 
             <ChangePasswordDialog
