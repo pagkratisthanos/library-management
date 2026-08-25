@@ -7,6 +7,7 @@ import com.library.management.dto.ErrorResponseDTO;
 import com.library.management.dto.ValidationErrorResponseDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -100,6 +101,15 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                         "VALIDATION_ERROR",
                         "The request body is not valid",
                         errors));
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponseDTO> handleDataAccessException(DataAccessException e) {
+        log.error("Database error. Message={}", e.getMessage(), e);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponseDTO("DATABASE_ERROR", "A database error occurred."));
     }
 
     @ExceptionHandler(Exception.class)
