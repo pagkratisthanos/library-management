@@ -10,6 +10,11 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d library_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   app:
     build: .
@@ -24,7 +29,20 @@ services:
       APP_SECURITY_SECRET_KEY: ${APP_SECURITY_SECRET_KEY}
       APP_SECURITY_JWT_EXPIRATION: ${APP_SECURITY_JWT_EXPIRATION:-43200000}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./library-management-frontend
+      args:
+        # the browser calls the API, not the container, so this is a host address
+        VITE_API_URL: http://localhost:8080/api/v1
+    container_name: library_web
+    ports:
+      - "5173:80"
+    depends_on:
+      - app
 
 volumes:
   postgres_data:
