@@ -29,6 +29,14 @@ import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+/**
+ * Stateless JWT security. There is no session and no login form: every request carries its own
+ * proof of identity in the Authorization header, or it is rejected.
+ *
+ * <p>Authorization is by capability rather than by role. A role is a bag of capabilities, so a new
+ * role can be introduced without touching this file, as long as it is granted existing
+ * capabilities.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -38,6 +46,12 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper;
 
+    /**
+     * The matchers are evaluated top to bottom and the first match wins, so order is part of the
+     * meaning. The rule for {@code /users/me/password} has to stay above the {@code /users/**}
+     * rules: moved below them, a user without MANAGE_USERS could no longer change their own
+     * password.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationProvider authenticationProvider)
@@ -86,6 +100,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    /** Only the React development server and the nginx container are allowed to call the API. */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -102,8 +117,9 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder,
                                                          UserDetailsService userDetailsService) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(passwordEncoder);
-        authenticationProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider authenticationProvider =
+                new DaoAuthenticationProvider(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
         return authenticationProvider;
     }
 
