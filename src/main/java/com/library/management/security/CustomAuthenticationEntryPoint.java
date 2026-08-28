@@ -8,10 +8,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Answers 401 in the same JSON shape the rest of the API uses.
+ *
+ * <p>Spring Security calls this when an unauthenticated request reaches a protected endpoint.
+ * {@link JwtAuthenticationFilter} also calls it directly for a token it cannot accept, so that a
+ * rejected token produces one 401 and one warning line rather than a stack trace.
+ */
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -21,7 +30,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException e) throws IOException {
 
-        log.warn("User not authenticated, with message={}", e.getMessage());
+        log.warn("Unauthenticated request to {} from IP={}. Message={}",
+                request.getRequestURI(), request.getRemoteAddr(), e.getMessage());
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json; charset=UTF-8");

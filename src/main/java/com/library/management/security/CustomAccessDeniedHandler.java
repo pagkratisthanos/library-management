@@ -8,10 +8,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Answers 403 in the same JSON shape the rest of the API uses. Reached when the caller is
+ * authenticated but lacks the capability the endpoint requires.
+ */
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 

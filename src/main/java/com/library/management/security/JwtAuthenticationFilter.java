@@ -9,9 +9,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,6 +31,12 @@ import java.io.IOException;
  *
  * <p>The authorities come from the database, not from the {@code role} claim inside the token, so a
  * role change takes effect on the next request instead of waiting for the token to expire.
+ *
+ * <p>A token that cannot be accepted is answered here, by handing the response to
+ * {@link CustomAuthenticationEntryPoint}, instead of by throwing. An expired or forged token is an
+ * ordinary event — a browser holding yesterday's cookie causes it — and throwing would let the
+ * exception escape the filter chain, where the servlet container logs a full stack trace at ERROR
+ * for something that is neither unexpected nor the server's fault.
  */
 @Component
 @RequiredArgsConstructor
@@ -37,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -44,17 +53,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         final String authorizationHeader = request.getHeader("Authorization");
-        final String jwt;
-        String username;
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authorizationHeader.substring(7);
+        final String jwt = authorizationHeader.substring(7);
+
         try {
-            username = jwtService.extractSubject(jwt);
+            String username = jwtService.extractSubject(jwt);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -71,14 +79,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (ExpiredJwtException e) {
-            throw new AuthenticationCredentialsNotFoundException("Token has expired");
+            // more specific than JwtException, so it has to be caught first
+            authenticationEntryPoint.commence(request, response,
+                    new CredentialsExpiredException("Token has expired"));
+            return;
         } catch (JwtException | IllegalArgumentException e) {
-            throw new BadCredentialsException("Invalid token");
-        } catch (BadCredentialsException e) {
-            throw e;
+            authenticationEntryPoint.commence(request, response,
+                    new BadCredentialsException("Invalid token"));
+            return;
+        } catch (AuthenticationException e) {
+            authenticationEntryPoint.commence(request, response, e);
+            return;
         } catch (Exception e) {
-            log.error("Unexpected error during validation", e);
-            throw new AuthenticationCredentialsNotFoundException("Token validation failed");
+            // anything else really is unexpected, so this one keeps its stack trace
+            log.error("Unexpected error while validating the token", e);
+            authenticationEntryPoint.commence(request, response,
+                    new AuthenticationServiceException("Token validation failed"));
+            return;
         }
 
         filterChain.doFilter(request, response);
