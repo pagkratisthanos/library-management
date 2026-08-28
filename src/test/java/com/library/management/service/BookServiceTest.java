@@ -99,6 +99,20 @@ class BookServiceTest {
     }
 
     @Test
+    void saveBook_whenIsbnBelongsToDeletedBook_shouldThrowException() {
+        existingBook.softDelete();
+        bookRepository.save(existingBook);
+
+        BookInsertDTO dto = new BookInsertDTO(
+                "Animal Farm", "978-0-452-28424-4", LocalDate.of(1945, 8, 17),
+                "English", BigDecimal.valueOf(1.20), "A political allegory", null
+        );
+
+        assertThatThrownBy(() -> bookService.saveBook(dto))
+                .isInstanceOf(EntityAlreadyExistsException.class);
+    }
+
+    @Test
     void saveBook_whenDailyCostNegative_shouldThrowException() {
         BookInsertDTO dto = new BookInsertDTO(
                 "1984", "978-0-452-28423-4", LocalDate.of(1949, 6, 8),

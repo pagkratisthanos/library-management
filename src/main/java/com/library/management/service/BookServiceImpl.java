@@ -39,7 +39,10 @@ public class BookServiceImpl implements IBookService {
             EntityNotFoundException.class})
     public Book saveBook(BookInsertDTO dto) throws EntityAlreadyExistsException, EntityInvalidArgumentException, EntityNotFoundException {
         try {
-            if (bookRepository.existsByIsbnAndDeletedFalse(dto.isbn())) {
+            // Soft-deleted books keep their ISBN, and the unique constraint on the column does not
+            // know about soft deletion. Excluding them here would let the insert through and let
+            // the database reject it, turning a business rule into a 500.
+            if (bookRepository.existsByIsbn(dto.isbn())) {
                 throw new EntityAlreadyExistsException("Book", "Book with isbn: " + dto.isbn() + " already exists.");
             }
 
