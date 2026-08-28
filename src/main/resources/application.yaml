@@ -29,6 +29,12 @@ spring:
 server:
   port: 8080
 
+logging:
+  pattern:
+    # MDCLoggingFilter puts the user and the client IP here. The defaults after ":-" cover the
+    # lines written outside a request, such as startup.
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{user:-system}@%X{ip:-local}] %logger{36} - %msg%n"
+
 app:
   security:
     secret-key: ${APP_SECURITY_SECRET_KEY}
