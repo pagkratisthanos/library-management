@@ -35,7 +35,7 @@ application on top of it, with role based access for administrators and libraria
 - **Springdoc OpenAPI** 2.8.9 (Swagger UI)
 - **Docker** + Docker Compose
 - **JaCoCo** 0.8.12 — code coverage
-- **JUnit 5** + AssertJ — 482 tests
+- **JUnit 5** + AssertJ — 483 tests
 
 ### Frontend
 - **React** 19 + **TypeScript**
@@ -123,6 +123,14 @@ that:
 | localhost:5433 | PostgreSQL, if you want to inspect it |
 
 Sign in with `admin` / `admin123!`.
+
+The database arrives with a library already in it — twenty-four authors, twenty-six
+titles, forty-five physical copies, twenty-four members and thirty-two loans — so there
+is something to look at from the first screen. It is sized and shaped to reach every
+state the interface can show: three pages of results everywhere, titles the library holds
+no copies of, a title that is entirely lent out, all five copy conditions, authors who can
+be deleted and authors who cannot, and loans that are open, overdue and returned. A second
+account, `librarian` / `admin123!`, shows the reduced interface a librarian gets.
 
 ### What is running
 
@@ -236,6 +244,18 @@ local run needs no extra setup.
 
 Database credentials are read from `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`
 and `SPRING_DATASOURCE_PASSWORD`, defaulting to the local PostgreSQL values.
+
+### Logging
+
+Every log line carries the user and the client IP of the request that produced it:
+
+```
+12:54:10.481 INFO  [admin@127.0.0.1] c.l.m.s.BookServiceImpl - Book updated with uuid=0b00…
+```
+
+A servlet filter puts both into the logging context at the start of each request and clears
+them at the end. Lines written outside a request, such as during startup, show
+`[system@local]`.
 
 ### Building for production
 
@@ -414,6 +434,11 @@ question rather than a flag on the title.
 All entities extend `AbstractEntity`, which carries the UUID primary key, the audit
 timestamps and the soft delete flags.
 
+Nothing is ever deleted for real. A delete sets a flag, the row stays, and history that
+points at it stays valid — a returned rental still names the copy it was for. One
+consequence is worth knowing: a deleted book keeps its ISBN, so that ISBN cannot be reused
+by a new book.
+
 ### Migrations
 
 | Migration | Description |
@@ -426,6 +451,10 @@ timestamps and the soft delete flags.
 | V12 | Create roles, capabilities, users tables + insert ADMIN/LIBRARIAN roles + 15 capabilities |
 | V13 | Insert default admin user (incorrect hash — fixed in V14) |
 | V14 | Fix admin password hash |
+| V15 | Demo data: authors, books, copies, members, loans, and a librarian account |
+
+`V15` exists so that a fresh installation is explorable rather than empty. Delete it if
+you want to start from a blank library.
 
 Deletion is **soft** throughout: rows carry `deleted` and `deletedAt` and are filtered
 out of every read path rather than removed.
@@ -439,11 +468,12 @@ that the entities and the migrated database agree.
 
 The API uses **JWT Bearer Token** authentication.
 
-### Default Admin Credentials
-```
-username: admin
-password: admin123!
-```
+### Default accounts
+
+| Username | Password | Role | Comes from |
+|----------|----------|------|------------|
+| `admin` | `admin123!` | ADMIN | migration V13 |
+| `librarian` | `admin123!` | LIBRARIAN | migration V15, with the demo data |
 
 ### Login
 ```http
@@ -551,6 +581,9 @@ GET /api/v1/books?sort=availableCopies,desc
 Every book carries `totalCopies` and `availableCopies`, counted by the database with a
 Hibernate `@Formula`. The list therefore still costs one query, and both fields can be
 sorted on.
+
+ISBNs are unique across the whole table, deleted books included. A book cannot be deleted
+while any of its copies is out on loan; deleting it soft-deletes its copies with it.
 
 ### Members
 | Method | Endpoint | Description | Required Capability |
@@ -726,7 +759,7 @@ After running the tests, open the JaCoCo report:
 target/jacoco-report/index.html
 ```
 
-482 tests.
+483 tests.
 
 ---
 
