@@ -24,6 +24,18 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Translates exceptions into HTTP responses, so that no controller has to catch anything.
+ *
+ * <p>Spring picks the handler whose declared type is closest to the thrown exception, which is why
+ * the catch-all {@code Exception} handler does not swallow the specific ones. It is last in the
+ * file only for readability.
+ *
+ * <p>Exceptions that Spring MVC raises before a controller is reached — a malformed body, a failed
+ * {@code @Valid} check — belong to {@link ResponseEntityExceptionHandler} and are customised by
+ * overriding its methods. Adding an {@code @ExceptionHandler} for the same type instead of
+ * overriding makes the two ambiguous and the application fails to start.
+ */
 @ControllerAdvice
 @Slf4j
 public class ErrorHandler extends ResponseEntityExceptionHandler {
@@ -56,6 +68,11 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
 
     }
 
+    /**
+     * The response deliberately does not say whether it was the username or the password that was
+     * wrong, so that the endpoint cannot be used to discover which accounts exist. The IP is logged
+     * instead, where repeated attempts are visible.
+     */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponseDTO> handleAuthenticationException(
             AuthenticationException e,
@@ -68,6 +85,10 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                 .body(new ErrorResponseDTO("BAD_CREDENTIALS", "Invalid username or password"));
     }
 
+    /**
+     * Raised when {@code ?sort=} names a property the entity does not have. It is the client's
+     * mistake, not the server's, so it answers 400 rather than the 500 it would default to.
+     */
     @ExceptionHandler(PropertyReferenceException.class)
     public ResponseEntity<ErrorResponseDTO> handlePropertyReferenceException(PropertyReferenceException e) {
         log.warn("Invalid sort or filter property. Message={}", e.getMessage());
@@ -103,6 +124,7 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
                         errors));
     }
 
+    /** The real message goes to the log, not to the client: it names tables and constraints. */
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<ErrorResponseDTO> handleDataAccessException(DataAccessException e) {
         log.error("Database error. Message={}", e.getMessage(), e);

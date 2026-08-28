@@ -20,6 +20,15 @@ function decodeToken(token: string | null): JwtPayload | null {
     }
 }
 
+/**
+ * The JWT cookie is the only source of truth for who is signed in. Identity is derived by decoding
+ * it on each render rather than copied into state, so there is no second copy that can drift — a
+ * cleared cookie means signed out, immediately.
+ *
+ * The role read from the token decides what the interface offers. It is not a security boundary:
+ * the backend re-checks every request against the database, so a tampered token buys a different
+ * menu and nothing else.
+ */
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [token, setToken] = useState<string | null>(
         () => getCookie(TOKEN_COOKIE) ?? null,
@@ -48,6 +57,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setToken(null)
     }
 
+    // The api client cannot import React, so it calls back here when the server rejects a token we
+    // were still holding. That is the only way the app learns a session died on the backend.
     useEffect(() => {
         setUnauthorizedHandler(() => {
             deleteCookie(TOKEN_COOKIE, { path: "/" })

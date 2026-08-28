@@ -13,6 +13,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.function.Function;
 
+/**
+ * Issues and reads the JSON Web Tokens the API authenticates with.
+ *
+ * <p>The signing key and the lifetime come from configuration, never from source. In production
+ * both arrive as environment variables, so the same jar can be deployed anywhere without a rebuild.
+ *
+ * <p>The token carries a {@code role} claim for the browser's benefit — the frontend decodes it to
+ * decide which menu items to draw. The backend ignores it and loads the authorities from the
+ * database on every request, because a claim signed an hour ago cannot be trusted to still describe
+ * the account.
+ */
 @Service
 public class JwtService {
 

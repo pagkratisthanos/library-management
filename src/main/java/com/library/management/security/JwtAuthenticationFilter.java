@@ -20,6 +20,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Turns a valid Bearer token into an authenticated request.
+ *
+ * <p>A request without a token is passed straight through rather than rejected. That is deliberate:
+ * this filter only establishes identity, and it is {@link SecurityConfiguration} that decides which
+ * endpoints need one. Rejecting here would also block the public login and Swagger endpoints.
+ *
+ * <p>The authorities come from the database, not from the {@code role} claim inside the token, so a
+ * role change takes effect on the next request instead of waiting for the token to expire.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -12,6 +12,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Puts the current username and client IP into the logging context, so that they can be attached to
+ * every log line written while handling a request, without each call site passing them along.
+ * A log pattern picks them up with {@code %X{user}} and {@code %X{ip}}.
+ *
+ * <p>The context is tied to the thread, and threads are pooled and reused, so it must be cleared in
+ * a {@code finally} block. Without that, the next request on the same thread would be logged under
+ * the previous user's name.
+ *
+ * <p>Behind a proxy the connecting address is the proxy's, so {@code X-Forwarded-For} is preferred
+ * where present and its first entry — the original client — is taken.
+ */
 @Component
 public class MDCLoggingFilter extends OncePerRequestFilter {
 

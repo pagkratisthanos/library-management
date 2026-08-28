@@ -23,13 +23,25 @@ public class Book extends AbstractEntity {
     @Setter(AccessLevel.PRIVATE)
     private List<Copy> copies = new ArrayList<>();
 
+    /**
+     * Batched rather than fetched with an entity graph. A graph would join the authors into the
+     * page query, and a join that multiplies rows cannot be combined with SQL {@code LIMIT} —
+     * Hibernate would fall back to paginating in memory. {@code @BatchSize} keeps the page query
+     * intact and loads the authors of all twenty books on the page in one extra query instead of
+     * twenty.
+     */
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     @ManyToMany(mappedBy = "books")
     @BatchSize(size = 20)
     private Set<Author> authors = new HashSet<>();
 
-    /** Copies of this book that have not been soft-deleted. Read-only, computed by the database. */
+    /**
+     * Copies of this book that have not been soft-deleted. Read-only, computed by the database.
+     *
+     * <p>A subquery rather than {@code copies.size()} so that it can be sorted and filtered on in
+     * SQL, and so that listing a page of books does not have to load every copy of every book.
+     */
     @Setter(AccessLevel.NONE)
     @Formula("(select count(c.id) from copies c where c.book_id = {alias}.id and c.deleted = false)")
     private long totalCopies;

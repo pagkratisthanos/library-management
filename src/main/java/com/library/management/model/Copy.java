@@ -31,7 +31,16 @@ public class Copy extends AbstractEntity {
     @Column(nullable = false)
     private CopyCondition condition;
 
-    /** Semantic order for sorting: best condition first. Read-only, computed by the database. */
+    /**
+     * Semantic order for sorting: best condition first. Read-only, computed by the database.
+     *
+     * <p>Sorting on {@code condition} itself would order alphabetically, which puts DAMAGED before
+     * NEW. This column exists so that {@code ?sort=conditionRank} means what a librarian expects.
+     *
+     * <p>The {@code {alias}} prefix is required, not decorative. Hibernate replaces it with this
+     * entity's alias in the generated SQL; written as a bare column name, the formula breaks with
+     * <em>ambiguous column</em> as soon as a query joins the copies table more than once.
+     */
     @Formula("CASE {alias}.condition " +
             "WHEN 'NEW' THEN 1 " +
             "WHEN 'GOOD' THEN 2 " +
